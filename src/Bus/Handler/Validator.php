@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Handler;
 
-use Amp\Promise;
 use Nayleen\Async\Bus\Message;
 use ReflectionFunction;
 use ReflectionNamedType;
@@ -38,12 +37,12 @@ trait Validator
             return false;
         }
 
-        // handlers need to return a Promise
+        // handlers need to have voic as return type hint
         $return = $reflection->getReturnType();
 
-        return !(
+        return (
             !$return instanceof ReflectionNamedType
-            || !is_a($return->getName(), Promise::class, true)
+            || !($return->getName() !== 'void')
         );
     }
 }

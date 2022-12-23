@@ -4,9 +4,6 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Queue;
 
-use Amp\Promise;
-use Amp\Success;
-
 final class InMemoryQueue implements Queue
 {
     /**
@@ -18,26 +15,18 @@ final class InMemoryQueue implements Queue
     {
     }
 
-    /**
-     * @return Promise<null|string>
-     */
-    public function consume(): Promise
+    public function consume(): ?string
     {
         if ($this->queue === []) {
-            return new Success();
+            return null;
         }
 
-        return new Success(array_shift($this->queue));
+        return array_shift($this->queue);
     }
 
-    /**
-     * @return Promise<null>
-     */
-    public function enqueue(string $message): Promise
+    public function enqueue(string $message): void
     {
         $this->queue[] = $message;
-
-        return new Success();
     }
 
     public function name(): string

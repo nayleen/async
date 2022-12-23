@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Queue;
 
-use Amp\Promise;
 use Amp\Serialization\Serializer;
 use Nayleen\Async\Bus\Message;
 
@@ -14,8 +13,8 @@ final class Publisher
     {
     }
 
-    public function publish(Queue $queue, Message $message): Promise
+    public function publish(Queue $queue, Message $message): void
     {
-        return $queue->enqueue($this->serializer->serialize($message));
+        $queue->enqueue($this->serializer->serialize($message));
     }
 }

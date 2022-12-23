@@ -4,13 +4,9 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Middleware;
 
-use Amp\Promise;
-use Amp\Success;
 use DomainException;
 use Nayleen\Async\Bus\Bus;
 use Nayleen\Async\Bus\Message;
-
-use function Amp\call;
 
 final class MiddlewareBus implements Bus
 {
@@ -20,7 +16,7 @@ final class MiddlewareBus implements Bus
     private array $middlewares = [];
 
     /**
-     * @var null|callable(Message): Promise
+     * @var null|callable(Message): void
      */
     private mixed $stack = null;
 
@@ -32,12 +28,12 @@ final class MiddlewareBus implements Bus
     }
 
     /**
-     * @return callable(Message): Promise
+     * @return callable(Message): void
      */
     private function createStack(int $index = 0): callable
     {
         if (!isset($this->middlewares[$index])) {
-            return static fn (Message $message) => new Success();
+            return static fn (Message $message) => null;
         }
 
         return fn (Message $message) => $this->middlewares[$index]->handle($message, $this->createStack($index + 1));
@@ -52,15 +48,13 @@ final class MiddlewareBus implements Bus
         $this->middlewares[] = $middleware;
     }
 
-    public function handle(Message $message): Promise
+    public function handle(Message $message): void
     {
-        return call(function () use ($message) {
-            if (!isset($this->stack)) {
-                $this->stack = $this->createStack();
-            }
+        if (!isset($this->stack)) {
+            $this->stack = $this->createStack();
+        }
 
-            return call($this->stack, $message);
-        });
+        ($this->stack)($message);
     }
 
     public function prepend(Middleware $middleware): void

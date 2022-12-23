@@ -7,6 +7,7 @@ namespace Nayleen\Async\Kernel\Component;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
+use Nayleen\Async\Kernel\Container\ServiceFactory;
 use Traversable;
 
 final class Components implements Countable, IteratorAggregate
@@ -16,11 +17,9 @@ final class Components implements Countable, IteratorAggregate
      */
     private array $components = [];
 
-    public function __construct(Component ...$components)
+    public function __construct(private readonly ServiceFactory $serviceFactory)
     {
-        foreach ($components as $component) {
-            $this->add($component);
-        }
+
     }
 
     private function register(Component $component): void
@@ -30,7 +29,7 @@ final class Components implements Countable, IteratorAggregate
         }
 
         foreach ($component->dependencies() as $dependency) {
-            $this->add(new $dependency());
+            $this->add($this->serviceFactory->make($dependency));
         }
     }
 
@@ -63,5 +62,10 @@ final class Components implements Countable, IteratorAggregate
     public function has(string|Component $component): bool
     {
         return isset($this->components[(string) $component]);
+    }
+
+    public function reverse(): Traversable
+    {
+        return new ArrayIterator(array_reverse($this->components));
     }
 }

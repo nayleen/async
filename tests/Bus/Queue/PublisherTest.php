@@ -6,8 +6,6 @@ namespace Nayleen\Async\Bus\Queue;
 
 use Amp\PHPUnit\AsyncTestCase;
 use Amp\Serialization\Serializer;
-use Amp\Success;
-use Generator;
 use Nayleen\Async\Bus\Message;
 
 /**
@@ -18,7 +16,7 @@ class PublisherTest extends AsyncTestCase
     /**
      * @test
      */
-    public function publishes_after_serialization(): Generator
+    public function publishes_after_serialization(): void
     {
         $message = $this->createMock(Message::class);
         $encoded = 'message';
@@ -27,9 +25,9 @@ class PublisherTest extends AsyncTestCase
         $serializer->expects(self::once())->method('serialize')->with($message)->willReturn($encoded);
 
         $queue = $this->createMock(Queue::class);
-        $queue->expects(self::once())->method('enqueue')->with($encoded)->willReturn(new Success());
+        $queue->expects(self::once())->method('enqueue')->with($encoded);
 
         $publisher = new Publisher($serializer);
-        yield $publisher->publish($queue, $message);
+        $publisher->publish($queue, $message);
     }
 }

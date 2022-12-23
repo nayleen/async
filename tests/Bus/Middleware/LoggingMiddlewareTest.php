@@ -5,8 +5,6 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Middleware;
 
 use Amp\PHPUnit\AsyncTestCase;
-use Amp\Success;
-use Generator;
 use Nayleen\Async\Bus\Message;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -19,7 +17,7 @@ class LoggingMiddlewareTest extends AsyncTestCase
     /**
      * @test
      */
-    public function invokes_logger(): Generator
+    public function invokes_logger(): void
     {
         $level = LogLevel::DEBUG;
         $message = $this->createMock(Message::class);
@@ -35,14 +33,9 @@ class LoggingMiddlewareTest extends AsyncTestCase
             );
 
         $middleware = new LoggingMiddleware($logger, $level);
-
-        yield $middleware->handle(
+        $middleware->handle(
             $message,
-            $this->createCallback(1, function (Message $message) use ($logger, $level) {
-                $logger->log($level, 'Processing...', ['message' => $message]);
-
-                return new Success();
-            }),
+            $this->createCallback(1, fn (Message $message) => $logger->log($level, 'Processing...', ['message' => $message])),
         );
     }
 }

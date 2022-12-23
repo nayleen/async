@@ -5,9 +5,6 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Event;
 
 use Amp\PHPUnit\AsyncTestCase;
-use Amp\Promise;
-use Amp\Success;
-use Generator;
 use Nayleen\Async\Bus\Message;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -20,7 +17,7 @@ class EventBusMiddlewareTest extends AsyncTestCase
     /**
      * @test
      */
-    public function passes_to_found_event_handlers(): Generator
+    public function passes_to_found_event_handlers(): void
     {
         $level = LogLevel::DEBUG;
 
@@ -40,11 +37,7 @@ class EventBusMiddlewareTest extends AsyncTestCase
                 [$level, 'Executing next handler...'],
             );
 
-        $handler = static function (Message $message) use ($logger, $level): Promise {
-            $logger->log($level, 'Processing...');
-
-            return new Success();
-        };
+        $handler = static fn (Message $message) => $logger->log($level, 'Processing...');
 
         $handlers = new Handlers(
             [
@@ -53,26 +46,21 @@ class EventBusMiddlewareTest extends AsyncTestCase
         );
 
         $middleware = new EventBusMiddleware($handlers, $logger, $level);
-        yield $middleware->handle($message, function (Message $message) use ($logger, $level) {
-            $logger->log($level, 'Executing next handler...');
-
-            return new Success();
-        });
+        $middleware->handle($message, fn (Message $message) => $logger->log($level, 'Executing next handler...'));
     }
 
     /**
      * @test
      */
-    public function passes_to_next_handler_when_no_handlers_found(): Generator
+    public function passes_to_next_handler_when_no_handlers_found(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::once())->method('log');
 
         $middleware = new EventBusMiddleware(new Handlers(), $logger);
-        yield $middleware->handle($this->createMock(Message::class), function () use ($logger) {
-            $logger->log(LogLevel::DEBUG, 'Executing next handler...');
-
-            return new Success();
-        });
+        $middleware->handle(
+            $this->createMock(Message::class),
+            fn () => $logger->log(LogLevel::DEBUG, 'Executing next handler...')
+        );
     }
 }

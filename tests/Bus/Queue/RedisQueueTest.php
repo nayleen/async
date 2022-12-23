@@ -7,8 +7,6 @@ namespace Nayleen\Async\Bus\Queue;
 use Amp\PHPUnit\AsyncTestCase;
 use Amp\Redis\Redis;
 use Amp\Redis\RedisList;
-use Amp\Success;
-use Generator;
 
 /**
  * @internal
@@ -18,16 +16,16 @@ class RedisQueueTest extends AsyncTestCase
     /**
      * @test
      */
-    public function can_consume_queue(): Generator
+    public function can_consume_queue(): void
     {
         $list = $this->createMock(RedisList::class);
-        $list->expects(self::once())->method('popHead')->willReturn(new Success('message'));
+        $list->expects(self::once())->method('popHead')->willReturn('message');
 
         $redis = $this->createMock(Redis::class);
         $redis->expects(self::once())->method('getList')->willReturn($list);
 
         $queue = new RedisQueue($redis, 'test');
-        $message = yield $queue->consume();
+        $message = $queue->consume();
 
         self::assertSame('message', $message);
     }
@@ -35,16 +33,16 @@ class RedisQueueTest extends AsyncTestCase
     /**
      * @test
      */
-    public function can_enqueue(): Generator
+    public function can_enqueue(): void
     {
         $list = $this->createMock(RedisList::class);
-        $list->expects(self::once())->method('pushTail')->with('message')->willReturn(new Success());
+        $list->expects(self::once())->method('pushTail')->with('message');
 
         $redis = $this->createMock(Redis::class);
         $redis->expects(self::once())->method('getList')->willReturn($list);
 
         $queue = new RedisQueue($redis, 'test');
-        yield $queue->enqueue('message');
+        $queue->enqueue('message');
     }
 
     /**

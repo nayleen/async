@@ -4,15 +4,12 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Queue\Middleware;
 
-use Amp\Promise;
 use Nayleen\Async\Bus\Message;
 use Nayleen\Async\Bus\Middleware\Middleware;
 use Nayleen\Async\Bus\Queue\Publisher;
 use Nayleen\Async\Bus\Queue\Queue;
 use Nayleen\Async\Bus\Queue\QueueMap;
 use OutOfBoundsException;
-
-use function Amp\call;
 
 final class PublishesToConfiguredQueueMiddleware implements Middleware
 {
@@ -23,23 +20,19 @@ final class PublishesToConfiguredQueueMiddleware implements Middleware
     ) {
     }
 
-    public function handle(Message $message, callable $next): Promise
+    public function handle(Message $message, callable $next): void
     {
-        return call(function () use ($message, $next) {
-            try {
-                $queue = $this->queueMap->queue($message);
-            } catch (OutOfBoundsException $ex) {
-                if (!$this->fallback) {
-                    throw $ex;
-                }
-
-                $queue = $this->fallback;
+        try {
+            $queue = $this->queueMap->queue($message);
+        } catch (OutOfBoundsException $ex) {
+            if (!$this->fallback) {
+                throw $ex;
             }
 
-            $promise = $this->publisher->publish($queue, $message);
-            $promise->onResolve(fn () => $next($message));
+            $queue = $this->fallback;
+        }
 
-            return $promise;
-        });
+        $this->publisher->publish($queue, $message);
+        $next($message);
     }
 }

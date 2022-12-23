@@ -4,12 +4,8 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Queue;
 
-use Amp\Promise;
 use Amp\Redis\Redis;
 use Amp\Redis\RedisList;
-use Amp\Success;
-
-use function Amp\call;
 
 final class RedisQueue implements Queue
 {
@@ -30,24 +26,14 @@ final class RedisQueue implements Queue
         return $this->list;
     }
 
-    /**
-     * @return Promise<null|string>
-     */
-    public function consume(): Promise
+    public function consume(): ?string
     {
         return $this->list()->popHead();
     }
 
-    /**
-     * @return Promise<null>
-     */
-    public function enqueue(string $message): Promise
+    public function enqueue(string $message): void
     {
-        return call(function () use ($message) {
-            yield $this->list()->pushTail($message);
-
-            return new Success();
-        });
+        $this->list()->pushTail($message);
     }
 
     public function name(): string

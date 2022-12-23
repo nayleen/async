@@ -5,9 +5,6 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Command;
 
 use Amp\PHPUnit\AsyncTestCase;
-use Amp\Promise;
-use Amp\Success;
-use Generator;
 use Nayleen\Async\Bus\Message;
 use OutOfBoundsException;
 use Psr\Log\LoggerInterface;
@@ -21,7 +18,7 @@ class CommandBusMiddlewareTest extends AsyncTestCase
     /**
      * @test
      */
-    public function passes_to_found_handler(): Generator
+    public function passes_to_found_handler(): void
     {
         $level = LogLevel::DEBUG;
 
@@ -41,26 +38,22 @@ class CommandBusMiddlewareTest extends AsyncTestCase
 
         $handlers = new Handlers(
             [
-                'message' => static function (Message $message) use ($logger, $level): Promise {
+                'message' => static function (Message $message) use ($logger, $level): void {
                     $logger->log($level, 'Processing...');
-
-                    return new Success();
                 },
             ],
         );
 
         $middleware = new CommandBusMiddleware($handlers, $logger, $level);
-        yield $middleware->handle($message, function (Message $message) use ($logger, $level) {
+        $middleware->handle($message, function (Message $message) use ($logger, $level): void {
             $logger->log($level, 'Executing next handler...');
-
-            return new Success();
         });
     }
 
     /**
      * @test
      */
-    public function throws_when_no_handler_is_found(): Generator
+    public function throws_when_no_handler_is_found(): void
     {
         $this->expectException(OutOfBoundsException::class);
 
@@ -68,6 +61,6 @@ class CommandBusMiddlewareTest extends AsyncTestCase
         $message->method('name')->willReturn('message');
 
         $middleware = new CommandBusMiddleware(new Handlers());
-        yield $middleware->handle($message, fn () => new Success());
+        $middleware->handle($message, fn () => null);
     }
 }

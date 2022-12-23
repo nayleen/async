@@ -5,8 +5,6 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Queue\Middleware;
 
 use Amp\PHPUnit\AsyncTestCase;
-use Amp\Success;
-use Generator;
 use Nayleen\Async\Bus\Message;
 use Nayleen\Async\Bus\Queue\Publisher;
 use Nayleen\Async\Bus\Queue\Queue;
@@ -21,7 +19,7 @@ class PublishesToConfiguredQueueMiddlewareTest extends AsyncTestCase
     /**
      * @test
      */
-    public function not_mapped_exception_rethrown_without_fallback(): Generator
+    public function not_mapped_exception_rethrown_without_fallback(): void
     {
         $this->expectException(OutOfBoundsException::class);
 
@@ -31,28 +29,28 @@ class PublishesToConfiguredQueueMiddlewareTest extends AsyncTestCase
         $publisher->expects(self::never())->method('publish');
 
         $middleware = new PublishesToConfiguredQueueMiddleware($publisher, new QueueMap());
-        yield $middleware->handle($message, $this->createCallback(0, fn (Message $message) => new Success()));
+        $middleware->handle($message, $this->createCallback(0, fn (Message $message) => null));
     }
 
     /**
      * @test
      */
-    public function publishes_to_fallback_queue_if_unmapped(): Generator
+    public function publishes_to_fallback_queue_if_unmapped(): void
     {
         $message = $this->createMock(Message::class);
         $queue = $this->createMock(Queue::class);
 
         $publisher = $this->createMock(Publisher::class);
-        $publisher->expects(self::once())->method('publish')->with($queue, $message)->willReturn(new Success());
+        $publisher->expects(self::once())->method('publish')->with($queue, $message);
 
         $middleware = new PublishesToConfiguredQueueMiddleware($publisher, new QueueMap(), $queue);
-        yield $middleware->handle($message, $this->createCallback(1, fn (Message $message) => new Success()));
+        $middleware->handle($message, $this->createCallback(1, fn (Message $message) => null));
     }
 
     /**
      * @test
      */
-    public function publishes_to_mapped_queue(): Generator
+    public function publishes_to_mapped_queue(): void
     {
         $name = 'test';
 
@@ -63,11 +61,11 @@ class PublishesToConfiguredQueueMiddlewareTest extends AsyncTestCase
         $queue = $this->createMock(Queue::class);
 
         $publisher = $this->createMock(Publisher::class);
-        $publisher->expects(self::once())->method('publish')->with($queue, $message)->willReturn(new Success());
+        $publisher->expects(self::once())->method('publish')->with($queue, $message);
 
         $map = new QueueMap([$name => $queue]);
 
         $middleware = new PublishesToConfiguredQueueMiddleware($publisher, $map, $fallback);
-        yield $middleware->handle($message, $this->createCallback(1, fn (Message $message) => new Success()));
+        $middleware->handle($message, $this->createCallback(1, fn (Message $message) => null));
     }
 }

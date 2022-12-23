@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Queue;
 
 use Amp\PHPUnit\AsyncTestCase;
-use Generator;
 
 /**
  * @internal
@@ -15,12 +14,12 @@ class InMemoryQueueTest extends AsyncTestCase
     /**
      * @test
      */
-    public function can_consume_queue(): Generator
+    public function can_consume_queue(): void
     {
         $queue = new InMemoryQueue('test');
 
-        yield $queue->enqueue('message');
-        $message = yield $queue->consume();
+        $queue->enqueue('message');
+        $message = $queue->consume();
 
         self::assertSame('message', $message);
     }

@@ -1,4 +1,4 @@
-ci: csdiff phpunit cleanup
+ci: csdiff psalm phpunit cleanup
 
 cleanup:
 	@docker-compose down -v 2>/dev/null
@@ -22,3 +22,6 @@ normalize:
 
 phpunit: composer
 	@docker-compose run --rm php php -dzend.assertions=1 -dassert.exception=1 -dxdebug.mode=off vendor/bin/phpunit 2>/dev/null
+
+psalm: composer
+	@docker-compose run --rm php php -dzend.assertions=1 -dassert.exceptions=1 -dxdebug.mode=off vendor/bin/psalm.phar --show-info=true 2>/dev/null

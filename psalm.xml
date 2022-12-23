@@ -12,10 +12,4 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
-
-    <plugins>
-        <pluginClass class="HectorJ\SafePHPPsalmPlugin\Plugin" />
-        <pluginClass class="Lctrs\PsalmPsrContainerPlugin\Plugin" />
-        <pluginClass class="Psalm\PhpUnitPlugin\Plugin" />
-    </plugins>
 </psalm>

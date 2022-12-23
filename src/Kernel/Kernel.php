@@ -4,78 +4,79 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Kernel;
 
-use Acclimate\Container\ArrayContainer;
-use Acclimate\Container\CompositeContainer;
-use Acclimate\Container\ContainerAcclimator;
-use Amp\Loop\Driver;
+use LogicException;
 use Nayleen\Async\Kernel\Component\Component;
 use Nayleen\Async\Kernel\Component\Components;
-use Nayleen\Async\Kernel\Component\DependentComponent;
-use Nayleen\Async\Kernel\Exception\ReloadException;
-use Nayleen\Async\Kernel\Exception\StopException;
+use Nayleen\Async\Kernel\Component\Finder;
+use Nayleen\Async\Kernel\Container\Container;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Revolt\EventLoop;
 
 final class Kernel
 {
-    private readonly Components $components;
+    private ?Container $container = null;
 
-    private ?CompositeContainer $container = null;
+    private ?EventLoop\Driver $loop = null;
 
-    private readonly ContainerAcclimator $containerAcclimator;
+    private bool $reload = false;
 
-    private readonly ?ContainerInterface $wrappedContainer;
-
-    /**
-     * @param iterable<class-string<Component>>|Components $components
-     */
     public function __construct(
-        iterable|Components $components,
-        ?ContainerInterface $wrappedContainer = null,
-        ?ContainerAcclimator $containerAcclimator = null,
+        private readonly Components $components,
+        private readonly Container $serviceProvider,
     ) {
-        if (is_iterable($components)) {
-            $components = new Components(...$components);
-        }
 
-        $this->components = $components;
-        $this->containerAcclimator = $containerAcclimator ?? new ContainerAcclimator();
-
-        if (isset($wrappedContainer)) {
-            $wrappedContainer = $this->containerAcclimator->acclimate($wrappedContainer);
-        }
-
-        $this->wrappedContainer = $wrappedContainer;
     }
 
     public function __destruct()
     {
         $this->shutdown();
-        unset($this->container, $this->wrappedContainer);
+    }
+
+    private function shutdown(): void
+    {
+        foreach ($this->components->reverse() as $component) {
+            $component->shutdown($this->container);
+        }
+
+        $this->container = null;
+    }
+
+    /**
+     * @param iterable<class-string<Component>>|Finder $components
+     */
+    public static function create(
+        iterable|Finder $components,
+        ?ContainerInterface $delegateLookupContainer = null,
+    ) {
+        $container = new Container();
+
+        if ($delegateLookupContainer) {
+            $container->add($delegateLookupContainer);
+        }
+
+        $kernelComponents = new Components($container);
+        foreach ($components as $component) {
+            $kernelComponents->add($container->make($component));
+        }
+
+        return new self($kernelComponents, $container);
     }
 
     public function boot(): ContainerInterface
     {
-        if ($this->container !== null) {
+        if ($this->booted()) {
             return $this->container;
         }
 
-        $container = new CompositeContainer([
-            new ArrayContainer(
-                [
-                    self::class => $this,
-                ],
-                $this->wrappedContainer
-            )
-        ]);
+        $container = (clone $this->serviceProvider);
+        $container->set(EventLoop\Driver::class, EventLoop::getDriver());
+        $container->set(LoggerInterface::class, new NullLogger());
+        $container->set(self::class, $this);
 
         foreach ($this->components as $component) {
-            $providedDependencies = $component->register($container);
-
-            if (isset($providedDependencies)) {
-                $providedDependencies = $this->containerAcclimator->acclimate($providedDependencies);
-                $container->addContainer($providedDependencies);
-            }
+            $container->add($component->register(clone $container));
         }
 
         foreach ($this->components as $component) {
@@ -85,56 +86,77 @@ final class Kernel
         return $this->container = $container;
     }
 
-    public function reload(Driver $driver): callable
+    public function booted(): bool
     {
-        return static function () use ($driver): void {
-            $driver->stop();
-            throw new ReloadException();
-        };
+        return isset($this->container);
     }
 
-    public function shutdown(): void
+    public function components(): Components
     {
-        if ($this->container === null) {
-            return;
-        }
-
-        foreach (array_reverse($this->components) as $component) {
-            $component->shutdown($this->container);
-        }
-
-        $this->container = null;
+        return $this->components;
     }
 
-    public function start(?callable $callback = null): void
+    public function container(): ContainerInterface
+    {
+        if (!$this->booted()) {
+            throw new LogicException();
+        }
+
+        return $this->container;
+    }
+
+    public function loop(): EventLoop\Driver
+    {
+        if (!$this->running()) {
+            throw new LogicException();
+        }
+
+        return $this->loop;
+    }
+
+    /**
+     * @param callable(Kernel): void|null $callback
+     */
+    public function run(?callable $callback = null): void
     {
         reload:
         $container = $this->boot();
 
-        $logger = $container->get(LoggerInterface::class);
-        $loop = $container->get(Driver::class);
+        $loop = $container->get(EventLoop\Driver::class);
+        $loop->queue(
+            fn (LoggerInterface $logger) => $logger->debug(sprintf('Loop started using %s.', $loop::class)),
+            $container->get(LoggerInterface::class),
+        );
 
         if ($callback) {
-            $loop->defer($callback);
+            $loop->defer(fn () => $callback($this));
         }
 
-        try {
-            $loop->unreference($loop->defer(static fn () => $logger->debug(sprintf('Loop started using %s.', $loop::class))));
-            $loop->run();
-        } catch (ReloadException) {
-            $this->shutdown();
-            goto reload;
-        } catch (StopException) {
-        }
+        ($this->loop = $loop)->run();
+        unset($loop, $this->loop);
+
+        $reload = $this->reload;
+        $this->reload = false;
 
         $this->shutdown();
+
+        if ($reload) {
+            goto reload;
+        }
     }
 
-    public function stop(Driver $driver): callable
+    public function running(): bool
     {
-        return static function (string $watcherId) use ($driver): void {
-            $driver->cancel($watcherId);
-            $driver->stop();
-        };
+        return isset($this->container, $this->loop) && $this->loop->isRunning();
+    }
+
+    public function stop(bool $reload = false): void
+    {
+        if (!$this->running()) {
+            throw new \LogicException();
+        }
+
+        $this->reload = $reload;
+        $this->loop->queue(fn () => $this->loop->stop());
     }
 }

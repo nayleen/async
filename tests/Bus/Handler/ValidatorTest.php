@@ -4,8 +4,6 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Handler;
 
-use Amp\Promise;
-use Amp\Success;
 use Nayleen\Async\Bus\Message;
 use PHPUnit\Framework\TestCase;
 
@@ -23,37 +21,37 @@ class ValidatorTest extends TestCase
             ],
 
             'no parameters' => [
-                'handler' => fn (): Promise => new Success(),
+                'handler' => fn () => null,
                 'result' => false,
             ],
 
             'first parameter missing type' => [
-                'handler' => fn ($message): Promise => new Success(),
+                'handler' => fn ($message) => null,
                 'result' => false,
             ],
 
             'first parameter not a message' => [
-                'handler' => fn (object $message): Promise => new Success(),
+                'handler' => fn (object $message) => null,
                 'result' => false,
             ],
 
             'no return type' => [
-                'handler' => fn (Message $message) => new Success(),
-                'result' => false,
+                'handler' => fn (Message $message) => null,
+                'result' => true,
             ],
 
             'return type not a promise' => [
-                'handler' => fn (Message $message): object => new Success(),
+                'handler' => fn (Message $message): object => null,
                 'result' => false,
             ],
 
             'correctly typed' => [
-                'handler' => fn (Message $message): Promise => new Success(),
+                'handler' => fn (Message $message) => null,
                 'result' => true,
             ],
 
             'additional parameters' => [
-                'handler' => fn (Message $message, bool $isValidated): Promise => new Success(),
+                'handler' => fn (Message $message, bool $isValidated) => null,
                 'result' => false,
             ],
         ];

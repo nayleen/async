@@ -4,19 +4,11 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Queue;
 
-use Amp\Promise;
-
 interface Queue
 {
-    /**
-     * @return Promise<null|string>
-     */
-    public function consume(): Promise;
+    public function consume(): ?string;
 
-    /**
-     * @return Promise<null>
-     */
-    public function enqueue(string $message): Promise;
+    public function enqueue(string $message): void;
 
     public function name(): string;
 }

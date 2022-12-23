@@ -4,21 +4,18 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Queue;
 
-use Amp\CancellationToken;
+use Amp\Cancellation;
 use Amp\CancelledException;
-use Amp\NullCancellationToken;
-use Amp\Promise;
+use Amp\NullCancellation;
 use Amp\Serialization\Serializer;
-use Amp\Success;
 use Nayleen\Async\Bus\Bus;
 use Nayleen\Async\Bus\Message;
 
-use function Amp\call;
 use function Amp\delay;
 
 final class Consumer
 {
-    private const DEFAULT_CONSUME_DELAY = 50; // ms
+    private const DEFAULT_CONSUME_DELAY = 0.05; // ms
 
     public function __construct(
         private readonly Bus $bus,
@@ -27,30 +24,26 @@ final class Consumer
     ) {
     }
 
-    public function consume(Queue $queue, ?CancellationToken $cancellationToken = null): Promise
+    public function consume(Queue $queue, ?Cancellation $cancellation = null): void
     {
-        $cancellationToken ??= new NullCancellationToken();
+        $cancellation ??= new NullCancellation();
 
-        return call(function () use ($queue, $cancellationToken) {
-            try {
-                while (true) {
-                    $cancellationToken->throwIfRequested();
+        try {
+            while (true) {
+                $cancellation->throwIfRequested();
 
-                    $encoded = yield $queue->consume();
-                    if (!$encoded) {
-                        yield delay($this->consumeDelay);
-                        continue;
-                    }
-
-                    $message = $this->serializer->unserialize($encoded);
-                    assert($message instanceof Message);
-
-                    yield $this->bus->handle($message);
+                $encoded = $queue->consume();
+                if (!$encoded) {
+                    delay($this->consumeDelay, cancellation: $cancellation);
+                    continue;
                 }
-            } catch (CancelledException) {
-            }
 
-            return new Success();
-        });
+                $message = $this->serializer->unserialize($encoded);
+                assert($message instanceof Message);
+
+                $this->bus->handle($message);
+            }
+        } catch (CancelledException) {
+        }
     }
 }

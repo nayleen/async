@@ -5,8 +5,6 @@ services:
         image: thecodingmachine/php:8.1-v4-cli
         container_name: php
         environment:
-            - PHP_EXTENSION_FFI=1
-            - PHP_EXTENSION_FIBER=1
             - PHP_EXTENSION_XDEBUG=1
         init: true
         links:

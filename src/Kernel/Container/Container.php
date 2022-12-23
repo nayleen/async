@@ -2,9 +2,12 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Kernel;
+namespace Nayleen\Async\Kernel\Container;
 
-use Exception;
+use Closure;
+use Nayleen\Async\Kernel\Container\Exception\AutowiringException;
+use Nayleen\Async\Kernel\Container\Exception\CircularDependencyException;
+use Nayleen\Async\Kernel\Container\Exception\NotFoundException;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionFunction;
@@ -14,7 +17,7 @@ use ReflectionParameter;
 use ReflectionUnionType;
 use Throwable;
 
-final class Container implements ContainerInterface
+final class Container implements ServiceFactory, ServiceProvider
 {
     /**
      * @var ContainerInterface[]
@@ -27,18 +30,19 @@ final class Container implements ContainerInterface
     private array $runtimeDependencies;
 
     /**
-     * @var array<class-string, object|null>
+     * @var array<class-string, bool>
      */
     private array $trackedResolves = [];
 
     private const FACTORY_SUFFIX = '.factory';
 
-    public function __construct(Kernel $kernel)
+    public function __construct()
     {
         $this->runtimeDependencies = [
             self::class => $this,
             ContainerInterface::class => $this,
-            Kernel::class => $kernel,
+            ServiceFactory::class => $this,
+            ServiceProvider::class => $this,
         ];
     }
 
@@ -54,20 +58,28 @@ final class Container implements ContainerInterface
             $name = $reflectionParameter->getName();
             $type = $reflectionParameter->getType();
 
-            if ($type === null) {
-                if (!isset($userParameters[$name])) {
-                    throw new Exception();
-                }
-
+            if (isset($userParameters[$name])) {
                 $parameters[$name] = $userParameters[$name];
                 continue;
             }
 
-            $parameters[$name] = match (true) {
-                $type instanceof ReflectionNamedType => $this->resolve($type, $userParameters),
-                $type instanceof ReflectionIntersectionType,
-                $type instanceof ReflectionUnionType => $this->resolveAll($type, $userParameters),
-            };
+            try {
+                $parameters[$name] = match (true) {
+                    $type === null => match ($reflectionParameter->isDefaultValueAvailable()) {
+                        true => $reflectionParameter->getDefaultValue(),
+                        default => null,
+                    },
+                    $type instanceof ReflectionNamedType => $this->resolve($type, $userParameters),
+                    $type instanceof ReflectionIntersectionType,
+                    $type instanceof ReflectionUnionType => $this->resolveAll($type, $userParameters),
+                };
+            } catch (Throwable $ex) {
+                if (!$reflectionParameter->isOptional()) {
+                    throw $ex;
+                }
+
+                $parameters[$name] = $reflectionParameter->getDefaultValue();
+            }
         }
 
         $this->trackedResolves = [];
@@ -76,15 +88,16 @@ final class Container implements ContainerInterface
     }
 
     /**
-     * @param class-string $id
+     * @template T
+     *
+     * @param class-string<T> $id
+     * @return T
      */
-    private function create(string $id, array $parameters): ?object
+    private function create(string $id, array $parameters): object
     {
-        $factoryId = $this->factoryId($id);
-
         // use registered factory to create the service
-        if (isset($this->runtimeDependencies[$factoryId])) {
-            $factory = $this->runtimeDependencies[$factoryId];
+        if (isset($this->runtimeDependencies[$this->factoryId($id)])) {
+            $factory = $this->runtimeDependencies[$this->factoryId($id)];
             assert(is_callable($factory));
 
             $reflection = new ReflectionFunction($factory);
@@ -100,6 +113,16 @@ final class Container implements ContainerInterface
             return $reflection->newInstance();
         }
 
+        if (!$constructor->isPublic()) {
+            throw AutowiringException::privateConstructor($reflection);
+        }
+
+        if (isset($this->trackedResolves[$id])) {
+            throw new CircularDependencyException($id, array_key_last($this->trackedResolves));
+        }
+
+        $this->trackedResolves[$id] = true;
+
         $parameters = $this->autowire($constructor->getParameters(), $parameters);
 
         return $reflection->newInstanceArgs($parameters);
@@ -110,30 +133,15 @@ final class Container implements ContainerInterface
         return sprintf('%s%s', $id, self::FACTORY_SUFFIX);
     }
 
-    private function resolve(ReflectionNamedType $type, array $userParameters): ?object
+    private function resolve(ReflectionNamedType $type, array $userParameters): object
     {
         $typeName = $type->getName();
+        $this->trackedResolves[$typeName] = true;
 
-        if (array_key_exists($typeName, $this->trackedResolves)) {
-            throw new Exception();
-        }
-
-        $this->trackedResolves[$typeName] = null;
-
-        try {
-            $value = $this->make($typeName, $userParameters);
-        } catch (Throwable $ex) {
-            if (!$type->allowsNull()) {
-                throw $ex;
-            }
-
-            $value = null;
-        }
-
-        return $value;
+        return $this->make($typeName, $userParameters);
     }
 
-    private function resolveAll(ReflectionIntersectionType|ReflectionUnionType $type, array $userParameters): ?object
+    private function resolveAll(ReflectionIntersectionType|ReflectionUnionType $type, array $userParameters): object
     {
         foreach ($type->getTypes() as $namedType) {
             try {
@@ -142,9 +150,12 @@ final class Container implements ContainerInterface
             }
         }
 
-        throw new Exception();
+        throw AutowiringException::cannotResolveCombinedType(array_key_last($this->trackedResolves), $type);
     }
 
+    /**
+     * @internal
+     */
     public function add(ContainerInterface $container): self
     {
         $this->delegateLookupContainers[] = $container;
@@ -152,34 +163,58 @@ final class Container implements ContainerInterface
         return $this;
     }
 
-    public function alias(string $alias, string $original): self
+    /**
+     * @api
+     *
+     * @param non-empty-string $alias
+     * @param non-empty-string $originalId
+     */
+    public function alias(string $alias, string $originalId): self
     {
-        $this->factory($alias, fn () => $this->get($original));
+        // aliases are basically lazy factories referencing original
+        $this->factory($alias, fn () => $this->get($originalId));
 
         return $this;
     }
 
+    /**
+     * @api
+     *
+     * @param non-empty-string $param
+     */
     public function env(string $param, string $default = null): string
     {
-        $hasDefault = ($default !== null);
         $value = getenv($param);
 
         return match ($value) {
-            false => match ($hasDefault) {
+            false => match ($default !== null) {
                 true => $default,
-                false => throw new Exception(),
+                false => throw NotFoundException::missingEnvironmentParameter($param),
             },
             default => $value,
         };
     }
 
-    public function factory(string $id, callable $factory): self
+    /**
+     * @api
+     *
+     * @param non-empty-string $id
+     */
+    public function factory(string $id, Closure $factory): self
     {
         $this->set($this->factoryId($id), $factory);
 
         return $this;
     }
 
+    /**
+     * @api
+     *
+     * @template T
+     *
+     * @param non-empty-string|class-string<T> $id
+     * @return mixed|T
+     */
     public function get(string $id): mixed
     {
         // lookup in runtime dependencies first
@@ -194,54 +229,72 @@ final class Container implements ContainerInterface
             }
         }
 
-        // finally, try building the service on the fly
-        try {
-            return $this->make($id);
-        } catch (Throwable) {
-            throw new Exception();
-        }
+        // finally try creating service on the fly
+        return $this->make($id);
     }
 
+    /**
+     * @api
+     *
+     * @template T
+     *
+     * @param non-empty-string|class-string<T> $id
+     */
     public function has(string $id): bool
     {
         $factoryId = $this->factoryId($id);
 
-        // lookup in runtime dependencies first
+        // try lookup in runtime dependencies
         if (isset($this->runtimeDependencies[$id]) || isset($this->runtimeDependencies[$factoryId])) {
             return true;
         }
 
-        // then delegate to other containers
+        // delegate to other containers
         foreach ($this->delegateLookupContainers as $container) {
             if ($container->has($id)) {
                 return true;
             }
         }
 
+        // not available
         return false;
     }
 
     /**
-     * @param class-string $id
-     * @return object
+     * @api
+     *
+     * @template T
+     *
+     * @param non-empty-string|class-string<T> $id
+     * @return T
      */
     public function make(string $id, array $parameters = []): object
     {
-        // we can only "make" classes available through autoloading
+        // can only "make" classes available through autoloading
+        // or having been previously set
         if (!class_exists($id) && !$this->has($id)) {
-            throw new Exception();
+            throw NotFoundException::notAutoloadable($id);
         }
 
-        // short circuit if the service has already been created before
+        // short circuit if service has already been created before
         if (isset($this->runtimeDependencies[$id])) {
             return $this->runtimeDependencies[$id];
         }
 
-        $this->set($id, $service = $this->create($id, $parameters));
+        $instance = $this->create($id, $parameters);
 
-        return $service;
+        if (count($parameters) === 0) {
+            $this->set($id, $instance);
+        }
+
+        return $instance;
     }
 
+    /**
+     * @api
+     *
+     * @param non-empty-string $id
+     */
     public function set(string $id, mixed $value): self
     {
         $this->runtimeDependencies[$id] = $value;
