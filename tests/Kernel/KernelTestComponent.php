@@ -9,7 +9,6 @@ use Nayleen\Async\Kernel\Container\Container;
 use Nayleen\Async\Kernel\Container\ServiceProvider;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Revolt\EventLoop;
 use Revolt\EventLoop\Driver;
 
 /**
@@ -18,7 +17,7 @@ use Revolt\EventLoop\Driver;
 final class KernelTestComponent implements Component
 {
     public function __construct(
-        private readonly Driver $loopDriver,
+        private readonly Driver $loop,
         private readonly LoggerInterface $logger,
     ) {
 
@@ -26,7 +25,7 @@ final class KernelTestComponent implements Component
 
     public function boot(ContainerInterface $container): void
     {
-        EventLoop::setDriver($container->get(Driver::class));
+
     }
 
     public function name(): string
@@ -37,7 +36,7 @@ final class KernelTestComponent implements Component
     public function register(ServiceProvider $serviceProvider): ContainerInterface
     {
         $container = new Container();
-        $container->set(Driver::class, $this->loopDriver);
+        $container->set(Driver::class, $this->loop);
         $container->set(LoggerInterface::class, $this->logger);
 
         return $container;

@@ -4,14 +4,12 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Kernel;
 
-use LogicException;
 use Nayleen\Async\Kernel\Component\Component;
 use Nayleen\Async\Kernel\Component\Components;
 use Nayleen\Async\Kernel\Component\Finder;
 use Nayleen\Async\Kernel\Container\Container;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use Revolt\EventLoop;
 
 final class Kernel
@@ -34,26 +32,21 @@ final class Kernel
         $this->shutdown();
     }
 
-    private function shutdown(): void
-    {
-        foreach ($this->components->reverse() as $component) {
-            $component->shutdown($this->container);
-        }
-
-        $this->container = null;
-    }
-
     /**
      * @param iterable<class-string<Component>>|Finder $components
      */
     public static function create(
-        iterable|Finder $components,
+        iterable|Components $components,
         ?ContainerInterface $delegateLookupContainer = null,
     ) {
         $container = new Container();
 
         if ($delegateLookupContainer) {
             $container->add($delegateLookupContainer);
+        }
+
+        if ($components instanceof Components) {
+            return new self($components, $container);
         }
 
         $kernelComponents = new Components($container);
@@ -71,9 +64,6 @@ final class Kernel
         }
 
         $container = (clone $this->serviceProvider);
-        $container->set(EventLoop\Driver::class, EventLoop::getDriver());
-        $container->set(LoggerInterface::class, new NullLogger());
-        $container->set(self::class, $this);
 
         foreach ($this->components as $component) {
             $container->add($component->register(clone $container));
@@ -96,22 +86,10 @@ final class Kernel
         return $this->components;
     }
 
-    public function container(): ContainerInterface
+    public function reload(): void
     {
-        if (!$this->booted()) {
-            throw new LogicException();
-        }
-
-        return $this->container;
-    }
-
-    public function loop(): EventLoop\Driver
-    {
-        if (!$this->running()) {
-            throw new LogicException();
-        }
-
-        return $this->loop;
+        $this->reload = true;
+        $this->stop();
     }
 
     /**
@@ -133,7 +111,7 @@ final class Kernel
         }
 
         ($this->loop = $loop)->run();
-        unset($loop, $this->loop);
+        unset($container, $loop);
 
         $reload = $this->reload;
         $this->reload = false;
@@ -150,13 +128,24 @@ final class Kernel
         return isset($this->container, $this->loop) && $this->loop->isRunning();
     }
 
-    public function stop(bool $reload = false): void
+    public function shutdown(): void
+    {
+        if ($this->booted()) {
+            foreach ($this->components->reverse() as $component) {
+                $component->shutdown($this->container);
+            }
+        }
+
+        $this->container = null;
+        $this->loop = null;
+    }
+
+    public function stop(): void
     {
         if (!$this->running()) {
             throw new \LogicException();
         }
 
-        $this->reload = $reload;
         $this->loop->queue(fn () => $this->loop->stop());
     }
 }

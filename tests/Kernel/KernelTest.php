@@ -4,33 +4,43 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Kernel;
 
-use Amp\DeferredCancellation;
 use Monolog\Test\TestCase;
 use Nayleen\Async\Kernel\Component\Component;
 use Nayleen\Async\Kernel\Component\Components;
 use Nayleen\Async\Kernel\Container\Container;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Revolt\EventLoop;
-use Revolt\EventLoop\Driver;
+use Revolt\EventLoop\DriverFactory;
+use stdClass;
 
 /**
  * @internal
  */
 class KernelTest extends TestCase
 {
-    private function createKernel(Component ...$components): Kernel
-    {
+    private LoggerInterface|MockObject $logger;
+
+    private EventLoop\Driver|MockObject $loop;
+
+    private function createKernel(
+        EventLoop\Driver $loop = null,
+        LoggerInterface $logger = null,
+        Component ...$components,
+    ): Kernel {
+        $this->logger = $logger ?? new NullLogger();
+        $this->loop = $loop ?? EventLoop::getDriver();
+
         $container = new Container();
-        $container->set(LoggerInterface::class, new NullLogger());
 
         $kernelComponents = new Components($container);
-        foreach ($components as $component) {
+        foreach ([new KernelTestComponent($this->loop, $this->logger), ...$components] as $component) {
             $kernelComponents->add($component);
         }
 
-        return new Kernel($kernelComponents, $container);
+        return Kernel::create($kernelComponents, $container);
     }
 
     /**
@@ -39,9 +49,8 @@ class KernelTest extends TestCase
     public function boot_creates_container(): void
     {
         $kernel = $this->createKernel();
-        $container = $kernel->boot();
 
-        self::assertInstanceOf(ContainerInterface::class, $container);
+        self::assertInstanceOf(ContainerInterface::class, $kernel->boot());
     }
 
     /**
@@ -50,9 +59,12 @@ class KernelTest extends TestCase
     public function allows_access_to_components(): void
     {
         $component = $this->createMock(Component::class);
-        $kernel = $this->createKernel($component);
+        $kernel = $this->createKernel(components: $component);
 
-        self::assertEquals([$component], iterator_to_array($kernel->components()));
+        self::assertEquals(
+            [new KernelTestComponent($this->loop, $this->logger), $component],
+            iterator_to_array($kernel->components())
+        );
     }
 
     /**
@@ -61,13 +73,13 @@ class KernelTest extends TestCase
     public function produced_container_can_wrap_a_top_level_container(): void
     {
         $wrappedContainer = new Container();
-        $wrappedContainer->set(LoggerInterface::class, $logger = $this->createStub(LoggerInterface::class));
+        $wrappedContainer->set(stdClass::class, $instance = new stdClass());
 
         $kernel = Kernel::create([], $wrappedContainer);
         $container = $kernel->boot();
 
-        self::assertTrue($container->has(LoggerInterface::class));
-        self::assertSame($logger, $container->get(LoggerInterface::class));
+        self::assertTrue($container->has(stdClass::class));
+        self::assertSame($instance, $container->get(stdClass::class));
     }
 
     /**
@@ -96,7 +108,7 @@ class KernelTest extends TestCase
             $shutdownOrder[] = 'component2';
         });
 
-        $kernel = $this->createKernel($component1, $component2);
+        $kernel = $this->createKernel(null, null, $component1, $component2);
 
         $kernel->boot();
         $kernel->boot(); // repeat boots do not create the container again
@@ -110,17 +122,13 @@ class KernelTest extends TestCase
     /**
      * @test
      */
-    public function start_will_run_event_loop(): void
+    public function run_will_run_event_loop(): void
     {
-        $mockDriver = $this->createMock(Driver::class);
+        $mockDriver = $this->createMock(EventLoop\Driver::class);
         $mockDriver->expects(self::once())->method('queue');
         $mockDriver->expects(self::once())->method('run');
 
-        $wrappedContainer = new Container();
-        $wrappedContainer->set(Driver::class, $mockDriver);
-        $wrappedContainer->set(LoggerInterface::class, new NullLogger());
-
-        $kernel = Kernel::create([], $wrappedContainer);
+        $kernel = $this->createKernel($mockDriver);
         $kernel->run();
     }
 
@@ -129,18 +137,12 @@ class KernelTest extends TestCase
      */
     public function start_can_queue_callback_on_loop(): void
     {
-        $loopDriver = EventLoop::getDriver();
-
-        $wrappedContainer = new Container();
-        $wrappedContainer->set(Driver::class, $loopDriver);
-        $wrappedContainer->set(LoggerInterface::class, new NullLogger());
-
         $started = false;
 
-        $kernel = Kernel::create([], $wrappedContainer);
-        $kernel->run(function (Driver $loop) use (&$started) {
+        $kernel = $this->createKernel();
+        $kernel->run(function (Kernel $kernel) use (&$started) {
             $started = true;
-            $loop->stop();
+            $kernel->stop();
         });
 
         self::assertTrue($started);
@@ -151,16 +153,10 @@ class KernelTest extends TestCase
      */
     public function started_loop_informs_about_driver_via_logger(): void
     {
-        $loop = EventLoop::getDriver();
-
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('debug')->with(sprintf('Loop started using %s.', $loop::class));
+        $logger->expects(self::once())->method('debug')->with(sprintf('Loop started using %s.', EventLoop::getDriver()::class));
 
-        $wrappedContainer = new Container();
-        $wrappedContainer->set(Driver::class, $loop);
-        $wrappedContainer->set(LoggerInterface::class, $logger);
-
-        $kernel = Kernel::create([], $wrappedContainer);
+        $kernel = $this->createKernel(logger: $logger);
         $kernel->run();
     }
 
@@ -170,32 +166,26 @@ class KernelTest extends TestCase
      */
     public function kernel_can_be_reloaded_via_cancellation(): void
     {
-        $loop = EventLoop::getDriver();
-
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::exactly(2))->method('debug')->with(sprintf('Loop started using %s.', $loop::class));
+        $logger->expects(self::exactly(2))->method('debug')->with(sprintf('Loop started using %s.', EventLoop::getDriver()::class));
 
-        $wrappedContainer = new Container();
-        $wrappedContainer->set(Driver::class, $loop);
-        $wrappedContainer->set(LoggerInterface::class, $logger);
-
+        $invocations = 0;
         $hasBeenReloaded = false;
 
-        $reload = new DeferredCancellation();
-        $stop = new DeferredCancellation();
-        $reload->getCancellation()->subscribe(function () use (&$hasBeenReloaded) {
-            $hasBeenReloaded = true;
-        });
-
-        $kernel = Kernel::create([], $wrappedContainer);
-        $kernel->reloadOn($reload->getCancellation());
-        $kernel->run(function () use ($loop, $reload, $stop) {
+        $kernel = $this->createKernel(logger: $logger);
+        $kernel->run(function (Kernel $kernel) use (&$invocations, &$hasBeenReloaded) {
             // first we trigger a reload
-            $loop->defer(fn () => $reload->cancel());
+            if ($invocations++ === 0) {
+                EventLoop::queue(static fn () => $kernel->reload());
+                return;
+            }
+
             // then we stop the loop (otherwise we'd run -> reload -> run ... recursively)
-            //$loop->defer(fn () => $stop->cancel());
+            $hasBeenReloaded = true;
+            EventLoop::queue(static fn () => $kernel->stop());
         });
 
+        self::assertSame(2, $invocations);
         self::assertTrue($hasBeenReloaded);
     }
 }
