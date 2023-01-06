@@ -5,47 +5,76 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Kernel\Component;
 
 use ArrayIterator;
-use Countable;
+use DI\Container;
+use DI\ContainerBuilder;
 use IteratorAggregate;
-use Nayleen\Async\Kernel\Container\ServiceFactory;
+use Psr\Container\ContainerInterface;
 use Traversable;
 
-final class Components implements Countable, IteratorAggregate
+final class Components implements IteratorAggregate
 {
     /**
      * @var Component[]
      */
     private array $components = [];
 
-    public function __construct(private readonly ServiceFactory $serviceFactory)
+    /**
+     * @param iterable<class-string<Component>|Component> $components
+     */
+    public function __construct(iterable $components = [])
     {
-
-    }
-
-    private function register(Component $component): void
-    {
-        if (!$component instanceof DependentComponent) {
-            return;
-        }
-
-        foreach ($component->dependencies() as $dependency) {
-            $this->add($this->serviceFactory->make($dependency));
+        foreach ($components as $component) {
+            $this->add($component);
         }
     }
 
-    public function add(Component $component): void
+    /**
+     * @param class-string<Component>|Component $component
+     */
+    private function add(string|Component $component): void
     {
         if ($this->has($component)) {
             return;
         }
 
-        $this->register($component);
-        $this->components[(string) $component] = $component;
+        $component = $this->make($component);
+        $this->components[$component->name()] = $component;
     }
 
-    public function count(): int
+    /**
+     * @param class-string<Component>|Component $component
+     */
+    private function make(string|Component $component): Component
     {
-        return count($this->components);
+        if (is_string($component)) {
+            $component = new $component();
+        }
+
+        if ($component instanceof HasDependencies) {
+            foreach ($component->dependencies() as $dependency) {
+                $this->add($dependency);
+            }
+        }
+
+        return $component;
+    }
+
+    public function boot(ContainerInterface $container): void
+    {
+        foreach ($this->components as $component) {
+            $component->boot($container);
+        }
+    }
+
+    public function compile(): Container
+    {
+        $containerBuilder = new ContainerBuilder();
+
+        foreach ($this->components as $component) {
+            $component->register($containerBuilder);
+        }
+
+        return $containerBuilder->build();
     }
 
     /**
@@ -64,8 +93,17 @@ final class Components implements Countable, IteratorAggregate
         return isset($this->components[(string) $component]);
     }
 
-    public function reverse(): Traversable
+    public function reload(ContainerInterface $container): void
     {
-        return new ArrayIterator(array_reverse($this->components));
+        foreach ($this->components as $component) {
+            $component->reload($container);
+        }
+    }
+
+    public function shutdown(ContainerInterface $container): void
+    {
+        foreach (array_reverse($this->components) as $component) {
+            $component->shutdown($container);
+        }
     }
 }

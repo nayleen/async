@@ -4,28 +4,26 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Kernel;
 
+use DI\ContainerBuilder;
 use Nayleen\Async\Kernel\Component\Component;
-use Nayleen\Async\Kernel\Container\Container;
-use Nayleen\Async\Kernel\Container\ServiceProvider;
-use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Revolt\EventLoop\Driver;
 
 /**
  * @internal
  */
-final class KernelTestComponent implements Component
+final class KernelTestComponent extends Component
 {
-    public function __construct(
-        private readonly Driver $loop,
-        private readonly LoggerInterface $logger,
-    ) {
+    private readonly LoggerInterface $logger;
+    private readonly Driver $loop;
 
-    }
-
-    public function boot(ContainerInterface $container): void
+    public static function create(Driver $loop, LoggerInterface $logger)
     {
+        $instance = new self();
+        $instance->logger = $logger;
+        $instance->loop = $loop;
 
+        return $instance;
     }
 
     public function name(): string
@@ -33,22 +31,13 @@ final class KernelTestComponent implements Component
         return 'test';
     }
 
-    public function register(ServiceProvider $serviceProvider): ContainerInterface
+    public function register(ContainerBuilder $containerBuilder): void
     {
-        $container = new Container();
-        $container->set(Driver::class, $this->loop);
-        $container->set(LoggerInterface::class, $this->logger);
-
-        return $container;
-    }
-
-    public function shutdown(ContainerInterface $container): void
-    {
-
-    }
-
-    public function __toString(): string
-    {
-        return $this->name();
+        $containerBuilder->addDefinitions(
+            [
+                Driver::class => $this->loop,
+                LoggerInterface::class => $this->logger,
+            ]
+        );
     }
 }

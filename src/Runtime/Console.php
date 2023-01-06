@@ -4,31 +4,54 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Runtime;
 
+use Nayleen\Async\Kernel\Kernel;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-final class Console implements Runtime
+final class Console extends Runtime
 {
-    public function __construct(private readonly Application $console)
-    {
+    private ?InputInterface $input = null;
+    private ?OutputInterface $output = null;
+
+    public function __construct(
+        Kernel $kernel,
+        private readonly Application $console,
+    ) {
+        parent::__construct($kernel);
+
         $this->console->setAutoExit(false);
     }
 
-    public function run(
-        string|Command $command = null,
-        ?InputInterface $input = null,
-        ?OutputInterface $output = null,
-    ): int {
-        if ($command) {
-            $command = $command instanceof Command
-                ? $command->getName()
-                : $command;
+    protected function execute(): int
+    {
+        return $this->console->run($this->input, $this->output);
+    }
 
-            $this->console->setDefaultCommand($command, true);
+    public function command(string|Command $command): self
+    {
+        if ($command instanceof Command) {
+            $command = (string) $command->getName();
         }
 
-        return $this->console->run($input, $output);
+        assert($command !== '');
+        $this->console->setDefaultCommand($command, true);
+
+        return $this;
+    }
+
+    public function input(InputInterface $input): self
+    {
+        $this->input = $input;
+
+        return $this;
+    }
+
+    public function output(OutputInterface $output): self
+    {
+        $this->output = $output;
+
+        return $this;
     }
 }

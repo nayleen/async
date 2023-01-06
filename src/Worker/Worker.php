@@ -4,9 +4,8 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Worker;
 
-use Amp\Loop\Driver;
-use Amp\Promise;
 use Nayleen\Async\Timer\Timers;
+use Revolt\EventLoop\Driver;
 
 abstract class Worker
 {
@@ -20,5 +19,5 @@ abstract class Worker
         return new Timers();
     }
 
-    abstract public function run(): Promise;
+    abstract public function run(): void;
 }

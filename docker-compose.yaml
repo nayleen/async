@@ -9,9 +9,20 @@ services:
         init: true
         links:
             - redis
+        networks:
+            - async-runtimes
+        restart: "no"
         volumes:
             - ./:/usr/src/app
 
     redis:
-        image: redis:6
+        image: redis:7-alpine
         container_name: redis
+        networks:
+            - async-runtimes
+        restart: "no"
+
+networks:
+    async-runtimes:
+        driver: bridge
+        name: async-runtimes

@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Worker\Queue;
 
-use Amp\Promise;
 use Nayleen\Async\Bus\Queue\Consumer as QueueConsumer;
 use Nayleen\Async\Bus\Queue\Queue;
 use Nayleen\Async\Worker\Worker;
@@ -17,8 +16,8 @@ final class Consumer extends Worker
     ) {
     }
 
-    public function run(): Promise
+    public function run(): void
     {
-        return $this->consumer->consume($this->queue);
+        $this->consumer->consume($this->queue);
     }
 }

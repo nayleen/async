@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Runtime;
 
-use Amp\Loop\Driver;
+use Revolt\EventLoop\Driver;
 use Nayleen\Async\Worker\Worker as WorkerImplementation;
 
 final class Worker implements Runtime

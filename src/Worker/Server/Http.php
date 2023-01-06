@@ -5,18 +5,13 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Worker\Server;
 
 use Amp\Http\Server\HttpServer;
-use Amp\Loop\Driver;
-use Amp\Promise;
 use Nayleen\Async\Worker\Worker;
+use Revolt\EventLoop\Driver;
 
 final class Http extends Worker
 {
-    private const DEFAULT_SHUTDOWN_TIMEOUT = HttpServer::DEFAULT_SHUTDOWN_TIMEOUT;
-
-    public function __construct(
-        private readonly HttpServer $server,
-        private readonly int $shutdownTimeout = self::DEFAULT_SHUTDOWN_TIMEOUT,
-    ) {
+    public function __construct(private readonly HttpServer $server)
+    {
     }
 
     public function setup(Driver $loop): void
@@ -25,12 +20,12 @@ final class Http extends Worker
 
         $this->onSignals(
             $this->signals(),
-            fn () => $this->server->stop($this->shutdownTimeout),
+            fn () => $this->server->stop(),
         );
     }
 
-    public function run(): Promise
+    public function run(): void
     {
-        return $this->server->start();
+        $this->server->start();
     }
 }

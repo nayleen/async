@@ -4,57 +4,37 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Kernel;
 
+use DI\Container;
+use LogicException;
 use Nayleen\Async\Kernel\Component\Component;
 use Nayleen\Async\Kernel\Component\Components;
-use Nayleen\Async\Kernel\Component\Finder;
-use Nayleen\Async\Kernel\Container\Container;
+use Nayleen\Async\Runtime\Loop;
+use Nayleen\Async\Runtime\Runtime;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Revolt\EventLoop;
 
 final class Kernel
 {
+    public readonly Components $components;
+
     private ?Container $container = null;
 
     private ?EventLoop\Driver $loop = null;
 
     private bool $reload = false;
 
-    public function __construct(
-        private readonly Components $components,
-        private readonly Container $serviceProvider,
-    ) {
-
+    /**
+     * @param iterable<class-string<Component>|Component> $components
+     */
+    public function __construct(iterable $components)
+    {
+        $this->components = new Components([Bootstrapper::class, ...$components]);
     }
 
     public function __destruct()
     {
         $this->shutdown();
-    }
-
-    /**
-     * @param iterable<class-string<Component>>|Finder $components
-     */
-    public static function create(
-        iterable|Components $components,
-        ?ContainerInterface $delegateLookupContainer = null,
-    ) {
-        $container = new Container();
-
-        if ($delegateLookupContainer) {
-            $container->add($delegateLookupContainer);
-        }
-
-        if ($components instanceof Components) {
-            return new self($components, $container);
-        }
-
-        $kernelComponents = new Components($container);
-        foreach ($components as $component) {
-            $kernelComponents->add($container->make($component));
-        }
-
-        return new self($kernelComponents, $container);
     }
 
     public function boot(): ContainerInterface
@@ -63,15 +43,10 @@ final class Kernel
             return $this->container;
         }
 
-        $container = (clone $this->serviceProvider);
+        $container = $this->components->compile();
+        $container->set(self::class, $this);
 
-        foreach ($this->components as $component) {
-            $container->add($component->register(clone $container));
-        }
-
-        foreach ($this->components as $component) {
-            $component->boot($container);
-        }
+        $this->components->boot($container);
 
         return $this->container = $container;
     }
@@ -81,9 +56,21 @@ final class Kernel
         return isset($this->container);
     }
 
-    public function components(): Components
+    /**
+     * @psalm-internal Nayleen\Async
+     * @template T of Runtime
+     *
+     * @param class-string<T> $runtime
+     * @return T
+     */
+    public function create(string $runtime, array $parameters = []): Runtime
     {
-        return $this->components;
+        $this->boot();
+
+        $runtime = $this->container->make($runtime, $parameters);
+        assert($runtime instanceof Runtime);
+
+        return $runtime;
     }
 
     public function reload(): void
@@ -97,12 +84,13 @@ final class Kernel
      */
     public function run(?callable $callback = null): void
     {
-        reload:
+        return $this->create(Loop::class)->defer($callback)->run();
         $container = $this->boot();
 
+        reload:
         $loop = $container->get(EventLoop\Driver::class);
         $loop->queue(
-            fn (LoggerInterface $logger) => $logger->debug(sprintf('Loop started using %s.', $loop::class)),
+            fn (LoggerInterface $logger) => $logger->debug(sprintf('Kernel started using %s.', $loop::class)),
             $container->get(LoggerInterface::class),
         );
 
@@ -111,16 +99,19 @@ final class Kernel
         }
 
         ($this->loop = $loop)->run();
-        unset($container, $loop);
+        unset($this->loop, $loop);
 
         $reload = $this->reload;
         $this->reload = false;
 
-        $this->shutdown();
-
         if ($reload) {
+            $this->components->reload($container);
+            gc_collect_cycles();
+
             goto reload;
         }
+
+        $this->shutdown();
     }
 
     public function running(): bool
@@ -131,19 +122,16 @@ final class Kernel
     public function shutdown(): void
     {
         if ($this->booted()) {
-            foreach ($this->components->reverse() as $component) {
-                $component->shutdown($this->container);
-            }
+            $this->components->shutdown($this->container);
         }
 
-        $this->container = null;
-        $this->loop = null;
+        unset($this->container, $this->loop);
     }
 
     public function stop(): void
     {
         if (!$this->running()) {
-            throw new \LogicException();
+            throw new LogicException('Kernel is not running.');
         }
 
         $this->loop->queue(fn () => $this->loop->stop());

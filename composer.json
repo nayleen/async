@@ -8,14 +8,16 @@
         "ext-posix": "*",
         "amphp/amp": "^3",
         "amphp/log": "^2",
-        "nayleen/finder": "~0"
+        "nayleen/finder": "~0",
+        "php-di/php-di": "^6",
+        "revolt/event-loop": "^1"
     },
     "require-dev": {
         "amphp/http-server": "^3",
         "amphp/redis": "^2",
         "nayleen/development": "^2@dev",
-        "roave/security-advisories": "dev-latest",
-        "symfony/dotenv": "^6"
+        "roave/better-reflection": "^6",
+        "roave/security-advisories": "dev-latest"
     },
     "conflict": {
         "vimeo/psalm": "*"

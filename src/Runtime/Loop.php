@@ -4,13 +4,34 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Runtime;
 
-use Amp\Loop\Driver;
+use Nayleen\Async\Kernel\Kernel;
+use Revolt\EventLoop\Driver;
 use Throwable;
 
-final class Loop implements Runtime
+final class Loop extends Runtime
 {
-    public function __construct(private readonly Driver $loop)
+    /**
+     * @var callable|null
+     */
+    private $callback = null;
+
+    public function __construct(
+        Kernel $kernel,
+        private readonly Driver $loop,
+    ) {
+        parent::__construct($kernel);
+    }
+
+    public function defer(?callable $callback): self
     {
+        $this->callback = $callback;
+
+        return $this;
+    }
+
+    protected function execute(): ?int
+    {
+        // TODO: Implement execute() method.
     }
 
     public function run(?callable $deferred = null): int
