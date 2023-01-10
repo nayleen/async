@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Kernel\Component;
 
 use Generator;
-use Nayleen\Async\Kernel\KernelTestComponent;
+use Nayleen\Async\Kernel\Bootstrapper;
 use Nayleen\Finder\Engine\ComposerEngine;
 use Nayleen\Finder\Engine\Engine;
 use Nayleen\Finder\Expectation\Expectation;
@@ -32,11 +32,11 @@ class FinderTest extends TestCase
         $engineMock = new class implements Engine {
             public function find(Expectation $expectation): Generator
             {
-                yield KernelTestComponent::class;
+                yield Bootstrapper::class;
             }
         };
 
-        yield 'mocked' => ['engine' => $engineMock, 'expected' => [KernelTestComponent::class]];
+        yield 'mocked' => ['engine' => $engineMock, 'expected' => [Bootstrapper::class]];
         yield 'composer' => ['engine' => ComposerEngine::create(), 'expected' => []];
     }
 }

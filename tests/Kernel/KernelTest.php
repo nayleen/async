@@ -4,16 +4,19 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Kernel;
 
+use Exception;
 use LogicException;
 use Monolog\Test\TestCase;
 use Nayleen\Async\Kernel\Component\Component;
 use Nayleen\Async\Kernel\Component\Components;
-use Nayleen\Async\Runtime\Runtime;
-use Psr\Container\ContainerInterface;
+use Nayleen\Async\Kernel\Component\DependencyProvider;
+use Nayleen\Async\Kernel\Exception\NotRunningException;
+use Nayleen\Async\Kernel\Exception\ReloadException;
+use Nayleen\Async\Kernel\Exception\StopException;
+use Nayleen\Async\Kernel\Runtime\Console;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Revolt\EventLoop;
-use function Amp\delay;
 
 /**
  * @internal
@@ -28,22 +31,14 @@ class KernelTest extends TestCase
         return new Kernel(
             new Components(
                 [
-                    KernelTestComponent::create(
-                        $loop ?? EventLoop::getDriver(),
-                        $logger ?? new NullLogger(),
-                    ),
+                    DependencyProvider::create([
+                        EventLoop\Driver::class => $loop ?? EventLoop::getDriver(),
+                        LoggerInterface::class => $logger ?? new NullLogger(),
+                    ]),
                     ...$components
                 ]
             )
         );
-    }
-
-    /**
-     * @test
-     */
-    public function boot_creates_container(): void
-    {
-        self::assertInstanceOf(ContainerInterface::class, $this->createKernel()->boot());
     }
 
     /**
@@ -62,7 +57,7 @@ class KernelTest extends TestCase
     /**
      * @test
      */
-    public function create_prepends_bootstrapper(): void
+    public function always_prepends_bootstrapper(): void
     {
         $component = $this->createMock(Component::class);
         $kernel = new Kernel([$component]);
@@ -76,7 +71,7 @@ class KernelTest extends TestCase
     /**
      * @test
      */
-    public function bootstrapper_is_deduplicated_if_auto_prepended(): void
+    public function bootstrapper_is_deduplicated(): void
     {
         $bootstrapper = new Bootstrapper();
         $component = $this->createMock(Component::class);
@@ -114,7 +109,6 @@ class KernelTest extends TestCase
     public function run_will_run_event_loop(): void
     {
         $mockDriver = $this->createMock(EventLoop\Driver::class);
-        $mockDriver->expects(self::once())->method('queue');
         $mockDriver->expects(self::once())->method('run');
 
         $kernel = $this->createKernel($mockDriver);
@@ -127,11 +121,8 @@ class KernelTest extends TestCase
     public function start_can_queue_callback_on_loop(): void
     {
         $started = false;
-
-        $kernel = $this->createKernel();
-        $kernel->run(function (Kernel $kernel) use (&$started) {
+        $this->createKernel()->run(function () use (&$started) {
             $started = true;
-            $kernel->stop();
         });
 
         self::assertTrue($started);
@@ -152,7 +143,7 @@ class KernelTest extends TestCase
     /**
      * @test
      */
-    public function kernel_can_be_reloaded(): void
+    public function can_be_reloaded(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::exactly(2))->method('debug')->with(sprintf('Kernel started using %s.', EventLoop::getDriver()::class));
@@ -170,7 +161,7 @@ class KernelTest extends TestCase
 
             // then we stop the loop (otherwise we'd run -> reload -> run ... recursively)
             $hasBeenReloaded = true;
-            EventLoop::queue(static fn () => $kernel->stop());
+            $kernel->stop();
         });
 
         self::assertSame(2, $invocations);
@@ -180,11 +171,91 @@ class KernelTest extends TestCase
     /**
      * @test
      */
-    public function throws_if_stopped_while_not_running(): void
+    public function can_be_reloaded_by_throwing_reload_exception(): void
     {
-        $this->expectException(LogicException::class);
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::exactly(2))->method('debug')->with(sprintf('Kernel started using %s.', EventLoop::getDriver()::class));
+
+        $invocations = 0;
+        $hasBeenReloaded = false;
+
+        $kernel = $this->createKernel(logger: $logger);
+        $kernel->run(function (Kernel $kernel) use (&$invocations, &$hasBeenReloaded) {
+            // first we trigger a reload
+            if ($invocations++ === 0) {
+                throw new ReloadException();
+            }
+
+            // then we stop the loop (otherwise we'd run -> reload -> run ... recursively)
+            $hasBeenReloaded = true;
+            $kernel->stop();
+        });
+
+        self::assertSame(2, $invocations);
+        self::assertTrue($hasBeenReloaded);
+    }
+
+    /**
+     * @test
+     */
+    public function can_be_stopped_by_throwing_stop_exception(): void
+    {
+        $invocations = 0;
+        $enteredRun = false;
 
         $kernel = $this->createKernel();
-        $kernel->stop();
+        $kernel->run(function () use (&$invocations, &$enteredRun) {
+            $enteredRun = true;
+            $invocations++;
+
+            throw new StopException();
+        });
+
+        self::assertSame(1, $invocations);
+        self::assertTrue($enteredRun);
+    }
+
+    /**
+     * @test
+     */
+    public function throws_if_stopped_while_not_running(): void
+    {
+        $this->expectException(NotRunningException::class);
+
+        $this->createKernel()->stop();
+    }
+
+    /**
+     * @test
+     */
+    public function throws_if_failed_while_not_running(): void
+    {
+        $this->expectException(NotRunningException::class);
+
+        $this->createKernel()->fail($this->createStub(LogicException::class));
+    }
+
+    /**
+     * @test
+     */
+    public function failed_kernel_throws_outside_of_loop(): void
+    {
+        $expectedException = $this->createMock(Exception::class);
+        $this->expectExceptionObject($expectedException);
+
+        $kernel = $this->createKernel();
+        $kernel->run(function (Kernel $kernel) use ($expectedException) {
+            $kernel->fail($expectedException);
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function can_create_runtimes(): void
+    {
+        $runtime = $this->createKernel()->create(Console::class);
+
+        self::assertInstanceOf(Console::class, $runtime);
     }
 }

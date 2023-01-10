@@ -9,14 +9,14 @@ use Amp\Log;
 use DI;
 use Monolog\ErrorHandler;
 use Monolog\Logger;
-use Nayleen\Async\Kernel\Bootstrapper;
+use Nayleen\Async\Console\Output;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Revolt\EventLoop;
+use Symfony\Component\Console\Output\OutputInterface;
 
-return function (DI\ContainerBuilder $containerBuilder) {
-    /** @var Bootstrapper $this */
+return static function (DI\ContainerBuilder $containerBuilder) {
     // set container builder defaults
     $containerBuilder->ignorePhpDocErrors(true);
     $containerBuilder->useAnnotations(false);
@@ -36,6 +36,19 @@ return function (DI\ContainerBuilder $containerBuilder) {
         'dir.cache' => fn () => sys_get_temp_dir(),
 
         // services
+        'app.exception_handler' => function (ErrorHandler $errorHandler) {
+            $errorHandler->registerExceptionHandler();
+
+            $exceptionHandler = set_exception_handler(null);
+            set_exception_handler($exceptionHandler);
+
+            return $exceptionHandler;
+        },
+
+        'console.output' => function (ContainerInterface $c) {
+            return new Output($c->get('stream.stdout'));
+        },
+
         'logger.factory' => DI\value(function (
             ContainerInterface $container,
             ByteStream\WritableResourceStream $stream,
@@ -57,39 +70,33 @@ return function (DI\ContainerBuilder $containerBuilder) {
 
             return $logger;
         }),
-        
-        'app.exception_handler' => function (ErrorHandler $errorHandler) {
-            $errorHandler->registerExceptionHandler();
-
-            $exceptionHandler = set_exception_handler(null);
-            set_exception_handler($exceptionHandler);
-
-            return $exceptionHandler;
-        },
 
         'logger.stderr' => function (DI\Container $container) {
             return $container->call(
                 $container->get('logger.factory'),
                 [
                     $container,
-                    ByteStream\getStderr(),
+                    $container->make('stream.stderr'),
                     $container->get('app.name'),
                 ]
             );
         },
 
-        'logger.stdout' => function (ContainerInterface $container) {
+        'logger.stdout' => function (DI\Container $container) {
             return $container->call(
                 $container->get('logger.factory'),
                 [
                     $container,
-                    ByteStream\getStderr(),
+                    $container->make('stream.stdout'),
                     $container->get('app.name'),
                     $container->get('app.debug') ? LogLevel::DEBUG : LogLevel::INFO,
                 ]
             );
         },
-        
+
+        'stream.stderr' => fn () => ByteStream\getStderr(),
+        'stream.stdout' => fn () => ByteStream\getStdout(),
+
         ErrorHandler::class => DI\factory(function (LoggerInterface $logger) {
             $errorHandler = new ErrorHandler($logger);
             $errorHandler->registerErrorHandler(errorTypes: error_reporting());
@@ -114,5 +121,6 @@ return function (DI\ContainerBuilder $containerBuilder) {
 
         Logger::class => DI\get('logger.stdout'),
         LoggerInterface::class => DI\get(Logger::class),
+        OutputInterface::class => DI\get('console.output'),
     ]);
 };

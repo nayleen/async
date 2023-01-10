@@ -5,14 +5,15 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Kernel;
 
 use DI\Container;
-use LogicException;
 use Nayleen\Async\Kernel\Component\Component;
 use Nayleen\Async\Kernel\Component\Components;
-use Nayleen\Async\Runtime\Loop;
-use Nayleen\Async\Runtime\Runtime;
+use Nayleen\Async\Kernel\Exception\NotRunningException;
+use Nayleen\Async\Kernel\Exception\ReloadException;
+use Nayleen\Async\Kernel\Exception\StopException;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Revolt\EventLoop;
+use Revolt\EventLoop\Driver as Loop;
+use Throwable;
 
 final class Kernel
 {
@@ -20,9 +21,9 @@ final class Kernel
 
     private ?Container $container = null;
 
-    private ?EventLoop\Driver $loop = null;
+    private ?Throwable $failure = null;
 
-    private bool $reload = false;
+    private ?Loop $loop = null;
 
     /**
      * @param iterable<class-string<Component>|Component> $components
@@ -35,6 +36,29 @@ final class Kernel
     public function __destruct()
     {
         $this->shutdown();
+    }
+
+    private function handleFailure(): bool
+    {
+        return match (true) {
+            is_null($this->failure),
+            $this->failure instanceof StopException => false,
+            $this->failure instanceof ReloadException => $this->handleReload(),
+            default => throw $this->failure,
+        };
+    }
+
+    /**
+     * @return true
+     */
+    private function handleReload(): bool
+    {
+        $this->failure = null;
+
+        $this->components->reload($this->container);
+        gc_collect_cycles();
+
+        return true;
     }
 
     public function boot(): ContainerInterface
@@ -57,7 +81,7 @@ final class Kernel
     }
 
     /**
-     * @psalm-internal Nayleen\Async
+     * @api
      * @template T of Runtime
      *
      * @param class-string<T> $runtime
@@ -67,16 +91,22 @@ final class Kernel
     {
         $this->boot();
 
-        $runtime = $this->container->make($runtime, $parameters);
-        assert($runtime instanceof Runtime);
+        return $this->container->make($runtime, $parameters);
+    }
 
-        return $runtime;
+    public function fail(Throwable $failure): void
+    {
+        if (!$this->running()) {
+            throw new NotRunningException();
+        }
+
+        $this->failure = $failure;
+        $this->stop();
     }
 
     public function reload(): void
     {
-        $this->reload = true;
-        $this->stop();
+        $this->fail(new ReloadException());
     }
 
     /**
@@ -84,30 +114,33 @@ final class Kernel
      */
     public function run(?callable $callback = null): void
     {
-        return $this->create(Loop::class)->defer($callback)->run();
         $container = $this->boot();
 
         reload:
-        $loop = $container->get(EventLoop\Driver::class);
+        $logger = $container->get(LoggerInterface::class);
+        $loop = $container->get(Loop::class);
+
         $loop->queue(
-            fn (LoggerInterface $logger) => $logger->debug(sprintf('Kernel started using %s.', $loop::class)),
-            $container->get(LoggerInterface::class),
+            $logger->debug(...),
+            sprintf('Kernel started using %s.', $loop::class),
         );
 
         if ($callback) {
-            $loop->defer(fn () => $callback($this));
+            $loop->defer(function () use ($callback) {
+                try {
+                    $callback($this);
+                } catch (Throwable $ex) {
+                    $this->fail($ex);
+                }
+            });
         }
 
         ($this->loop = $loop)->run();
         unset($this->loop, $loop);
 
-        $reload = $this->reload;
-        $this->reload = false;
+        $reload = $this->handleFailure();
 
         if ($reload) {
-            $this->components->reload($container);
-            gc_collect_cycles();
-
             goto reload;
         }
 
@@ -116,7 +149,9 @@ final class Kernel
 
     public function running(): bool
     {
-        return isset($this->container, $this->loop) && $this->loop->isRunning();
+        return !isset($this->failure)
+            && isset($this->container, $this->loop)
+            && $this->loop->isRunning();
     }
 
     public function shutdown(): void
@@ -125,15 +160,15 @@ final class Kernel
             $this->components->shutdown($this->container);
         }
 
-        unset($this->container, $this->loop);
+        unset($this->container, $this->failure, $this->loop);
     }
 
     public function stop(): void
     {
         if (!$this->running()) {
-            throw new LogicException('Kernel is not running.');
+            throw new NotRunningException();
         }
 
-        $this->loop->queue(fn () => $this->loop->stop());
+        $this->loop->queue($this->loop->stop(...));
     }
 }
