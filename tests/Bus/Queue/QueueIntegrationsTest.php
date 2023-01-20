@@ -6,8 +6,8 @@ namespace Nayleen\Async\Bus\Queue;
 
 use Amp\DeferredCancellation;
 use Amp\PHPUnit\AsyncTestCase;
-use Amp\Redis\RedisConfig;
 use Amp\Redis\Redis;
+use Amp\Redis\RedisConfig;
 use Amp\Redis\RemoteExecutor;
 use Amp\Serialization\Serializer;
 use Generator;
@@ -34,7 +34,7 @@ class QueueIntegrationsTest extends AsyncTestCase
         $cancellation = new DeferredCancellation();
 
         $bus = $this->createMock(Bus::class);
-        $bus->expects(self::once())->method('handle')->with($message)->willReturnCallback(function () use ($cancellation) {
+        $bus->expects(self::once())->method('handle')->with($message)->willReturnCallback(function () use ($cancellation): void {
             $cancellation->cancel();
         });
 

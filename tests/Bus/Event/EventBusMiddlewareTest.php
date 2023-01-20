@@ -60,7 +60,7 @@ class EventBusMiddlewareTest extends AsyncTestCase
         $middleware = new EventBusMiddleware(new Handlers(), $logger);
         $middleware->handle(
             $this->createMock(Message::class),
-            fn () => $logger->log(LogLevel::DEBUG, 'Executing next handler...')
+            fn () => $logger->log(LogLevel::DEBUG, 'Executing next handler...'),
         );
     }
 }

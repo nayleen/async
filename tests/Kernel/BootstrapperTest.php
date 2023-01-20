@@ -6,6 +6,7 @@ namespace Nayleen\Async\Kernel;
 
 use Amp\Log\ConsoleFormatter;
 use Amp\Log\StreamHandler;
+use Amp\NullCancellation;
 use Closure;
 use DI\ContainerBuilder;
 use Monolog\Logger;
@@ -14,24 +15,10 @@ use Psr\Log\LoggerInterface;
 use Revolt\EventLoop;
 
 /**
- * @test
+ * @internal
  */
 class BootstrapperTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function sets_container_builder_defaults(): void
-    {
-        $containerBuilder = $this->createMock(ContainerBuilder::class);
-        $containerBuilder->expects(self::once())->method('ignorePhpDocErrors')->with(true);
-        $containerBuilder->expects(self::once())->method('useAnnotations')->with(false);
-        $containerBuilder->expects(self::once())->method('useAutowiring')->with(true);
-
-        $bootstrapper = new Bootstrapper();
-        $bootstrapper->register($containerBuilder);
-    }
-
     /**
      * @test
      */
@@ -42,26 +29,10 @@ class BootstrapperTest extends TestCase
 
         $container = $containerBuilder->build();
 
-        self::assertSame(true, $container->get('app.debug'));
+        self::assertTrue($container->get('app.debug'));
         self::assertSame('/usr/src/app', $container->get('dir.base'));
         self::assertSame('/tmp', $container->get('dir.cache'));
         self::assertSame('test', $container->get('app.env'));
-    }
-
-    /**
-     * @test
-     */
-    public function registers_default_loop_driver(): void
-    {
-        $bootstrapper = new Bootstrapper();
-        $bootstrapper->register($containerBuilder = new ContainerBuilder());
-
-        $container = $containerBuilder->build();
-
-        $driver = $container->get(EventLoop\Driver::class);
-
-        // due to APP_DEBUG=true
-        self::assertInstanceOf(EventLoop\Driver\TracingDriver::class, $driver);
     }
 
     /**
@@ -97,6 +68,35 @@ class BootstrapperTest extends TestCase
     /**
      * @test
      */
+    public function registers_default_loop_driver(): void
+    {
+        $bootstrapper = new Bootstrapper();
+        $bootstrapper->register($containerBuilder = new ContainerBuilder());
+
+        $container = $containerBuilder->build();
+
+        $driver = $container->get(EventLoop\Driver::class);
+
+        // due to APP_DEBUG=true
+        self::assertInstanceOf(EventLoop\Driver\TracingDriver::class, $driver);
+    }
+
+    /**
+     * @test
+     */
+    public function sets_container_builder_defaults(): void
+    {
+        $containerBuilder = $this->createMock(ContainerBuilder::class);
+        $containerBuilder->expects(self::once())->method('useAttributes')->with(false);
+        $containerBuilder->expects(self::once())->method('useAutowiring')->with(true);
+
+        $bootstrapper = new Bootstrapper();
+        $bootstrapper->register($containerBuilder);
+    }
+
+    /**
+     * @test
+     */
     public function sets_error_handler_on_boot(): void
     {
         $bootstrapper = new Bootstrapper();
@@ -104,7 +104,7 @@ class BootstrapperTest extends TestCase
 
         $container = $containerBuilder->build();
 
-        $bootstrapper->boot($container);
+        $bootstrapper->boot($container, new NullCancellation());
 
         self::assertInstanceOf(Closure::class, $container->get(EventLoop\Driver::class)->getErrorHandler());
     }
