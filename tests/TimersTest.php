@@ -2,15 +2,12 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Unit;
+namespace Nayleen\Async;
 
 use Nayleen\Async\Timer\Cron;
 use Nayleen\Async\Timer\Interval;
-use Nayleen\Async\Timers;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Revolt\EventLoop;
-use Symfony\Component\Clock\MockClock;
 
 /**
  * @internal
@@ -30,8 +27,7 @@ class TimersTest extends TestCase
     private function createTimers(): Timers
     {
         $timers = new Timers($this->cron, $this->interval);
-        $timers = $timers->withClock(new MockClock());
-        $timers->setup($this->createStub(EventLoop\Driver::class));
+        $timers->start($this->createStub(Kernel::class));
 
         return $timers;
     }
@@ -41,10 +37,10 @@ class TimersTest extends TestCase
      */
     public function cancel_proxies_to_timers(): void
     {
-        $this->cron->expects(self::atLeast(1))->method('cancel'); // also called during destructor
-        $this->interval->expects(self::atLeast(1))->method('cancel'); // also called during destructor
+        $this->cron->expects(self::atLeast(1))->method('stop'); // also called during destructor
+        $this->interval->expects(self::atLeast(1))->method('stop'); // also called during destructor
 
-        $this->createTimers()->cancel();
+        $this->createTimers()->stop();
     }
 
     /**

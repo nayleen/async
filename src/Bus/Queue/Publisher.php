@@ -7,6 +7,9 @@ namespace Nayleen\Async\Bus\Queue;
 use Amp\Serialization\Serializer;
 use Nayleen\Async\Bus\Message;
 
+/**
+ * @api
+ */
 final class Publisher
 {
     public function __construct(private readonly Serializer $serializer)

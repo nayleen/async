@@ -8,14 +8,22 @@
         "ext-posix": "*",
         "amphp/amp": "^3",
         "amphp/log": "^2",
+        "amphp/parallel": "^2",
+        "dragonmantank/cron-expression": "^2",
         "nayleen/finder": "~0",
-        "php-di/php-di": "^6",
-        "revolt/event-loop": "^1"
+        "php-di/php-di": "^7",
+        "revolt/event-loop": "^1",
+        "symfony/clock": "^6"
     },
     "require-dev": {
-        "amphp/http-server": "^3",
+        "amphp/cache": "^2",
+        "amphp/cluster": "2.x-dev",
+        "amphp/http": "2.x-dev",
+        "amphp/http-server": "3.x-dev",
+        "amphp/process": "2.x-dev",
         "amphp/redis": "^2",
-        "nayleen/development": "^2@dev",
+        "amphp/socket": "^2",
+        "nayleen/development": "^2",
         "roave/better-reflection": "^6",
         "roave/security-advisories": "dev-latest"
     },
@@ -23,9 +31,14 @@
         "vimeo/psalm": "*"
     },
     "suggest": {
+        "amphp/cluster": "To run existing workers as clusters",
         "amphp/http-server": "To run http server workers",
-        "amphp/redis": "To use Redis as the backing queue for busses"
+        "amphp/redis": "To use Redis as the backing queue for busses or as worker cache",
+        "amphp/socket": "To run socket server workers",
+        "amphp/websocket-server": "To run websocket server workers"
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Nayleen\\Async\\": "src/"
@@ -48,9 +61,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "0.1.x-dev"
+            "dev-main": "0.5.x-dev"
         }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    }
 }

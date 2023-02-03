@@ -7,6 +7,9 @@ namespace Nayleen\Async\Bus\Event;
 use Nayleen\Async\Bus\Handler\Validator;
 use Nayleen\Async\Bus\Message;
 
+/**
+ * @api
+ */
 final class Handlers
 {
     use Validator;

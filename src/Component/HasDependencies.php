@@ -2,7 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Kernel\Component;
+namespace Nayleen\Async\Component;
+
+use Nayleen\Async\Component;
 
 interface HasDependencies
 {

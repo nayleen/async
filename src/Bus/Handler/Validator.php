@@ -8,6 +8,9 @@ use Nayleen\Async\Bus\Message;
 use ReflectionFunction;
 use ReflectionNamedType;
 
+/**
+ * @internal
+ */
 trait Validator
 {
     private function validateHandler(callable $handler): bool
@@ -40,9 +43,8 @@ trait Validator
         // handlers need to have voic as return type hint
         $return = $reflection->getReturnType();
 
-        return (
+        return
             !$return instanceof ReflectionNamedType
-            || !($return->getName() !== 'void')
-        );
+            || !($return->getName() !== 'void');
     }
 }

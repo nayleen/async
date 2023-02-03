@@ -2,31 +2,26 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Kernel;
+namespace Nayleen\Async;
 
-use Amp\Cancellation;
 use DI\ContainerBuilder;
-use Nayleen\Async\Component;
-use Nayleen\Async\Kernel;
-use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
-use Revolt\EventLoop;
+use Nayleen\Async\Exception\ReloadException;
+use Nayleen\Async\Exception\StopException;
+use Nayleen\Async\Recommender\Performance;
 
+/**
+ * @internal
+ */
 final class Bootstrapper extends Component
 {
-    public function boot(ContainerInterface $container, Cancellation $cancellation): void
+    public function boot(Kernel $kernel): void
     {
-        $loop = $container->get(EventLoop\Driver::class);
-        $kernel = $container->get(Kernel::class);
+        Performance::recommend($kernel);
 
-        $loop->unreference($loop->onSignal(SIGUSR1, $kernel->reload(...)));
-        $loop->unreference($loop->onSignal(SIGINT, $kernel->stop(...)));
-        $loop->unreference($loop->onSignal(SIGTERM, $kernel->stop(...)));
-
-        $env = (string) $container->get('app.env');
-        assert($env !== '');
-
-        PerformanceRecommender::execute($container->get(LoggerInterface::class), $env);
+        $loop = $kernel->loop();
+        $loop->unreference($loop->onSignal(SIGUSR1, static fn () => throw new ReloadException()));
+        $loop->unreference($loop->onSignal(SIGINT, static fn () => throw new StopException()));
+        $loop->unreference($loop->onSignal(SIGTERM, static fn () => throw new StopException()));
     }
 
     public function name(): string
@@ -40,11 +35,13 @@ final class Bootstrapper extends Component
         $containerBuilder->useAttributes(false);
         $containerBuilder->useAutowiring(true);
 
-        $configPath = dirname(__DIR__, 2) . '/config/bootstrap';
+        $configPath = dirname(__DIR__) . '/config/bootstrap';
         assert(file_exists($configPath) && is_dir($configPath));
 
-        $this->load($containerBuilder, $configPath . '/app.php');
+        $this->load($containerBuilder, $configPath . '/async.php');
+        $this->load($containerBuilder, $configPath . '/cache.php');
         $this->load($containerBuilder, $configPath . '/console.php');
         $this->load($containerBuilder, $configPath . '/logger.php');
+        $this->load($containerBuilder, $configPath . '/redis.php');
     }
 }

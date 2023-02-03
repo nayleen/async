@@ -10,19 +10,16 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Psr\Log\NullLogger;
 
+/**
+ * @api
+ */
 final class EventBusMiddleware implements Middleware
 {
-    private readonly string $level;
-
-    private readonly LoggerInterface $logger;
-
     public function __construct(
         private readonly Handlers $handlers,
-        ?LoggerInterface $logger = null,
-        ?string $level = null,
+        private readonly LoggerInterface $logger = new NullLogger(),
+        private readonly string $level = LogLevel::DEBUG,
     ) {
-        $this->level = $level ?? LogLevel::DEBUG;
-        $this->logger = $logger ?? new NullLogger();
     }
 
     /**
@@ -34,6 +31,7 @@ final class EventBusMiddleware implements Middleware
 
         if (count($handlers) === 0) {
             $next($message);
+
             return;
         }
 

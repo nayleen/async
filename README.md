@@ -1,4 +1,4 @@
-# nayleen/amphp-runtimes
+# nayleen/async-runtimes
 
 ## Installation
-`composer require nayleen/amphp-runtimes`
+`composer require nayleen/async-runtimes`

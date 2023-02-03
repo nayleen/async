@@ -2,11 +2,15 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Kernel\Component;
+namespace Nayleen\Async\Component;
 
 use DI\ContainerBuilder;
 use DI\Definition\Source\DefinitionSource;
+use Nayleen\Async\Component;
 
+/**
+ * @api
+ */
 abstract class DependencyProvider extends Component
 {
     /**

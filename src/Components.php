@@ -2,15 +2,17 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Component;
+namespace Nayleen\Async;
 
 use ArrayIterator;
-use DI\Container;
-use DI\ContainerBuilder;
+use DI;
 use IteratorAggregate;
-use Psr\Container\ContainerInterface;
+use Nayleen\Async\Component\HasDependencies;
 use Traversable;
 
+/**
+ * @api
+ */
 final class Components implements IteratorAggregate
 {
     /**
@@ -59,17 +61,17 @@ final class Components implements IteratorAggregate
         return $component;
     }
 
-    public function boot(ContainerInterface $container): void
+    public function boot(Kernel $kernel): void
     {
+        assert($kernel->writeDebug('Booting Kernel', ['loop_driver' => $kernel->loop()::class]));
+
         foreach ($this->components as $component) {
-            $component->boot($container);
+            $component->boot($kernel);
         }
     }
 
-    public function compile(): Container
+    public function compile(DI\ContainerBuilder $containerBuilder): DI\Container
     {
-        $containerBuilder = new ContainerBuilder();
-
         foreach ($this->components as $component) {
             $component->register($containerBuilder);
         }
@@ -93,17 +95,21 @@ final class Components implements IteratorAggregate
         return isset($this->components[(string) $component]);
     }
 
-    public function reload(ContainerInterface $container): void
+    public function reload(Kernel $kernel): void
     {
+        assert($kernel->writeDebug('Reloading Kernel'));
+
         foreach ($this->components as $component) {
-            $component->reload($container);
+            $component->reload($kernel);
         }
     }
 
-    public function shutdown(ContainerInterface $container): void
+    public function shutdown(Kernel $kernel): void
     {
+        assert($kernel->writeDebug('Shutting down Kernel'));
+
         foreach (array_reverse($this->components) as $component) {
-            $component->shutdown($container);
+            $component->shutdown($kernel);
         }
     }
 }

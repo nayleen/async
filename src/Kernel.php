@@ -2,193 +2,171 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Kernel;
+namespace Nayleen\Async;
 
+use Amp\Cancellation;
 use Amp\CancelledException;
-use DI\Container;
-use Nayleen\Async\Component\Component;
-use Nayleen\Async\Component\Components;
+use Amp\CompositeCancellation;
+use Amp\DeferredCancellation;
+use Amp\Future;
+use Amp\NullCancellation;
+use Amp\Sync\Channel;
+use DI;
+use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\Finder;
-use Nayleen\Async\Kernel\Exception\NotRunningException;
-use Nayleen\Async\Kernel\Exception\ReloadException;
-use Nayleen\Async\Kernel\Exception\StopException;
-use Nayleen\Async\Kernel\Exception\TerminateException;
-use Nayleen\Async\Runtime;
+use Nayleen\Async\Exception\ReloadException;
+use Nayleen\Async\Exception\StopException;
 use Psr\Log\LoggerInterface;
-use Revolt\EventLoop\Driver as Loop;
-use Throwable;
+use Psr\Log\LogLevel;
+use Revolt\EventLoop;
 
+/**
+ * @api
+ */
 final class Kernel
 {
-    private ?string $callbackId = null;
+    private readonly Components $components;
 
-    private ?Container $container = null;
+    private readonly DI\Container $container;
 
-    private ?Throwable $failure = null;
-
-    private ?Loop $loop = null;
-
-    public readonly Components $components;
+    private readonly DeferredCancellation $deferredCancellation;
 
     /**
      * @param iterable<class-string<Component>|Component> $components
      */
-    public function __construct(iterable $components = new Finder())
-    {
-        $this->components = new Components([Bootstrapper::class, ...$components]);
+    public function __construct(
+        iterable $components = new Finder(),
+        ?Channel $channel = null,
+        Cancellation $cancellation = new NullCancellation(),
+    ) {
+        $this->components = new Components(
+            [
+                Bootstrapper::class,
+                DependencyProvider::create([Channel::class => $channel]),
+                ...$components,
+            ]
+        );
+
+        $this->deferredCancellation = new DeferredCancellation();
+        $this->cancellation = new CompositeCancellation($this->deferredCancellation->getCancellation(), $cancellation);
     }
 
     public function __destruct()
     {
-        $this->shutdown();
-    }
-
-    /**
-     * @psalm-suppress MixedInferredReturnType
-     */
-    private function handleFailure(): bool
-    {
-        if ($this->failure === null) {
-            return false;
+        if (isset($this->container)) {
+            $this->components->shutdown($this);
         }
-
-        return match (true) {
-            $this->failure instanceof CancelledException,
-            $this->failure instanceof StopException,
-            $this->failure instanceof TerminateException => false,
-            $this->failure instanceof ReloadException => $this->handleReload(),
-            default => throw $this->failure,
-        };
     }
 
-    /**
-     * @return true
-     */
-    private function handleReload(): bool
+    public function cancellation(): Cancellation
     {
-        assert(isset($this->container));
-
-        $this->failure = null;
-        $this->components->reload($this->container);
-        gc_collect_cycles();
-
-        return true;
+        return $this->cancellation;
     }
 
-    public function boot(): Container
+    public function clock(): Clock
+    {
+        return $this->container()->get(Clock::class);
+    }
+
+    public function container(): DI\Container
     {
         if (isset($this->container)) {
             return $this->container;
         }
 
-        $container = $this->components->compile();
-        $container->set(self::class, $this);
+        $this->container = $this->components->compile(new DI\ContainerBuilder());
+        unset($this->channel);
 
-        $this->components->boot($container);
+        $this->container->set(self::class, $this);
+        $this->components->boot($this);
 
-        return $this->container = $container;
-    }
-
-    public function fail(Throwable $failure): void
-    {
-        if (!isset($this->loop)) {
-            throw new NotRunningException();
-        }
-
-        $this->failure = $failure;
-        $this->stop();
+        return $this->container;
     }
 
     /**
-     * @api
-     *
-     * @template T of Runtime
-     *
-     * @param class-string<T> $runtimeClass
-     * @param array<string, mixed> $parameters
+     * @return non-empty-string
      */
-    public function make(string $runtimeClass, array $parameters = []): Runtime
+    public function environment(): string
     {
-        assert($parameters === [] || !array_is_list($parameters));
+        return $this->container()->get('async.env');
+    }
 
-        $runtime = $this->boot()->make($runtimeClass, $parameters);
+    /**
+     * @param class-string<Runtime> $runtime
+     * @param array<string, string> $parameters
+     */
+    public function execute(string $runtime, array $parameters = []): int
+    {
+        $container = $this->container();
+
+        $runtime = $container->make($runtime, $parameters);
         assert($runtime instanceof Runtime);
 
-        return $runtime;
+        return $container->call($runtime, $parameters);
     }
 
-    public function reload(): void
+    public function loop(): EventLoop\Driver
     {
-        $this->fail(new ReloadException());
+        return $this->container()->get(EventLoop\Driver::class);
     }
 
     /**
-     * @param callable(Kernel): void|null $callback
+     * @template T
+     *
+     * @param class-string<T>|string $class
+     * @param array<class-string|string, string> $parameters
+     * @return T
      */
-    public function run(?callable $callback = null): void
+    public function make(string $class, array $parameters = []): mixed
     {
-        $container = $this->boot();
+        return $this->container()->make($class, $parameters);
+    }
 
+    /**
+     * @param callable(Kernel): (Future|null) $callback
+     */
+    public function run(callable $callback): mixed
+    {
         reload:
-        $logger = $container->get(LoggerInterface::class);
-        $loop = $container->get(Loop::class);
+        $loop = $this->loop();
 
-        $loop->queue(
-            $logger->debug(...),
-            sprintf('Kernel started using %s.', $loop::class),
-        );
+        try {
+            $future = $callback($this);
+            $return = $future?->await($this->cancellation());
 
-        if ($callback) {
-            $this->callbackId = $loop->defer(function () use ($callback): void {
-                try {
-                    $callback($this);
-                } catch (Throwable $ex) {
-                    $this->fail($ex);
-                }
-            });
-        }
+            $loop->run();
+        } catch (CancelledException) {
+        } catch (ReloadException) {
+            $this->components->reload($this);
+            gc_collect_cycles();
 
-        ($this->loop = $loop)->run();
-
-        if (isset($this->callbackId)) {
-            $loop->cancel($this->callbackId);
-        }
-
-        unset($this->loop, $loop);
-
-        $reload = $this->handleFailure();
-
-        if ($reload) {
             goto reload;
+        } catch (StopException) {
+            assert($this->writeDebug('Stopping Kernel'));
         }
 
-        $this->shutdown();
+        return $return ?? null;
     }
 
-    public function shutdown(): void
+    public function write(string $level, string $message, array $context = []): bool
     {
-        if (isset($this->container)) {
-            $this->components->shutdown($this->container);
-        }
+        /**
+         * @var LoggerInterface $stdOut
+         */
+        $stdOut = $this->container()->get('async.logger.stdout');
+        $stdOut->log($level, $message, $context);
 
-        unset($this->callbackId, $this->container, $this->failure, $this->loop);
+        return true;
     }
 
-    public function stop(): void
+    public function writeDebug(string $message, array $context = []): bool
     {
-        if (!isset($this->loop)) {
-            throw new NotRunningException();
-        }
+        /**
+         * @var LoggerInterface $stdErr
+         */
+        $stdErr = $this->container()->get('async.logger.stderr');
+        $stdErr->log(LogLevel::DEBUG, $message, $context);
 
-        if (isset($this->callbackId)) {
-            $this->loop->cancel($this->callbackId);
-        }
-
-        $this->loop->queue($this->loop->stop(...));
-    }
-
-    public function terminate(): void
-    {
-        $this->fail(new TerminateException());
+        return true;
     }
 }

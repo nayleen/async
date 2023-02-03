@@ -2,23 +2,13 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Timer;
-
-use Nayleen\Async\Clock;
-use Nayleen\Async\Exception\SetupException;
-use Revolt\EventLoop;
-use Symfony\Component\Clock\ClockInterface;
-use Symfony\Component\Clock\MonotonicClock;
+namespace Nayleen\Async;
 
 /**
  * @api
  */
 final class Timers
 {
-    private ClockInterface $clock;
-
-    private bool $setup = false;
-
     /**
      * @var Timer[]
      */
@@ -26,45 +16,12 @@ final class Timers
 
     public function __construct(Timer ...$timers)
     {
-        $this->clock = new MonotonicClock();
         $this->timers = $timers;
     }
 
     public function __destruct()
     {
-        if ($this->setup) {
-            $this->cancel();
-            unset($this->clock, $this->timers);
-        }
-    }
-
-    public function setup(EventLoop\Driver $loop): self
-    {
-        /*
-         * @psalm-suppress RedundantPropertyInitializationCheck
-         */
-        assert($this->setup === false, SetupException::alreadySetup(self::class));
-
-        $clock = new Clock($loop, $this->clock);
-
-        $copy = new self();
-        foreach ($this->timers as $i => $timer) {
-            $copy->timers[$i] = match ($timer::class) {
-                Cron::class => $timer->setup($loop, $clock),
-                default => $timer->setup($loop),
-            };
-        }
-
-        $copy->setup = true;
-
-        return $copy;
-    }
-
-    public function cancel(): void
-    {
-        foreach ($this->timers as $timer) {
-            $timer->cancel();
-        }
+        $this->stop();
     }
 
     public function disable(): void
@@ -81,23 +38,24 @@ final class Timers
         }
     }
 
+    public function start(Kernel $kernel): void
+    {
+        foreach ($this->timers as $timer) {
+            $timer->start($kernel);
+        }
+    }
+
+    public function stop(): void
+    {
+        foreach ($this->timers as $timer) {
+            $timer->stop();
+        }
+    }
+
     public function suspendFor(float|int $duration): void
     {
         foreach ($this->timers as $timer) {
             $timer->suspendFor($duration);
         }
-    }
-
-    /**
-     * @internal
-     */
-    public function withClock(ClockInterface $clock): self
-    {
-        assert($this->setup === false, SetupException::alreadySetup(self::class));
-
-        $copy = clone $this;
-        $copy->clock = $clock;
-
-        return $copy;
     }
 }

@@ -2,13 +2,10 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Unit;
+namespace Nayleen\Async;
 
 use DI\ContainerBuilder;
-use Nayleen\Async\Component;
 use Nayleen\Async\Component\HasDependencies;
-use Nayleen\Async\Components;
-use Nayleen\Async\Kernel\Bootstrapper;
 use PHPUnit\Framework\TestCase;
 
 /**

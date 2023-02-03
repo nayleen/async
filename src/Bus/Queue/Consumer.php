@@ -13,6 +13,9 @@ use Nayleen\Async\Bus\Message;
 
 use function Amp\delay;
 
+/**
+ * @api
+ */
 final class Consumer
 {
     private const DEFAULT_CONSUME_DELAY = 0.05; // ms
@@ -20,7 +23,7 @@ final class Consumer
     public function __construct(
         private readonly Bus $bus,
         private readonly Serializer $serializer,
-        private readonly int $consumeDelay = self::DEFAULT_CONSUME_DELAY,
+        private readonly float $consumeDelay = self::DEFAULT_CONSUME_DELAY,
     ) {
     }
 

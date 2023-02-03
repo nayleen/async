@@ -2,13 +2,15 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Component;
+namespace Nayleen\Async;
 
 use DI\ContainerBuilder;
 use InvalidArgumentException;
-use Psr\Container\ContainerInterface;
 use Stringable;
 
+/**
+ * @api
+ */
 abstract class Component implements Stringable
 {
     final public function __construct()
@@ -39,7 +41,7 @@ abstract class Component implements Stringable
         $containerBuilder->addDefinitions($definitions);
     }
 
-    public function boot(ContainerInterface $container): void
+    public function boot(Kernel $kernel): void
     {
     }
 
@@ -50,11 +52,11 @@ abstract class Component implements Stringable
 
     abstract public function register(ContainerBuilder $containerBuilder): void;
 
-    public function reload(ContainerInterface $container): void
+    public function reload(Kernel $kernel): void
     {
     }
 
-    public function shutdown(ContainerInterface $container): void
+    public function shutdown(Kernel $kernel): void
     {
     }
 

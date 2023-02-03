@@ -6,6 +6,9 @@ namespace Nayleen\Async\Bus\Middleware;
 
 use Nayleen\Async\Bus\Message;
 
+/**
+ * @api
+ */
 interface Middleware
 {
     /**

@@ -2,10 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async;
+namespace Nayleen\Async\Console;
 
 use Amp\ByteStream\WritableResourceStream;
-use Nayleen\Async\Console\StreamOutput;
 use PHPUnit\Framework\TestCase;
 
 /**

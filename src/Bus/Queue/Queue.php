@@ -4,6 +4,9 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Queue;
 
+/**
+ * @api
+ */
 interface Queue
 {
     public function consume(): ?string;

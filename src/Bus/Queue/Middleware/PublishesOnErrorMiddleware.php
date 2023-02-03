@@ -10,6 +10,9 @@ use Nayleen\Async\Bus\Queue\Publisher;
 use Nayleen\Async\Bus\Queue\Queue;
 use Throwable;
 
+/**
+ * @api
+ */
 final class PublishesOnErrorMiddleware implements Middleware
 {
     public function __construct(

@@ -2,24 +2,35 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Timer;
+namespace Nayleen\Async;
 
-use Amp\CancelledException;
 use DateTimeImmutable;
 use DateTimeZone;
 use Revolt\EventLoop;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Clock\MonotonicClock;
 
-use function Amp\delay;
-
+/**
+ * @api
+ */
 final class Clock implements ClockInterface
 {
+    private readonly ClockInterface $clock;
+
+    private readonly DateTimeZone $timezone;
+
     public function __construct(
         private readonly EventLoop\Driver $loop,
-        private MonotonicClock $clock,
+        ?ClockInterface $clock = null,
+        string|DateTimeZone|null $timezone = null,
     ) {
+        $this->timezone = match (true) {
+            $timezone === null => new DateTimeZone(date_default_timezone_get()),
+            is_string($timezone) => new DateTimeZone($timezone),
+            $timezone instanceof DateTimeZone => $timezone,
+        };
 
+        $this->clock = $clock ?? new MonotonicClock($this->timezone);
     }
 
     public function now(): DateTimeImmutable
@@ -30,7 +41,9 @@ final class Clock implements ClockInterface
     public function sleep(float|int $seconds): void
     {
         $suspension = $this->loop->getSuspension();
-        $callbackId = $this->loop->unreference($this->loop->delay($seconds, static fn () => $suspension->resume()));
+        $callbackId = $this->loop->unreference(
+            $this->loop->delay($seconds, static fn () => $suspension->resume()),
+        );
 
         try {
             $suspension->suspend();
@@ -39,10 +52,17 @@ final class Clock implements ClockInterface
         }
     }
 
-    public function withTimeZone(\DateTimeZone|string $timezone): static
+    public function timeZone(): DateTimeZone
     {
-        $this->clock = $this->clock->withTimeZone($timezone);
+        return $this->timezone;
+    }
 
-        return $this;
+    public function withTimeZone(DateTimeZone|string $timezone): static
+    {
+        return new self(
+            $this->loop,
+            $this->clock->withTimeZone($timezone),
+            $timezone,
+        );
     }
 }

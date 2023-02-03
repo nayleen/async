@@ -6,10 +6,11 @@
     cacheDirectory="/tmp/psalm"
 >
     <projectFiles>
-        <directory name="src"/>
+        <directory name="config" />
+        <directory name="src" />
 
         <ignoreFiles>
-            <directory name="vendor"/>
+            <directory name="vendor" />
         </ignoreFiles>
     </projectFiles>
 </psalm>

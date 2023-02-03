@@ -5,9 +5,10 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Worker;
 
 use Amp\Cancellation;
+use Nayleen\Async\Kernel;
 use Nayleen\Async\Timers;
+use Nayleen\Async\Worker;
 use PHPUnit\Framework\TestCase;
-use Revolt\EventLoop;
 
 /**
  * @internal
@@ -19,17 +20,16 @@ class WorkerTest extends TestCase
      */
     public function sets_up_attached_timers(): void
     {
-        $loop = $this->createStub(EventLoop\Driver::class);
+        $kernel = $this->createStub(Kernel::class);
 
         $timers = $this->createMock(Timers::class);
-        $timers->expects(self::once())->method('setup')->with($loop);
+        $timers->expects(self::once())->method('start')->with($kernel);
 
-        $worker = new class() extends Worker {
-            public function run(Cancellation $cancellation): void
+        $worker = new class($timers) extends Worker {
+            protected function execute(Cancellation $cancellation): void
             {
             }
         };
-        $worker->attach($timers);
-        $worker->setup($loop);
+        $worker->run($kernel);
     }
 }

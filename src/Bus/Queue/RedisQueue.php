@@ -7,6 +7,9 @@ namespace Nayleen\Async\Bus\Queue;
 use Amp\Redis\Redis;
 use Amp\Redis\RedisList;
 
+/**
+ * @api
+ */
 final class RedisQueue implements Queue
 {
     private ?RedisList $list = null;

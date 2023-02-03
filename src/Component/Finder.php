@@ -2,10 +2,11 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Kernel\Component;
+namespace Nayleen\Async\Component;
 
 use Generator;
 use IteratorAggregate;
+use Nayleen\Async\Component;
 use Nayleen\Finder\Engine\ComposerEngine;
 use Nayleen\Finder\Engine\Engine;
 use Nayleen\Finder\Expectation\ExtendsClass;
@@ -14,6 +15,8 @@ use Nayleen\Finder\Finder as FinderInterface;
 use Traversable;
 
 /**
+ * @api
+ *
  * @implements FinderInterface<Component>
  * @implements IteratorAggregate<class-string<Component>>
  */
@@ -34,6 +37,9 @@ final class Finder implements FinderInterface, IteratorAggregate
         $this->engine = $engine;
     }
 
+    /**
+     * @return Generator<class-string<Component>>
+     */
     public function find(): Generator
     {
         $expectation = (new ExtendsClass(Component::class))->and(new IsInstantiable());

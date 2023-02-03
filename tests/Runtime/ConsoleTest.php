@@ -7,7 +7,6 @@ namespace Nayleen\Async\Runtime;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Kernel;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Revolt\EventLoop;
 use Symfony\Component\Console\Application;
@@ -33,8 +32,8 @@ class ConsoleTest extends TestCase
             [
                 DependencyProvider::create([
                     EventLoop\Driver::class => EventLoop::getDriver(),
-                    'logger.stderr' => new NullLogger(),
-                    'logger.stdout' => new NullLogger(),
+                    'async.logger.stderr' => new NullLogger(),
+                    'async.logger.stdout' => new NullLogger(),
                     OutputInterface::class => $this->output,
                 ]),
             ],
@@ -50,8 +49,8 @@ class ConsoleTest extends TestCase
         $console->expects(self::once())->method('has')->with('test')->willReturn(true);
         $console->expects(self::once())->method('setDefaultCommand')->with('test', true);
 
-        $runtime = new Console($this->createKernel(), $console, $this->output);
-        $runtime->command('test')->run();
+        $runtime = new Console($this->createKernel(), $console);
+        $runtime->command('test')->run($this->output);
     }
 
     /**
@@ -66,8 +65,8 @@ class ConsoleTest extends TestCase
         $console->expects(self::exactly(2))->method('has')->with('test')->willReturnOnConsecutiveCalls(false, true);
         $console->expects(self::once())->method('setDefaultCommand')->with('test', true);
 
-        $runtime = new Console($this->createKernel(), $console, $this->output);
-        $runtime->command($command)->run();
+        $runtime = new Console($this->createKernel(), $console);
+        $runtime->command($command)->run($this->output);
     }
 
     /**
@@ -81,8 +80,8 @@ class ConsoleTest extends TestCase
         $console = $this->createMock(Application::class);
         $console->expects(self::once())->method('run')->with($input, $output);
 
-        $runtime = new Console($this->createKernel(), $console, $output);
-        $runtime->input($input)->output($output)->run();
+        $runtime = new Console($this->createKernel(), $console);
+        $runtime->run($output, $input);
     }
 
     /**
@@ -91,9 +90,9 @@ class ConsoleTest extends TestCase
     public function run_executes_console(): void
     {
         $console = $this->createMock(Application::class);
-        $console->expects(self::once())->method('run')->with(null, $this->output);
+        $console->expects(self::once())->method('run')->with($this->anything(), $this->output)->willReturn(0);
 
-        $runtime = new Console($this->createKernel(), $console, $this->output);
-        $runtime->run();
+        $runtime = new Console($this->createKernel(), $console);
+        $runtime->run($this->output);
     }
 }

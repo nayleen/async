@@ -2,11 +2,15 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Kernel\Component;
+namespace Nayleen\Async\Component;
 
 use DI\ContainerBuilder;
+use Nayleen\Async\Component;
 use Psr\Container\ContainerInterface;
 
+/**
+ * @api
+ */
 abstract class ContainerWrapper extends Component
 {
     private readonly ContainerInterface $container;

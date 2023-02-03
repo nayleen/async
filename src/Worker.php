@@ -2,26 +2,36 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Runtime;
+namespace Nayleen\Async;
 
-use Nayleen\Async\Kernel;
-use Nayleen\Async\Runtime;
-use Nayleen\Async\Worker\Worker as WorkerImplementation;
+use Amp\Cancellation;
 
 /**
  * @api
  */
-final class Worker extends Runtime
+abstract class Worker
 {
-    public function __construct(
-        Kernel $kernel,
-        private readonly WorkerImplementation $worker
-    ) {
-        parent::__construct($kernel);
+    public function __construct(private readonly Timers $timers = new Timers())
+    {
     }
 
-    protected function execute(): void
+    abstract protected function execute(Cancellation $cancellation): void;
+
+    protected function start(Kernel $kernel): void
     {
-        $this->worker->run($this->kernel);
+        $kernel->cancellation()->subscribe($this->stop(...));
+
+        $this->timers->start($kernel);
+    }
+
+    final public function run(Kernel $kernel): void
+    {
+        $this->start($kernel);
+        $this->execute($kernel->cancellation());
+    }
+
+    public function stop(): void
+    {
+        $this->timers->stop();
     }
 }

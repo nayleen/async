@@ -6,9 +6,8 @@ namespace Nayleen\Async\Runtime;
 
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Kernel;
-use Nayleen\Async\Worker\Worker as WorkerImplementation;
+use Nayleen\Async\Worker as WorkerImplementation;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Revolt\EventLoop;
 
@@ -28,8 +27,8 @@ class WorkerTest extends TestCase
             [
                 DependencyProvider::create([
                     EventLoop\Driver::class => $this->loop,
-                    'logger.stderr' => new NullLogger(),
-                    'logger.stdout' => new NullLogger(),
+                    'async.logger.stderr' => new NullLogger(),
+                    'async.logger.stdout' => new NullLogger(),
                 ]),
             ],
         );
@@ -45,7 +44,7 @@ class WorkerTest extends TestCase
         $worker = $this->createMock(WorkerImplementation::class);
         $worker->expects(self::once())->method('run');
 
-        $runtime = new Worker($kernel, $worker);
+        $runtime = Worker::create($kernel, $worker);
         $runtime->run();
     }
 }

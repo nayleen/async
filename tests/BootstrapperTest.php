@@ -2,12 +2,10 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Kernel;
+namespace Nayleen\Async;
 
 use Amp\Log\ConsoleFormatter;
 use Amp\Log\StreamHandler;
-use Amp\NullCancellation;
-use Closure;
 use DI\ContainerBuilder;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
@@ -29,10 +27,10 @@ class BootstrapperTest extends TestCase
 
         $container = $containerBuilder->build();
 
-        self::assertTrue($container->get('app.debug'));
-        self::assertSame('/usr/src/app', $container->get('dir.base'));
-        self::assertSame('/tmp', $container->get('dir.cache'));
-        self::assertSame('test', $container->get('app.env'));
+        self::assertTrue($container->get('async.debug'));
+        self::assertSame('/usr/src/app', $container->get('async.dir.base'));
+        self::assertSame('/tmp', $container->get('async.dir.cache'));
+        self::assertSame('test', $container->get('async.env'));
     }
 
     /**
@@ -57,10 +55,7 @@ class BootstrapperTest extends TestCase
         $handler = $handlers[0];
         self::assertInstanceOf(StreamHandler::class, $handler);
 
-        // uses the async console formatter, configured to:
-        // - allow inline breaks
-        // - include stack traces
-        // - print stack traces due to APP_DEBUG=true
+        // uses the async console formatter
         $formatter = $handler->getFormatter();
         self::assertInstanceOf(ConsoleFormatter::class, $formatter);
     }
@@ -76,8 +71,6 @@ class BootstrapperTest extends TestCase
         $container = $containerBuilder->build();
 
         $driver = $container->get(EventLoop\Driver::class);
-
-        // due to APP_DEBUG=true
         self::assertInstanceOf(EventLoop\Driver\TracingDriver::class, $driver);
     }
 
@@ -92,20 +85,5 @@ class BootstrapperTest extends TestCase
 
         $bootstrapper = new Bootstrapper();
         $bootstrapper->register($containerBuilder);
-    }
-
-    /**
-     * @test
-     */
-    public function sets_error_handler_on_boot(): void
-    {
-        $bootstrapper = new Bootstrapper();
-        $bootstrapper->register($containerBuilder = new ContainerBuilder());
-
-        $container = $containerBuilder->build();
-
-        $bootstrapper->boot($container, new NullCancellation());
-
-        self::assertInstanceOf(Closure::class, $container->get(EventLoop\Driver::class)->getErrorHandler());
     }
 }

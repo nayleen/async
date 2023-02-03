@@ -2,11 +2,10 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Unit;
+namespace Nayleen\Async;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Nayleen\Async\Clock;
 use PHPUnit\Framework\TestCase;
 use Revolt\EventLoop;
 use Symfony\Component\Clock\ClockInterface;

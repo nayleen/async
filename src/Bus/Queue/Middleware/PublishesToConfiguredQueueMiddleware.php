@@ -11,6 +11,9 @@ use Nayleen\Async\Bus\Queue\Queue;
 use Nayleen\Async\Bus\Queue\QueueMap;
 use OutOfBoundsException;
 
+/**
+ * @api
+ */
 final class PublishesToConfiguredQueueMiddleware implements Middleware
 {
     public function __construct(

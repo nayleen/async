@@ -8,6 +8,9 @@ use Nayleen\Async\Bus\Handler\Validator;
 use Nayleen\Async\Bus\Message;
 use OutOfBoundsException;
 
+/**
+ * @api
+ */
 final class Handlers
 {
     use Validator;

@@ -8,6 +8,9 @@ use DomainException;
 use Nayleen\Async\Bus\Bus;
 use Nayleen\Async\Bus\Message;
 
+/**
+ * @api
+ */
 final class MiddlewareBus implements Bus
 {
     /**
@@ -16,7 +19,7 @@ final class MiddlewareBus implements Bus
     private array $middlewares = [];
 
     /**
-     * @var null|callable(Message): void
+     * @var callable(Message): void|null
      */
     private mixed $stack = null;
 
@@ -33,10 +36,13 @@ final class MiddlewareBus implements Bus
     private function createStack(int $index = 0): callable
     {
         if (!isset($this->middlewares[$index])) {
-            return static fn (Message $message) => null;
+            return static function (Message $message): void {
+            };
         }
 
-        return fn (Message $message) => $this->middlewares[$index]->handle($message, $this->createStack($index + 1));
+        return function (Message $message) use ($index): void {
+            $this->middlewares[$index]->handle($message, $this->createStack($index + 1));
+        };
     }
 
     public function append(Middleware $middleware): void

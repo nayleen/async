@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Console\Command;
+namespace Nayleen\Async\Command;
 
 use Generator;
 use Nayleen\Async\Component\Finder;

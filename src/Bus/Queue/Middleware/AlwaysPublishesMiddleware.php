@@ -9,6 +9,9 @@ use Nayleen\Async\Bus\Middleware\Middleware;
 use Nayleen\Async\Bus\Queue\Publisher;
 use Nayleen\Async\Bus\Queue\Queue;
 
+/**
+ * @api
+ */
 final class AlwaysPublishesMiddleware implements Middleware
 {
     public function __construct(

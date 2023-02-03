@@ -4,10 +4,14 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Timer;
 
-use Nayleen\Async\Kernel\Exception\StopException;
+use Nayleen\Async\Component\DependencyProvider;
+use Nayleen\Async\Components;
+use Nayleen\Async\Exception\StopException;
+use Nayleen\Async\Kernel;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Revolt\EventLoop;
 
 /**
@@ -30,7 +34,7 @@ class IntervalTest extends TestCase
         $this->loop->method('unreference')->willReturnArgument(0);
     }
 
-    private function createInterval(): Interval
+    private function createInterval(Kernel $kernel): Interval
     {
         $interval = new class($this->logger) extends Interval {
             private int $invocations = 0;
@@ -47,12 +51,30 @@ class IntervalTest extends TestCase
                     throw new StopException();
                 }
 
-                $this->logger->alert('Executing cron');
+                $this->logger->alert('Executing interval timer');
                 $this->invocations++;
             }
         };
 
-        return $interval->setup($this->loop);
+        $interval->start($kernel);
+
+        return $interval;
+    }
+
+    private function createKernel(): Kernel
+    {
+        return new Kernel(
+            new Components(
+                [
+                    DependencyProvider::create([
+                        EventLoop\Driver::class => $this->loop,
+                        LoggerInterface::class => $this->logger,
+                        'async.logger.stderr' => new NullLogger(),
+                        'async.logger.stdout' => $this->logger,
+                    ]),
+                ],
+            ),
+        );
     }
 
     /**
@@ -63,10 +85,10 @@ class IntervalTest extends TestCase
         try {
             $expectedDelay = 60;
 
-            $this->loop->expects(self::exactly(2))->method('delay')->with($expectedDelay, self::anything());
-            $this->logger->expects(self::once())->method('alert');
+            $this->loop->expects(self::once())->method('delay')->with($expectedDelay, self::anything());
+            $this->logger->expects(self::once())->method('alert')->with('Executing interval timer');
 
-            $this->createInterval()->run();
+            $this->createInterval($this->createKernel())->run();
         } catch (StopException) {
         }
     }

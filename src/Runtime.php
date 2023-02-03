@@ -2,46 +2,22 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Kernel;
-
-use Amp\Cancellation;
-use Amp\DeferredCancellation;
-use Nayleen\Async\Kernel\Exception\StopException;
-use Nayleen\Async\Kernel\Exception\TerminateException;
-use Revolt\EventLoop;
+namespace Nayleen\Async;
 
 abstract class Runtime
 {
-    private readonly DeferredCancellation $cancellation;
-
-    public function __construct(private readonly Kernel $kernel)
+    public function __construct(protected readonly Kernel $kernel)
     {
-        $this->cancellation = new DeferredCancellation();
+
     }
 
-    protected function setup(EventLoop\Driver $loop): void
+    /**
+     * @return static
+     */
+    public static function create(Kernel $kernel = new Kernel()): Runtime
     {
-        $loop->onSignal(SIGHUP, $this->kernel->reload(...));
-        $loop->onSignal(SIGINT, fn () => $this->cancellation->cancel(new StopException()));
-        $loop->onSignal(SIGTERM, fn () => $this->cancellation->cancel(new TerminateException()));
+        return $kernel->make(static::class);
     }
 
-    protected function cancellation(): Cancellation
-    {
-        return $this->cancellation->getCancellation();
-    }
-
-    abstract protected function execute(): void;
-
-    final public function run(): void
-    {
-        $container = $this->kernel->boot();
-
-        $this->setup($container->get(EventLoop\Driver::class));
-
-        $this->kernel->run(function (Kernel $kernel): void {
-            $this->execute();
-            $kernel->stop();
-        });
-    }
+    abstract public function run(): int;
 }

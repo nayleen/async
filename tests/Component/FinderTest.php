@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Component;
 
 use Generator;
-use Nayleen\Async\Kernel\Bootstrapper;
+use Nayleen\Async\Bootstrapper;
 use Nayleen\Finder\Engine\Engine;
 use Nayleen\Finder\Expectation\Expectation;
 use PHPUnit\Framework\TestCase;

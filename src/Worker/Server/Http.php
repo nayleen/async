@@ -4,28 +4,36 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Worker\Server;
 
+use Amp\Cancellation;
+use Amp\Http\Server\DefaultErrorHandler;
+use Amp\Http\Server\ErrorHandler;
 use Amp\Http\Server\HttpServer;
-use Nayleen\Async\Worker\Worker;
-use Revolt\EventLoop\Driver;
+use Amp\Http\Server\RequestHandler;
+use Nayleen\Async\Timers;
+use Nayleen\Async\Worker;
 
+/**
+ * @api
+ */
 final class Http extends Worker
 {
-    public function __construct(private readonly HttpServer $server)
-    {
+    public function __construct(
+        private readonly HttpServer $server,
+        private readonly RequestHandler $requestHandler,
+        private readonly ErrorHandler $errorHandler = new DefaultErrorHandler(),
+        Timers $timers = new Timers(),
+    ) {
+        parent::__construct($timers);
     }
 
-    public function setup(Driver $loop): void
+    protected function execute(Cancellation $cancellation): void
     {
-        parent::setup($loop);
-
-        $this->onSignals(
-            $this->signals(),
-            fn () => $this->server->stop(),
-        );
+        $this->server->start($this->requestHandler, $this->errorHandler);
     }
 
-    public function run(): void
+    public function stop(): void
     {
-        $this->server->start();
+        $this->server->stop();
+        parent::stop();
     }
 }

@@ -24,8 +24,8 @@
     </coverage>
 
     <php>
-        <env name="APP_DIR" value="/usr/src/app" />
-        <env name="APP_DEBUG" value="true" />
-        <env name="APP_ENV" value="test" />
+        <env name="AMP_DEBUG" value="true" />
+        <env name="ASYNC_DIR" value="/usr/src/app" />
+        <env name="ASYNC_ENV" value="test" />
     </php>
 </phpunit>
