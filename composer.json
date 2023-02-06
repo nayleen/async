@@ -9,7 +9,7 @@
         "amphp/amp": "^3",
         "amphp/log": "^2",
         "amphp/parallel": "^2",
-        "dragonmantank/cron-expression": "^2",
+        "dragonmantank/cron-expression": "^3",
         "nayleen/finder": "~0",
         "php-di/php-di": "^7",
         "revolt/event-loop": "^1",
