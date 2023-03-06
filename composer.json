@@ -23,7 +23,7 @@
         "amphp/process": "2.x-dev",
         "amphp/redis": "^2",
         "amphp/socket": "^2",
-        "nayleen/development": "^2",
+        "nayleen/development": "^3",
         "roave/better-reflection": "^6",
         "roave/security-advisories": "dev-latest"
     },
