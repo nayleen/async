@@ -23,12 +23,10 @@
         "amphp/process": "2.x-dev",
         "amphp/redis": "^2",
         "amphp/socket": "^2",
-        "nayleen/development": "^2",
+        "nayleen/codestandard": "dev-latest",
+        "nayleen/development-dependencies": "^3",
         "roave/better-reflection": "^6",
         "roave/security-advisories": "dev-latest"
-    },
-    "conflict": {
-        "vimeo/psalm": "*"
     },
     "suggest": {
         "amphp/cluster": "To run existing workers as clusters",
