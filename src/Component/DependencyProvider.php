@@ -14,30 +14,25 @@ use Nayleen\Async\Component;
 abstract class DependencyProvider extends Component
 {
     /**
-     * @var array<array-key, array|DefinitionSource|string>
+     * @var array<array-key, DefinitionSource|mixed[]|string>
      */
-    private readonly array $definitions;
+    private array $definitions;
 
     /**
      * @return non-empty-string
      */
-    private readonly string $name;
+    private string $name;
 
-    public static function create(string|array|DefinitionSource ...$definitions): self
+    /**
+     * @param DefinitionSource|mixed[]|string ...$definitions
+     */
+    public static function create(array|string|DefinitionSource ...$definitions): self
     {
-        assert(!empty($definitions));
+        assert(func_num_args() > 0);
 
         $instance = new class() extends DependencyProvider {
         };
-
-        /**
-         * @psalm-suppress UndefinedPropertyAssignment
-         */
         $instance->definitions = $definitions;
-
-        /**
-         * @psalm-suppress UndefinedPropertyAssignment
-         */
         $instance->name = uniqid('dependencies.', true);
 
         return $instance;

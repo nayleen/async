@@ -2,7 +2,6 @@
 
 namespace PHPSTORM_META
 {
-
     override(
         \DI\Container::get(0),
         map([
@@ -17,6 +16,13 @@ namespace PHPSTORM_META
 
     override(
         \DI\Container::make(0),
+        map([
+            '' => '@',
+        ])
+    );
+
+    override(
+        \Nayleen\Async\Kernel::make(0),
         map([
             '' => '@',
         ])

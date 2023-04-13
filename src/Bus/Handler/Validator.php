@@ -40,7 +40,7 @@ trait Validator
             return false;
         }
 
-        // handlers need to have voic as return type hint
+        // handlers need to have void as return type hint
         $return = $reflection->getReturnType();
 
         return

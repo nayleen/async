@@ -13,17 +13,18 @@ use Nayleen\Async\Bus\Message;
  */
 class MiddlewareBusTest extends AsyncTestCase
 {
-    private function createMiddleware(int $expectedIndex, array &$results = []): Middleware
+    private function createMiddleware(int $expectedIndex, Results $results = new Results()): Middleware
     {
         return new class($results, $expectedIndex) implements Middleware {
-            public function __construct(private array &$results, private int $expectedIndex)
-            {
+            public function __construct(
+                private readonly Results $results,
+                private readonly int $expectedIndex,
+            ) {
             }
 
             public function handle(Message $message, callable $next): void
             {
-                $this->results[] = $this->expectedIndex;
-
+                $this->results->list[] = $this->expectedIndex;
                 $next($message);
             }
         };
@@ -60,7 +61,7 @@ class MiddlewareBusTest extends AsyncTestCase
      */
     public function executes_middlewares_in_composed_order(): void
     {
-        $results = [];
+        $results = new Results();
 
         $bus = new MiddlewareBus();
         $bus->append($this->createMiddleware(2, $results));
@@ -69,7 +70,7 @@ class MiddlewareBusTest extends AsyncTestCase
 
         $bus->handle($this->createMock(Message::class));
 
-        self::assertSame([1, 2, 3], $results);
+        self::assertSame([1, 2, 3], $results->list);
     }
 
     /**
@@ -77,7 +78,7 @@ class MiddlewareBusTest extends AsyncTestCase
      */
     public function executes_middlewares_in_given_order(): void
     {
-        $results = [];
+        $results = new Results();
 
         $bus = new MiddlewareBus(
             $this->createMiddleware(1, $results),
@@ -85,6 +86,17 @@ class MiddlewareBusTest extends AsyncTestCase
         );
         $bus->handle($this->createMock(Message::class));
 
-        self::assertSame([1, 2], $results);
+        self::assertSame([1, 2], $results->list);
     }
+}
+
+/**
+ * @internal
+ */
+final class Results
+{
+    /**
+     * @var int[]
+     */
+    public array $list = [];
 }

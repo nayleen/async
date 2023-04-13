@@ -13,26 +13,18 @@ use Psr\Container\ContainerInterface;
  */
 abstract class ContainerWrapper extends Component
 {
-    private readonly ContainerInterface $container;
+    private ContainerInterface $container;
 
     /**
      * @return non-empty-string
      */
-    private readonly string $name;
+    private string $name;
 
     public static function create(ContainerInterface $container): self
     {
         $instance = new class() extends ContainerWrapper {
         };
-
-        /**
-         * @psalm-suppress UndefinedPropertyAssignment
-         */
         $instance->container = $container;
-
-        /**
-         * @psalm-suppress UndefinedPropertyAssignment
-         */
         $instance->name = sprintf('container.%s', spl_object_hash($container));
 
         return $instance;

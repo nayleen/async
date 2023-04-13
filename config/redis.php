@@ -31,20 +31,12 @@ return [
     'async.redis_supported' => DI\factory(static fn (): bool => class_exists(Redis::class)),
 
     // redis services
-    QueryExecutor::class => DI\factory(static function (QueryExecutorFactory $executorFactory): QueryExecutor {
-        return $executorFactory->createQueryExecutor();
-    }),
+    QueryExecutor::class => DI\factory(static fn (QueryExecutorFactory $executorFactory): QueryExecutor => $executorFactory->createQueryExecutor()),
 
-    QueryExecutorFactory::class => DI\factory(static function (RedisConfig $config): QueryExecutorFactory {
-        return new RemoteExecutorFactory($config);
-    }),
+    QueryExecutorFactory::class => DI\factory(static fn (RedisConfig $config): QueryExecutorFactory => new RemoteExecutorFactory($config)),
 
-    Redis::class => DI\factory(static function (QueryExecutor $executor): Redis {
-        return new Redis($executor);
-    }),
+    Redis::class => DI\factory(static fn (QueryExecutor $executor): Redis => new Redis($executor)),
 
-    RedisConfig::class => DI\factory(static function (string $dsn): RedisConfig {
-        return RedisConfig::fromUri($dsn);
-    })
+    RedisConfig::class => DI\factory(static fn (string $dsn): RedisConfig => RedisConfig::fromUri($dsn))
         ->parameter('dsn', DI\get('async.redis_dsn')),
 ];

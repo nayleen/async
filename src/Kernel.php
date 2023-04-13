@@ -10,7 +10,11 @@ use Amp\CompositeCancellation;
 use Amp\DeferredCancellation;
 use Amp\Future;
 use Amp\NullCancellation;
+use Amp\Parallel\Worker\Execution;
+use Amp\Parallel\Worker\Task;
+use Amp\Parallel\Worker\WorkerPool;
 use Amp\Sync\Channel;
+use Amp\TimeoutCancellation;
 use DI;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\Finder;
@@ -23,13 +27,15 @@ use Revolt\EventLoop;
 /**
  * @api
  */
-final class Kernel
+class Kernel
 {
-    private readonly Components $components;
+    private readonly Cancellation $cancellation;
 
-    private readonly DI\Container $container;
+    private DI\Container $container;
 
     private readonly DeferredCancellation $deferredCancellation;
+
+    public readonly Components $components;
 
     /**
      * @param iterable<class-string<Component>|Component> $components
@@ -44,18 +50,11 @@ final class Kernel
                 Bootstrapper::class,
                 DependencyProvider::create([Channel::class => $channel]),
                 ...$components,
-            ]
+            ],
         );
 
         $this->deferredCancellation = new DeferredCancellation();
         $this->cancellation = new CompositeCancellation($this->deferredCancellation->getCancellation(), $cancellation);
-    }
-
-    public function __destruct()
-    {
-        if (isset($this->container)) {
-            $this->components->shutdown($this);
-        }
     }
 
     public function cancellation(): Cancellation
@@ -88,21 +87,22 @@ final class Kernel
      */
     public function environment(): string
     {
-        return $this->container()->get('async.env');
+        $env = $this->container()->get('async.env');
+        assert(is_string($env) && $env !== '');
+
+        return $env;
     }
 
-    /**
-     * @param class-string<Runtime> $runtime
-     * @param array<string, string> $parameters
-     */
-    public function execute(string $runtime, array $parameters = []): int
+    public function execute(Task $task, ?float $timeout = null): mixed
     {
-        $container = $this->container();
+        assert($timeout === null || $timeout >= 0);
 
-        $runtime = $container->make($runtime, $parameters);
-        assert($runtime instanceof Runtime);
+        $cancellation = new CompositeCancellation(
+            $this->cancellation(),
+            $timeout ? new TimeoutCancellation($timeout) : new NullCancellation(),
+        );
 
-        return $container->call($runtime, $parameters);
+        return $this->submit($task, $cancellation)->await($cancellation);
     }
 
     public function loop(): EventLoop\Driver
@@ -111,19 +111,21 @@ final class Kernel
     }
 
     /**
-     * @template T
-     *
-     * @param class-string<T>|string $class
      * @param array<class-string|string, string> $parameters
-     * @return T
      */
     public function make(string $class, array $parameters = []): mixed
     {
         return $this->container()->make($class, $parameters);
     }
 
+    public function reload(): never
+    {
+        throw new ReloadException();
+    }
+
     /**
-     * @param callable(Kernel): (Future|null) $callback
+     * @template T of mixed
+     * @param callable(Kernel): (Future<T>|T) $callback
      */
     public function run(callable $callback): mixed
     {
@@ -135,19 +137,40 @@ final class Kernel
             $return = $future?->await($this->cancellation());
 
             $loop->run();
+
+            $this->components->shutdown($this);
         } catch (CancelledException) {
         } catch (ReloadException) {
             $this->components->reload($this);
             gc_collect_cycles();
 
             goto reload;
-        } catch (StopException) {
+        } catch (StopException $stop) {
+            if ($stop->signal !== null) {
+                assert($this->writeDebug('Received signal ' . $stop->signal));
+                $return ??= $stop->signal;
+            }
+
             assert($this->writeDebug('Stopping Kernel'));
+            $this->deferredCancellation->cancel($stop);
         }
 
         return $return ?? null;
     }
 
+    public function stop(?int $signal = null): never
+    {
+        throw new StopException($signal);
+    }
+
+    public function submit(Task $task, Cancellation $cancellation = new NullCancellation()): Execution
+    {
+        return $this->container()->get(WorkerPool::class)->getWorker()->submit($task, $cancellation);
+    }
+
+    /**
+     * @param mixed[] $context
+     */
     public function write(string $level, string $message, array $context = []): bool
     {
         /**
@@ -159,6 +182,9 @@ final class Kernel
         return true;
     }
 
+    /**
+     * @param mixed[] $context
+     */
     public function writeDebug(string $message, array $context = []): bool
     {
         /**

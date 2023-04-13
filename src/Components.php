@@ -53,7 +53,7 @@ final class Components implements IteratorAggregate
         }
 
         if ($component instanceof HasDependencies) {
-            foreach ($component->dependencies() as $dependency) {
+            foreach ($component::dependencies() as $dependency) {
                 $this->add($dependency);
             }
         }

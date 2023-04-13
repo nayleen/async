@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Middleware;
 
+use Closure;
 use DomainException;
 use Nayleen\Async\Bus\Bus;
 use Nayleen\Async\Bus\Message;
@@ -19,9 +20,9 @@ final class MiddlewareBus implements Bus
     private array $middlewares = [];
 
     /**
-     * @var callable(Message): void|null
+     * @var Closure(Message): void
      */
-    private mixed $stack = null;
+    private Closure $stack;
 
     public function __construct(Middleware ...$middlewares)
     {
@@ -31,7 +32,7 @@ final class MiddlewareBus implements Bus
     }
 
     /**
-     * @return callable(Message): void
+     * @return Closure(Message): void
      */
     private function createStack(int $index = 0): callable
     {

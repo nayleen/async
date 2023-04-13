@@ -24,17 +24,6 @@ abstract class Timer
 
     abstract protected function interval(): float|int;
 
-    public function start(Kernel $kernel): void
-    {
-        $this->loop = $kernel->loop();
-        $this->callbackId = $this->loop->unreference($this->loop->defer($this->run(...)));
-    }
-
-    final public function stop(): void
-    {
-        $this->loop->cancel($this->callbackId);
-    }
-
     final public function disable(): void
     {
         $this->loop->disable($this->callbackId);
@@ -47,10 +36,19 @@ abstract class Timer
 
     final public function run(): void
     {
-        while (true) {
-            $this->execute();
-            $this->suspendFor($this->interval());
-        }
+        $this->execute();
+        $this->suspendFor($this->interval());
+    }
+
+    public function start(Kernel $kernel): void
+    {
+        $this->loop = $kernel->loop();
+        $this->callbackId = $this->loop->unreference($this->loop->defer($this->run(...)));
+    }
+
+    final public function stop(): void
+    {
+        $this->loop->cancel($this->callbackId);
     }
 
     final public function suspendFor(float|int $duration): void

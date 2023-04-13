@@ -7,7 +7,6 @@ namespace Nayleen\Async\Worker\Server;
 use Amp\Http\Server\ErrorHandler;
 use Amp\Http\Server\HttpServer;
 use Amp\Http\Server\RequestHandler;
-use Amp\NullCancellation;
 use Nayleen\Async\Kernel;
 use PHPUnit\Framework\TestCase;
 

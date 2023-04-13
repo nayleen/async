@@ -11,4 +11,8 @@ use RuntimeException;
  */
 final class StopException extends RuntimeException
 {
+    public function __construct(public readonly ?int $signal = null)
+    {
+        parent::__construct();
+    }
 }

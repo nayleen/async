@@ -28,7 +28,7 @@ final class PublishesToConfiguredQueueMiddleware implements Middleware
         try {
             $queue = $this->queueMap->queue($message);
         } catch (OutOfBoundsException $ex) {
-            if (!$this->fallback) {
+            if (!isset($this->fallback)) {
                 throw $ex;
             }
 

@@ -2,12 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Worker;
+namespace Nayleen\Async;
 
 use Amp\Cancellation;
-use Nayleen\Async\Kernel;
-use Nayleen\Async\Timers;
-use Nayleen\Async\Worker;
 use PHPUnit\Framework\TestCase;
 
 /**

@@ -2,14 +2,13 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Command;
+namespace Nayleen\Async\Console\Command;
 
 use Generator;
-use Nayleen\Async\Component\Finder;
 use Nayleen\Finder\Engine\Engine;
 use Nayleen\Finder\Expectation\Expectation;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Command\HelpCommand;
+use Symfony\Component\Console\Command\Command;
 
 /**
  * @internal
@@ -19,8 +18,10 @@ class FinderTest extends TestCase
     /**
      * @test
      * @dataProvider provideFinderCases
+     *
+     * @param class-string<Command>[] $expectedCommands
      */
-    public function can_find_components(Engine $engine, array $expectedCommands): void
+    public function can_find_commands(Engine $engine, array $expectedCommands): void
     {
         $finder = new Finder($engine);
 
@@ -32,10 +33,10 @@ class FinderTest extends TestCase
         $engineMock = new class() implements Engine {
             public function find(Expectation $expectation): Generator
             {
-                yield HelpCommand::class;
+                yield Command::class;
             }
         };
 
-        yield 'mocked' => ['engine' => $engineMock, 'expected' => [HelpCommand::class]];
+        yield 'mocked' => ['engine' => $engineMock, 'expected' => [Command::class]];
     }
 }

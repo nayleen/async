@@ -14,7 +14,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Revolt\EventLoop;
-use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Clock\MockClock;
 
 /**
@@ -22,11 +21,11 @@ use Symfony\Component\Clock\MockClock;
  */
 class CronTest extends TestCase
 {
-    private ClockInterface|MockObject $clock;
+    private MockClock $clock;
 
-    private LoggerInterface|MockObject $logger;
+    private LoggerInterface&MockObject $logger;
 
-    private EventLoop\Driver|MockObject $loop;
+    private EventLoop\Driver&MockObject $loop;
 
     protected function setUp(): void
     {

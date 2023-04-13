@@ -38,8 +38,7 @@ return [
             $container->get(Redis::class),
             $container->get(Serializer::class),
         );
-    })
-        ->parameter('redisEnabled', DI\get('async.cache.redis')),
+    })->parameter('redisEnabled', DI\get('async.cache.redis')),
 
     KeyedMutex::class => DI\factory(static function (
         bool $redisEnabled,
@@ -54,6 +53,5 @@ return [
             $container->get(RedisMutexOptions::class),
             $container->get(LoggerInterface::class),
         );
-    })
-        ->parameter('redisEnabled', DI\get('async.cache.redis')),
+    })->parameter('redisEnabled', DI\get('async.cache.redis')),
 ];

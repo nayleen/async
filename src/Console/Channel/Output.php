@@ -2,22 +2,22 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Console;
+namespace Nayleen\Async\Console\Channel;
 
-use Amp\ByteStream\WritableResourceStream;
+use Amp\Sync\Channel;
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
-use Symfony\Component\Console\Output\Output;
+use Symfony\Component\Console\Output\Output as BaseOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @api
  */
-final class StreamOutput extends Output
+final class Output extends BaseOutput
 {
     public function __construct(
-        private readonly WritableResourceStream $stream,
+        private readonly Channel $channel,
         ?int $verbosity = OutputInterface::VERBOSITY_NORMAL,
-        bool $decorated = false,
+        bool $decorated = true,
         ?OutputFormatterInterface $formatter = null,
     ) {
         parent::__construct($verbosity, $decorated, $formatter);
@@ -25,7 +25,7 @@ final class StreamOutput extends Output
 
     public function __destruct()
     {
-        $this->stream->close();
+        $this->channel->close();
     }
 
     protected function doWrite(string $message, bool $newline): void
@@ -34,6 +34,6 @@ final class StreamOutput extends Output
             $message .= PHP_EOL;
         }
 
-        $this->stream->write($message);
+        $this->channel->send($message);
     }
 }

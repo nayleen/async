@@ -17,7 +17,7 @@ use Nayleen\Async\Bus\Message;
 /**
  * @internal
  */
-class QueueIntegrationsTest extends AsyncTestCase
+class QueueIntegrationTest extends AsyncTestCase
 {
     /**
      * @test

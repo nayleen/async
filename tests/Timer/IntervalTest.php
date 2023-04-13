@@ -19,9 +19,9 @@ use Revolt\EventLoop;
  */
 class IntervalTest extends TestCase
 {
-    private LoggerInterface|MockObject $logger;
+    private LoggerInterface&MockObject $logger;
 
-    private EventLoop\Driver|MockObject $loop;
+    private EventLoop\Driver&MockObject $loop;
 
     protected function setUp(): void
     {

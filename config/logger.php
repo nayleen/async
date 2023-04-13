@@ -32,7 +32,6 @@ return [
         if ($isClusterWorker) {
             $logHandler = new ClusterLogHandler($container->get(Channel::class), $logLevel, false);
         } else {
-
             $logHandler = new Log\StreamHandler($stream, $logLevel);
             $logHandler->setFormatter($container->get(Log\ConsoleFormatter::class));
         }
@@ -82,8 +81,7 @@ return [
         $errorHandler->registerFatalHandler();
 
         return $errorHandler;
-    })
-        ->parameter('logger', DI\get('async.logger.stderr')),
+    })->parameter('logger', DI\get('async.logger.stderr')),
 
     Log\ConsoleFormatter::class => DI\factory(static function (
         string $logFormat,

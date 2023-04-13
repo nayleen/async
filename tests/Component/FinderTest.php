@@ -6,6 +6,7 @@ namespace Nayleen\Async\Component;
 
 use Generator;
 use Nayleen\Async\Bootstrapper;
+use Nayleen\Async\Component;
 use Nayleen\Finder\Engine\Engine;
 use Nayleen\Finder\Expectation\Expectation;
 use PHPUnit\Framework\TestCase;
@@ -18,6 +19,8 @@ class FinderTest extends TestCase
     /**
      * @test
      * @dataProvider provideFinderCases
+     *
+     * @param class-string<Component>[] $expectedComponents
      */
     public function can_find_components(Engine $engine, array $expectedComponents): void
     {

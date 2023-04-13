@@ -7,7 +7,6 @@ namespace Nayleen\Async;
 use Nayleen\Async\Component\DependencyProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Revolt\EventLoop;
 
@@ -16,7 +15,7 @@ use Revolt\EventLoop;
  */
 class TimerTest extends TestCase
 {
-    private EventLoop\Driver|MockObject $loop;
+    private EventLoop\Driver&MockObject $loop;
 
     protected function setUp(): void
     {

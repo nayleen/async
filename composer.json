@@ -1,6 +1,6 @@
 {
-    "name": "nayleen/async-runtimes",
-    "description": "",
+    "name": "nayleen/async",
+    "description": "Building blocks for async applications.",
     "license": "MIT",
     "require": {
         "php": ">=8.1",
@@ -20,22 +20,19 @@
         "amphp/cluster": "2.x-dev",
         "amphp/http": "2.x-dev",
         "amphp/http-server": "3.x-dev",
-        "amphp/process": "2.x-dev",
+        "amphp/process": "^2",
         "amphp/redis": "^2",
-        "amphp/socket": "^2",
-        "nayleen/development": "^2",
+        "bnf/phpstan-psr-container": "^1.0",
+        "nayleen/codestandard": "dev-latest",
+        "nayleen/development-dependencies": "^3",
         "roave/better-reflection": "^6",
         "roave/security-advisories": "dev-latest"
     },
-    "conflict": {
-        "vimeo/psalm": "*"
-    },
     "suggest": {
-        "amphp/cluster": "To run existing workers as clusters",
+        "ext-igbinary": "For igbinary serialization",
         "amphp/http-server": "To run http server workers",
         "amphp/redis": "To use Redis as the backing queue for busses or as worker cache",
-        "amphp/socket": "To run socket server workers",
-        "amphp/websocket-server": "To run websocket server workers"
+        "amphp/websocket-server": "For websocket request handler support"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -51,7 +48,8 @@
     },
     "config": {
         "allow-plugins": {
-            "ergebnis/composer-normalize": true
+            "ergebnis/composer-normalize": true,
+            "phpstan/extension-installer": true
         },
         "lock": false,
         "preferred-install": {

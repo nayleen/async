@@ -52,7 +52,7 @@ final class Clock implements ClockInterface
         }
     }
 
-    public function timeZone(): DateTimeZone
+    public function timezone(): DateTimeZone
     {
         return $this->timezone;
     }

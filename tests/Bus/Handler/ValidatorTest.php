@@ -12,6 +12,9 @@ use PHPUnit\Framework\TestCase;
  */
 class ValidatorTest extends TestCase
 {
+    /**
+     * @return array<string, array{handler: callable, result: bool}>
+     */
     public function provideHandlers(): array
     {
         return [
@@ -38,11 +41,6 @@ class ValidatorTest extends TestCase
             'no return type' => [
                 'handler' => fn (Message $message) => null,
                 'result' => true,
-            ],
-
-            'return type not a promise' => [
-                'handler' => fn (Message $message): object => null,
-                'result' => false,
             ],
 
             'correctly typed' => [

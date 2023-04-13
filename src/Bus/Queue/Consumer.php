@@ -18,7 +18,7 @@ use function Amp\delay;
  */
 final class Consumer
 {
-    private const DEFAULT_CONSUME_DELAY = 0.05; // ms
+    private const DEFAULT_CONSUME_DELAY = 0.050; // ms
 
     public function __construct(
         private readonly Bus $bus,
@@ -27,16 +27,14 @@ final class Consumer
     ) {
     }
 
-    public function consume(Queue $queue, ?Cancellation $cancellation = null): void
+    public function consume(Queue $queue, Cancellation $cancellation = new NullCancellation()): void
     {
-        $cancellation ??= new NullCancellation();
-
         try {
-            while (true) {
+            while (!$cancellation->isRequested()) {
                 $cancellation->throwIfRequested();
 
                 $encoded = $queue->consume();
-                if (!$encoded) {
+                if ($encoded === null) {
                     delay($this->consumeDelay, cancellation: $cancellation);
                     continue;
                 }

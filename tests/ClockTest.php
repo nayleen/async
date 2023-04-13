@@ -28,7 +28,7 @@ class ClockTest extends TestCase
         $clock = new Clock($this->createStub(EventLoop\Driver::class), $wrappedClock);
         $clock = $clock->withTimeZone($timeZone);
 
-        self::assertSame($timeZone, $clock->timeZone());
+        self::assertSame($timeZone, $clock->timezone());
     }
 
     /**
@@ -77,6 +77,6 @@ class ClockTest extends TestCase
     {
         $clock = new Clock($this->createStub(EventLoop\Driver::class));
 
-        self::assertSame(date_default_timezone_get(), $clock->timeZone()->getName());
+        self::assertSame(date_default_timezone_get(), $clock->timezone()->getName());
     }
 }

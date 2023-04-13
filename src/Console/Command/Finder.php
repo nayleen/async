@@ -17,8 +17,8 @@ use Traversable;
 /**
  * @api
  *
- * @implements FinderInterface<Command>
- * @implements IteratorAggregate<class-string<Command>>
+ * @template-implements FinderInterface<Command>
+ * @template-implements IteratorAggregate<class-string<Command>>
  */
 final class Finder implements FinderInterface, IteratorAggregate
 {
@@ -37,9 +37,6 @@ final class Finder implements FinderInterface, IteratorAggregate
         $this->engine = $engine;
     }
 
-    /**
-     * @return Generator<class-string<Command>>
-     */
     public function find(): Generator
     {
         $expectation = (new ExtendsClass(Command::class))->and(new IsInstantiable());
@@ -47,9 +44,6 @@ final class Finder implements FinderInterface, IteratorAggregate
         return $this->engine->find($expectation);
     }
 
-    /**
-     * @return Traversable<class-string<Command>>
-     */
     public function getIterator(): Traversable
     {
         return $this->find();

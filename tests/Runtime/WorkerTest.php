@@ -16,12 +16,14 @@ use Revolt\EventLoop;
  */
 class WorkerTest extends TestCase
 {
+    private EventLoop\Driver $loop;
+
     protected function setUp(): void
     {
         $this->loop = EventLoop::getDriver();
     }
 
-    private function createKernel(): Kernel
+    private function createKernel(?WorkerImplementation $worker = null): Kernel
     {
         return new Kernel(
             [
@@ -29,6 +31,7 @@ class WorkerTest extends TestCase
                     EventLoop\Driver::class => $this->loop,
                     'async.logger.stderr' => new NullLogger(),
                     'async.logger.stdout' => new NullLogger(),
+                    WorkerImplementation::class => $worker,
                 ]),
             ],
         );
@@ -37,14 +40,12 @@ class WorkerTest extends TestCase
     /**
      * @test
      */
-    public function run_executes_worker(): void
+    public function can_instantiate_and_run_by_registered_class_name(): void
     {
-        $kernel = $this->createKernel();
-
         $worker = $this->createMock(WorkerImplementation::class);
         $worker->expects(self::once())->method('run');
 
-        $runtime = Worker::create($kernel, $worker);
+        $runtime = new Worker(WorkerImplementation::class, $this->createKernel($worker));
         $runtime->run();
     }
 }

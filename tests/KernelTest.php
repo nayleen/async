@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Amp\Sync\Channel;
 use Exception;
 use Monolog\Test\TestCase;
 use Nayleen\Async\Component\DependencyProvider;
@@ -52,10 +51,8 @@ class KernelTest extends TestCase
      */
     public function always_prepends_bootstrapper(): void
     {
-        $kernel = new Kernel();
-
-        $components = (fn () => $this->components)->bindTo($kernel, $kernel)();
-        $components = iterator_to_array($components);
+        $kernel = new Kernel($this->createComponents());
+        $components = iterator_to_array($kernel->components);
 
         self::assertInstanceOf(Bootstrapper::class, $components[0]);
     }
@@ -65,7 +62,7 @@ class KernelTest extends TestCase
      */
     public function booting_multiple_times_produces_same_container(): void
     {
-        $kernel = new Kernel();
+        $kernel = new Kernel($this->createComponents());
 
         $container1 = $kernel->container();
         $container2 = $kernel->container();
@@ -79,9 +76,7 @@ class KernelTest extends TestCase
     public function bootstrapper_gets_deduplicated(): void
     {
         $kernel = new Kernel([new Bootstrapper()]);
-
-        $components = (fn () => $this->components)->bindTo($kernel, $kernel)();
-        $components = iterator_to_array($components);
+        $components = iterator_to_array($kernel->components);
 
         self::assertInstanceOf(Bootstrapper::class, $components[0]);
         self::assertNotInstanceOf(Bootstrapper::class, $components[1]);
@@ -91,6 +86,28 @@ class KernelTest extends TestCase
      * @test
      */
     public function can_be_reloaded(): void
+    {
+        $invocations = 0;
+        $hasBeenReloaded = false;
+
+        $this->createKernel()->run(function (Kernel $kernel) use (&$invocations, &$hasBeenReloaded): void {
+            // first we trigger a reload
+            if ($invocations++ === 0) {
+                $kernel->reload();
+            }
+
+            // then we stop the loop (otherwise we'd run -> reload -> run ... recursively)
+            $hasBeenReloaded = true;
+        });
+
+        self::assertSame(2, $invocations);
+        self::assertTrue($hasBeenReloaded);
+    }
+
+    /**
+     * @test
+     */
+    public function can_be_reloaded_by_throwing_reload_exception(): void
     {
         $invocations = 0;
         $hasBeenReloaded = false;
@@ -117,6 +134,26 @@ class KernelTest extends TestCase
         $invocations = 0;
         $enteredRun = false;
 
+        $return = $this->createKernel()->run(function (Kernel $kernel) use (&$invocations, &$enteredRun): void {
+            $enteredRun = true;
+            $invocations++;
+
+            $kernel->stop();
+        });
+
+        self::assertNull($return);
+        self::assertSame(1, $invocations);
+        self::assertTrue($enteredRun);
+    }
+
+    /**
+     * @test
+     */
+    public function can_be_stopped_by_throwing_stop_exception(): void
+    {
+        $invocations = 0;
+        $enteredRun = false;
+
         $this->createKernel()->run(function () use (&$invocations, &$enteredRun): void {
             $enteredRun = true;
             $invocations++;
@@ -131,19 +168,39 @@ class KernelTest extends TestCase
     /**
      * @test
      */
-    public function can_be_stopped_by_throwing_stop_exception(): void
+    public function can_be_stopped_by_throwing_stop_exception_with_signal(): void
     {
         $invocations = 0;
         $enteredRun = false;
 
-        $kernel = $this->createKernel();
-        $kernel->run(function () use (&$invocations, &$enteredRun): void {
+        $return = $this->createKernel()->run(function () use (&$invocations, &$enteredRun): void {
             $enteredRun = true;
             $invocations++;
 
-            throw new StopException();
+            throw new StopException(SIGINT);
         });
 
+        self::assertSame($return, SIGINT);
+        self::assertSame(1, $invocations);
+        self::assertTrue($enteredRun);
+    }
+
+    /**
+     * @test
+     */
+    public function can_be_stopped_with_signal(): void
+    {
+        $invocations = 0;
+        $enteredRun = false;
+
+        $return = $this->createKernel()->run(function (Kernel $kernel) use (&$invocations, &$enteredRun): void {
+            $enteredRun = true;
+            $invocations++;
+
+            $kernel->stop(SIGINT);
+        });
+
+        self::assertSame($return, SIGINT);
         self::assertSame(1, $invocations);
         self::assertTrue($enteredRun);
     }
@@ -182,6 +239,18 @@ class KernelTest extends TestCase
 
         $kernel = $this->createKernel($mockDriver);
         $kernel->run(fn () => null);
+    }
+
+    /**
+     * @test
+     */
+    public function write_debug_logs_to_stderr(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::exactly(2))->method('log');
+
+        $kernel = $this->createKernel(stdErrLogger: $logger);
+        $kernel->writeDebug('Testing Kernel');
     }
 
     /**

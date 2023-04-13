@@ -6,6 +6,7 @@ namespace Nayleen\Async;
 
 use DI\ContainerBuilder;
 use InvalidArgumentException;
+use Safe;
 use Stringable;
 
 /**
@@ -18,27 +19,28 @@ abstract class Component implements Stringable
     }
 
     /**
-     * @param non-empty-string $filename
+     * @param non-empty-string ...$filenames
      */
-    final protected function load(ContainerBuilder $containerBuilder, string $filename): void
+    final protected function load(ContainerBuilder $containerBuilder, string ...$filenames): void
     {
-        $definitions = (static function () use ($filename): array {
-            assert(
-                file_exists($filename) && is_file($filename),
-                new InvalidArgumentException(sprintf(
-                    '%s config file "%s" does not exist!',
-                    static::class,
-                    $filename,
-                )),
-            );
+        foreach ($filenames as $filename) {
+            foreach (Safe\glob($filename) as $file) {
+                $definitions = (static function () use ($file): array {
+                    assert(
+                        file_exists($file) && is_file($file),
+                        new InvalidArgumentException(sprintf(
+                            '%s config file "%s" does not exist!',
+                            static::class,
+                            $file,
+                        )),
+                    );
 
-            /**
-             * @psalm-suppress UnresolvableInclude
-             */
-            return (array) require $filename;
-        })();
+                    return (array) require $file;
+                })();
 
-        $containerBuilder->addDefinitions($definitions);
+                $containerBuilder->addDefinitions($definitions);
+            }
+        }
     }
 
     public function boot(Kernel $kernel): void

@@ -1,0 +1,13 @@
+parameters:
+    checkGenericClassInNonGenericObjectType: false
+    ignoreErrors:
+        - '#Call to deprecated method withConsecutive\(\) of class PHPUnit\\Framework\\MockObject\\Builder\\InvocationMocker.#'
+        - '#Property .+Test\:\:\$kernel has unresolvable native type.#'
+        - '#Return type of call to method PHPUnit\\Framework\\TestCase\:\:createMock\(\) contains unresolvable type.#'
+        - '#Return type of call to method PHPUnit\\Framework\\TestCase\:\:createStub\(\) contains unresolvable type.#'
+    level: 9
+    paths:
+        - src
+        - tests
+    tipsOfTheDay: false
+    treatPhpDocTypesAsCertain: false

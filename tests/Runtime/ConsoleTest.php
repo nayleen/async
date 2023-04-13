@@ -43,20 +43,32 @@ class ConsoleTest extends TestCase
     /**
      * @test
      */
-    public function can_set_default_command(): void
+    public function can_run_console(): void
+    {
+        $console = $this->createMock(Application::class);
+        $console->expects(self::once())->method('run')->with(self::anything(), $this->output)->willReturn(0);
+
+        $runtime = new Console($console, $this->createKernel());
+        $runtime->run($this->output);
+    }
+
+    /**
+     * @test
+     */
+    public function can_set_and_execute_default_command(): void
     {
         $console = $this->createMock(Application::class);
         $console->expects(self::once())->method('has')->with('test')->willReturn(true);
         $console->expects(self::once())->method('setDefaultCommand')->with('test', true);
 
-        $runtime = new Console($this->createKernel(), $console);
+        $runtime = new Console($console, $this->createKernel());
         $runtime->command('test')->run($this->output);
     }
 
     /**
      * @test
      */
-    public function can_set_default_command_with_instance(): void
+    public function can_set_and_execute_default_command_with_instance(): void
     {
         $command = $this->createMock(Command::class);
         $command->method('getName')->willReturn('test');
@@ -65,7 +77,7 @@ class ConsoleTest extends TestCase
         $console->expects(self::exactly(2))->method('has')->with('test')->willReturnOnConsecutiveCalls(false, true);
         $console->expects(self::once())->method('setDefaultCommand')->with('test', true);
 
-        $runtime = new Console($this->createKernel(), $console);
+        $runtime = new Console($console, $this->createKernel());
         $runtime->command($command)->run($this->output);
     }
 
@@ -80,19 +92,7 @@ class ConsoleTest extends TestCase
         $console = $this->createMock(Application::class);
         $console->expects(self::once())->method('run')->with($input, $output);
 
-        $runtime = new Console($this->createKernel(), $console);
+        $runtime = new Console($console, $this->createKernel());
         $runtime->run($output, $input);
-    }
-
-    /**
-     * @test
-     */
-    public function run_executes_console(): void
-    {
-        $console = $this->createMock(Application::class);
-        $console->expects(self::once())->method('run')->with($this->anything(), $this->output)->willReturn(0);
-
-        $runtime = new Console($this->createKernel(), $console);
-        $runtime->run($this->output);
     }
 }

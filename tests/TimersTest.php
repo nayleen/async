@@ -14,20 +14,23 @@ use PHPUnit\Framework\TestCase;
  */
 class TimersTest extends TestCase
 {
-    private Cron|MockObject $cron;
+    private Cron&MockObject $cron;
 
-    private Interval|MockObject $interval;
+    private Interval&MockObject $interval;
+
+    private Kernel&MockObject $kernel;
 
     protected function setUp(): void
     {
         $this->cron = $this->createMock(Cron::class);
         $this->interval = $this->createMock(Interval::class);
+        $this->kernel = $this->createMock(Kernel::class);
     }
 
     private function createTimers(): Timers
     {
         $timers = new Timers($this->cron, $this->interval);
-        $timers->start($this->createStub(Kernel::class));
+        $timers->start($this->kernel);
 
         return $timers;
     }
