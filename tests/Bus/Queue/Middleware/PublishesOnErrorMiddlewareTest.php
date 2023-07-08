@@ -13,7 +13,7 @@ use Nayleen\Async\Bus\Queue\Queue;
 /**
  * @internal
  */
-class PublishesOnErrorMiddlewareTest extends AsyncTestCase
+final class PublishesOnErrorMiddlewareTest extends AsyncTestCase
 {
     /**
      * @test

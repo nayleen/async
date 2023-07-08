@@ -10,7 +10,7 @@ use Nayleen\Async\Bus\Message;
 /**
  * @api
  */
-final class Handlers
+class Handlers
 {
     use Validator;
 

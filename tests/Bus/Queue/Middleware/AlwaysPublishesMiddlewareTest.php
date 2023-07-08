@@ -12,7 +12,7 @@ use Nayleen\Async\Bus\Queue\Queue;
 /**
  * @internal
  */
-class AlwaysPublishesMiddlewareTest extends AsyncTestCase
+final class AlwaysPublishesMiddlewareTest extends AsyncTestCase
 {
     /**
      * @test

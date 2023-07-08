@@ -12,7 +12,7 @@ use Nayleen\Async\Bus\Queue\Queue;
 /**
  * @api
  */
-final class AlwaysPublishesMiddleware implements Middleware
+class AlwaysPublishesMiddleware implements Middleware
 {
     public function __construct(
         private readonly Publisher $publisher,

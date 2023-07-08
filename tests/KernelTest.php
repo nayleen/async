@@ -6,53 +6,24 @@ namespace Nayleen\Async;
 
 use Exception;
 use Monolog\Test\TestCase;
-use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Exception\ReloadException;
 use Nayleen\Async\Exception\StopException;
+use Nayleen\Async\Test\Kernel as TestKernel;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
-use Psr\Log\NullLogger;
 use Revolt\EventLoop;
 
 /**
  * @internal
  */
-class KernelTest extends TestCase
+final class KernelTest extends TestCase
 {
-    private function createComponents(
-        ?EventLoop\Driver $loop = null,
-        ?LoggerInterface $stdErrLogger = null,
-        ?LoggerInterface $stdOutLogger = null,
-        Component ...$components,
-    ): Components {
-        return new Components(
-            [
-                DependencyProvider::create([
-                    EventLoop\Driver::class => $loop ?? EventLoop::getDriver(),
-                    'async.logger.stderr' => $stdErrLogger ?? new NullLogger(),
-                    'async.logger.stdout' => $stdOutLogger ?? new NullLogger(),
-                ]),
-                ...$components,
-            ],
-        );
-    }
-
-    private function createKernel(
-        ?EventLoop\Driver $loop = null,
-        ?LoggerInterface $stdErrLogger = null,
-        ?LoggerInterface $stdOutLogger = null,
-        Component ...$components,
-    ): Kernel {
-        return new Kernel($this->createComponents($loop, $stdErrLogger, $stdOutLogger, ...$components));
-    }
-
     /**
      * @test
      */
     public function always_prepends_bootstrapper(): void
     {
-        $kernel = new Kernel($this->createComponents());
-        $components = iterator_to_array($kernel->components);
+        $components = iterator_to_array(TestKernel::create()->components);
 
         self::assertInstanceOf(Bootstrapper::class, $components[0]);
     }
@@ -62,7 +33,7 @@ class KernelTest extends TestCase
      */
     public function booting_multiple_times_produces_same_container(): void
     {
-        $kernel = new Kernel($this->createComponents());
+        $kernel = TestKernel::create();
 
         $container1 = $kernel->container();
         $container2 = $kernel->container();
@@ -90,7 +61,7 @@ class KernelTest extends TestCase
         $invocations = 0;
         $hasBeenReloaded = false;
 
-        $this->createKernel()->run(function (Kernel $kernel) use (&$invocations, &$hasBeenReloaded): void {
+        TestKernel::create()->run(function (Kernel $kernel) use (&$invocations, &$hasBeenReloaded): void {
             // first we trigger a reload
             if ($invocations++ === 0) {
                 $kernel->reload();
@@ -112,7 +83,7 @@ class KernelTest extends TestCase
         $invocations = 0;
         $hasBeenReloaded = false;
 
-        $this->createKernel()->run(function () use (&$invocations, &$hasBeenReloaded): void {
+        TestKernel::create()->run(function () use (&$invocations, &$hasBeenReloaded): void {
             // first we trigger a reload
             if ($invocations++ === 0) {
                 throw new ReloadException();
@@ -134,7 +105,7 @@ class KernelTest extends TestCase
         $invocations = 0;
         $enteredRun = false;
 
-        $return = $this->createKernel()->run(function (Kernel $kernel) use (&$invocations, &$enteredRun): void {
+        $return = TestKernel::create()->run(function (Kernel $kernel) use (&$invocations, &$enteredRun): void {
             $enteredRun = true;
             $invocations++;
 
@@ -154,7 +125,7 @@ class KernelTest extends TestCase
         $invocations = 0;
         $enteredRun = false;
 
-        $this->createKernel()->run(function () use (&$invocations, &$enteredRun): void {
+        TestKernel::create()->run(function () use (&$invocations, &$enteredRun): void {
             $enteredRun = true;
             $invocations++;
 
@@ -173,7 +144,7 @@ class KernelTest extends TestCase
         $invocations = 0;
         $enteredRun = false;
 
-        $return = $this->createKernel()->run(function () use (&$invocations, &$enteredRun): void {
+        $return = TestKernel::create()->run(function () use (&$invocations, &$enteredRun): void {
             $enteredRun = true;
             $invocations++;
 
@@ -193,7 +164,7 @@ class KernelTest extends TestCase
         $invocations = 0;
         $enteredRun = false;
 
-        $return = $this->createKernel()->run(function (Kernel $kernel) use (&$invocations, &$enteredRun): void {
+        $return = TestKernel::create()->run(function (Kernel $kernel) use (&$invocations, &$enteredRun): void {
             $enteredRun = true;
             $invocations++;
 
@@ -213,7 +184,7 @@ class KernelTest extends TestCase
         $expectedException = $this->createMock(Exception::class);
         $this->expectExceptionObject($expectedException);
 
-        $this->createKernel()->run(fn () => throw $expectedException);
+        TestKernel::create()->run(fn () => throw $expectedException);
     }
 
     /**
@@ -222,7 +193,7 @@ class KernelTest extends TestCase
     public function run_can_queue_callback_on_loop(): void
     {
         $started = false;
-        $this->createKernel()->run(function () use (&$started): void {
+        TestKernel::create()->run(function () use (&$started): void {
             $started = true;
         });
 
@@ -237,7 +208,7 @@ class KernelTest extends TestCase
         $mockDriver = $this->createMock(EventLoop\Driver::class);
         $mockDriver->expects(self::once())->method('run');
 
-        $kernel = $this->createKernel($mockDriver);
+        $kernel = TestKernel::create(loop: $mockDriver);
         $kernel->run(fn () => null);
     }
 
@@ -249,7 +220,7 @@ class KernelTest extends TestCase
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::exactly(2))->method('log');
 
-        $kernel = $this->createKernel(stdErrLogger: $logger);
+        $kernel = TestKernel::create(stdErrLogger: $logger);
         $kernel->writeDebug('Testing Kernel');
     }
 
@@ -265,7 +236,7 @@ class KernelTest extends TestCase
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::once())->method('log')->with($logLevel, $message, $context);
 
-        $kernel = $this->createKernel(stdOutLogger: $logger);
+        $kernel = TestKernel::create(stdOutLogger: $logger);
         $kernel->write($logLevel, $message, $context);
     }
 }

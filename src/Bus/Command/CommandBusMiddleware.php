@@ -13,7 +13,7 @@ use Psr\Log\NullLogger;
 /**
  * @api
  */
-final class CommandBusMiddleware implements Middleware
+class CommandBusMiddleware implements Middleware
 {
     public function __construct(
         private readonly Handlers $handlers,

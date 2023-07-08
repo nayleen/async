@@ -13,7 +13,7 @@ use Symfony\Component\Console\Command\Command;
 /**
  * @internal
  */
-class FinderTest extends TestCase
+final class FinderTest extends TestCase
 {
     /**
      * @test

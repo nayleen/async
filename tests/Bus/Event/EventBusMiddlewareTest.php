@@ -5,6 +5,9 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Event;
 
 use Amp\PHPUnit\AsyncTestCase;
+use Monolog\Handler\TestHandler;
+use Monolog\Level;
+use Monolog\Logger;
 use Nayleen\Async\Bus\Message;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -12,32 +15,22 @@ use Psr\Log\LogLevel;
 /**
  * @internal
  */
-class EventBusMiddlewareTest extends AsyncTestCase
+final class EventBusMiddlewareTest extends AsyncTestCase
 {
     /**
      * @test
      */
     public function passes_to_found_event_handlers(): void
     {
-        $level = LogLevel::DEBUG;
+        $levelName = LogLevel::DEBUG;
+        $level = Level::fromName($levelName);
 
         $message = $this->createMock(Message::class);
         $message->method('name')->willReturn('message');
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger
-            ->expects(self::exactly(6))
-            ->method('log')
-            ->withConsecutive(
-                [$level, 'Started notifying event handlers', ['event' => $message]],
-                [$level, 'Processing...'],
-                [$level, 'Processing...'],
-                [$level, 'Processing...'],
-                [$level, 'Finished notifying event handlers', ['event' => $message]],
-                [$level, 'Executing next handler...'],
-            );
-
-        $handler = static fn (Message $message) => $logger->log($level, 'Processing...');
+        $logger = new Logger('test');
+        $logger->pushHandler($testHandler = new TestHandler());
+        $handler = static fn (Message $message) => $logger->log($levelName, 'Processing...');
 
         $handlers = new Handlers(
             [
@@ -45,8 +38,15 @@ class EventBusMiddlewareTest extends AsyncTestCase
             ],
         );
 
-        $middleware = new EventBusMiddleware($handlers, $logger, $level);
-        $middleware->handle($message, fn (Message $message) => $logger->log($level, 'Executing next handler...'));
+        $middleware = new EventBusMiddleware($handlers, $logger, $levelName);
+        $middleware->handle($message, fn (Message $message) => $logger->log($levelName, 'Executing next handler...'));
+
+        self::assertTrue($testHandler->hasRecord(['message' => 'Started notifying event handlers', 'event' => $message], $level));
+        self::assertTrue($testHandler->hasRecord('Processing...', $level));
+        self::assertTrue($testHandler->hasRecord('Processing...', $level));
+        self::assertTrue($testHandler->hasRecord('Processing...', $level));
+        self::assertTrue($testHandler->hasRecord(['message' => 'Finished notifying event handlers', 'event' => $message], $level));
+        self::assertTrue($testHandler->hasRecord('Executing next handler...', $level));
     }
 
     /**

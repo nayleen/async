@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
-class OutputTest extends TestCase
+final class OutputTest extends TestCase
 {
     /**
      * @test
@@ -27,7 +27,7 @@ class OutputTest extends TestCase
     /**
      * @test
      */
-    public function writes_to_given_stream(): void
+    public function writes_to_given_channel(): void
     {
         $channel = $this->createMock(Channel::class);
         $channel->expects(self::once())->method('send')->with('test');

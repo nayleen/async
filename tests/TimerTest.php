@@ -13,7 +13,7 @@ use Revolt\EventLoop;
 /**
  * @internal
  */
-class TimerTest extends TestCase
+final class TimerTest extends TestCase
 {
     private EventLoop\Driver&MockObject $loop;
 

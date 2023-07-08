@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
-class TimersTest extends TestCase
+final class TimersTest extends TestCase
 {
     private Cron&MockObject $cron;
 

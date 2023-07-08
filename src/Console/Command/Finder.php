@@ -20,7 +20,7 @@ use Traversable;
  * @template-implements FinderInterface<Command>
  * @template-implements IteratorAggregate<class-string<Command>>
  */
-final class Finder implements FinderInterface, IteratorAggregate
+class Finder implements FinderInterface, IteratorAggregate
 {
     /**
      * @var Engine<Command>

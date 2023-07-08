@@ -12,7 +12,7 @@ use function Safe\ini_get;
 /**
  * @internal
  */
-final class Performance
+class Performance
 {
     private const LOG_LEVEL = LogLevel::NOTICE;
 

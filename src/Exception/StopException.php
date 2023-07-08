@@ -9,7 +9,7 @@ use RuntimeException;
 /**
  * @internal
  */
-final class StopException extends RuntimeException
+class StopException extends RuntimeException
 {
     public function __construct(public readonly ?int $signal = null)
     {

@@ -13,7 +13,7 @@ use Nayleen\Async\Worker;
 /**
  * @api
  */
-final class Consumer extends Worker
+class Consumer extends Worker
 {
     public function __construct(
         private readonly QueueConsumer $consumer,

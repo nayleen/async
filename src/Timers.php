@@ -7,7 +7,7 @@ namespace Nayleen\Async;
 /**
  * @api
  */
-final class Timers
+class Timers
 {
     /**
      * @var Timer[]

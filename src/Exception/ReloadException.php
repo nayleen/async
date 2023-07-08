@@ -9,6 +9,6 @@ use RuntimeException;
 /**
  * @internal
  */
-final class ReloadException extends RuntimeException
+class ReloadException extends RuntimeException
 {
 }

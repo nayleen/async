@@ -13,7 +13,7 @@ use Throwable;
 /**
  * @api
  */
-final class PublishesOnErrorMiddleware implements Middleware
+class PublishesOnErrorMiddleware implements Middleware
 {
     public function __construct(
         private readonly Publisher $publisher,

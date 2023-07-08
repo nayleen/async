@@ -14,7 +14,7 @@ use OutOfBoundsException;
 /**
  * @api
  */
-final class PublishesToConfiguredQueueMiddleware implements Middleware
+class PublishesToConfiguredQueueMiddleware implements Middleware
 {
     public function __construct(
         private readonly Publisher $publisher,

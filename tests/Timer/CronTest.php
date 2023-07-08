@@ -19,7 +19,7 @@ use Symfony\Component\Clock\MockClock;
 /**
  * @internal
  */
-class CronTest extends TestCase
+final class CronTest extends TestCase
 {
     private MockClock $clock;
 

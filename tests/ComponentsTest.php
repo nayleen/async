@@ -6,16 +6,17 @@ namespace Nayleen\Async;
 
 use DI;
 use DI\ContainerBuilder;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\HasDependencies;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Psr\Log\Test\TestLogger;
 
 /**
  * @internal
  */
-class ComponentsTest extends TestCase
+final class ComponentsTest extends TestCase
 {
     private function makeDependentComponent(): Component
     {
@@ -68,7 +69,9 @@ class ComponentsTest extends TestCase
      */
     public function shutdown_runs_shutdown_on_components(): void
     {
-        $logger = new TestLogger();
+        $logger = new Logger('test');
+        $logger->pushHandler($testHandler = new TestHandler());
+
         $components = new Components([
             $this->makeDependentComponent(),
             DependencyProvider::create([
@@ -79,7 +82,7 @@ class ComponentsTest extends TestCase
         $kernel = new Kernel($components);
         $components->shutdown($kernel);
 
-        self::assertTrue($logger->hasDebugThatMatches('/Shutting down Kernel/'));
-        self::assertTrue($logger->hasDebugThatMatches('/Shutting down Dependency/'));
+        self::assertTrue($testHandler->hasDebugThatMatches('/Shutting down Kernel/'));
+        self::assertTrue($testHandler->hasDebugThatMatches('/Shutting down Dependency/'));
     }
 }

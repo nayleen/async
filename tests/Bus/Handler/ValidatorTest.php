@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
-class ValidatorTest extends TestCase
+final class ValidatorTest extends TestCase
 {
     /**
      * @return array<string, array{handler: callable, result: bool}>

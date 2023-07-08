@@ -8,6 +8,7 @@ use Amp\Serialization\SerializationException;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use Safe;
 use stdClass;
 
 /**
@@ -20,13 +21,13 @@ final class IgbinarySerializerTest extends TestCase
     public function notSerializable(): Generator
     {
         yield 'anonymous class' => [
-            new class {
-            }
+            new class() {
+            },
         ];
         yield 'Closure' => [fn (): mixed => null];
         yield 'Generator' => [fn (): Generator => yield 123];
         yield 'ReflectionClass' => [new ReflectionClass(stdClass::class)];
-        yield 'resource' => [fopen(__FILE__, 'r')];
+        yield 'resource' => [Safe\fopen(__FILE__, 'rb')];
     }
 
     /**
@@ -56,6 +57,16 @@ final class IgbinarySerializerTest extends TestCase
 
     /**
      * @test
+     * @depends serialize_produces_expected_result
+     */
+    public function unserialize_restores_original_value(string $serialized): void
+    {
+        $serializer = new IgbinarySerializer();
+        self::assertSame($this->value, $serializer->unserialize($serialized));
+    }
+
+    /**
+     * @test
      */
     public function unserialize_throws_on_unserializable_value(): void
     {
@@ -66,15 +77,5 @@ final class IgbinarySerializerTest extends TestCase
         $serialized = substr($serialized, 1);
 
         $serializer->unserialize($serialized);
-    }
-
-    /**
-     * @test
-     * @depends serialize_produces_expected_result
-     */
-    public function unserialize_restores_original_value(string $serialized): void
-    {
-        $serializer = new IgbinarySerializer();
-        self::assertSame($this->value, $serializer->unserialize($serialized));
     }
 }

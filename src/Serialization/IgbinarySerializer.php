@@ -9,7 +9,7 @@ use Amp\Serialization\Serializer;
 use RuntimeException;
 use Throwable;
 
-final class IgbinarySerializer implements Serializer
+class IgbinarySerializer implements Serializer
 {
     private static bool $isSupported;
 
@@ -35,13 +35,11 @@ final class IgbinarySerializer implements Serializer
             } catch (Throwable $throwable) {
                 throw new SerializationException('The given data could not be serialized', previous: $throwable);
             }
-
-            if ($serialized === false) {
-                throw new SerializationException('The given data could not be serialized');
-            }
         } finally {
             set_error_handler($oldErrorHandler);
         }
+
+        assert(is_string($serialized) && $serialized !== '');
 
         return $serialized;
     }

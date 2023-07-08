@@ -11,7 +11,7 @@ use Nayleen\Async\Bus\Message;
 /**
  * @internal
  */
-class MiddlewareBusTest extends AsyncTestCase
+final class MiddlewareBusTest extends AsyncTestCase
 {
     private function createMiddleware(int $expectedIndex, Results $results = new Results()): Middleware
     {

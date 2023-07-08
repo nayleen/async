@@ -13,7 +13,7 @@ use Nayleen\Async\Bus\Message;
 /**
  * @internal
  */
-class ConsumerTest extends AsyncTestCase
+final class ConsumerTest extends AsyncTestCase
 {
     /**
      * @test

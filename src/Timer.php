@@ -24,17 +24,17 @@ abstract class Timer
 
     abstract protected function interval(): float|int;
 
-    final public function disable(): void
+    public function disable(): void
     {
         $this->loop->disable($this->callbackId);
     }
 
-    final public function enable(): void
+    public function enable(): void
     {
         $this->loop->enable($this->callbackId);
     }
 
-    final public function run(): void
+    public function run(): void
     {
         $this->execute();
         $this->suspendFor($this->interval());
@@ -46,14 +46,16 @@ abstract class Timer
         $this->callbackId = $this->loop->unreference($this->loop->defer($this->run(...)));
     }
 
-    final public function stop(): void
+    public function stop(): void
     {
         $this->loop->cancel($this->callbackId);
     }
 
-    final public function suspendFor(float|int $duration): void
+    public function suspendFor(float|int $duration): void
     {
         $this->disable();
-        $this->loop->unreference($this->loop->delay((float) $duration, $this->enable(...)));
+        $this->loop->unreference(
+            $this->loop->delay((float) $duration, $this->enable(...)),
+        );
     }
 }

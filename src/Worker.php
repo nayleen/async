@@ -24,7 +24,7 @@ abstract class Worker
         $this->timers->start($kernel);
     }
 
-    final public function run(Kernel $kernel): void
+    public function run(Kernel $kernel): void
     {
         $this->start($kernel);
         $this->execute($kernel->cancellation());

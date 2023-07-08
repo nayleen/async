@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
-class ConsumerTest extends TestCase
+final class ConsumerTest extends TestCase
 {
     /**
      * @test

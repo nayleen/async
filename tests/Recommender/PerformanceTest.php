@@ -11,7 +11,7 @@ use Safe;
 /**
  * @internal
  */
-class PerformanceTest extends TestCase
+final class PerformanceTest extends TestCase
 {
     private string|false $originalEnvValue;
 

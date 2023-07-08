@@ -9,7 +9,7 @@ use Amp\PHPUnit\AsyncTestCase;
 /**
  * @internal
  */
-class InMemoryQueueTest extends AsyncTestCase
+final class InMemoryQueueTest extends AsyncTestCase
 {
     /**
      * @test

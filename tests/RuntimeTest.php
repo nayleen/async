@@ -4,57 +4,35 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Nayleen\Async\Component\DependencyProvider;
+use Nayleen\Async\Test\Kernel as TestKernel;
+use Nayleen\Async\Test\Runtime as TestRuntime;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
-use Revolt\EventLoop;
 
 /**
  * @internal
  */
 final class RuntimeTest extends TestCase
 {
-    private function createComponents(
-        ?EventLoop\Driver $loop = null,
-        ?LoggerInterface $stdErrLogger = null,
-        ?LoggerInterface $stdOutLogger = null,
-        Component ...$components,
-    ): Components {
-        return new Components(
-            [
-                DependencyProvider::create([
-                    EventLoop\Driver::class => $loop ?? EventLoop::getDriver(),
-                    'async.logger.stderr' => $stdErrLogger ?? new NullLogger(),
-                    'async.logger.stdout' => $stdOutLogger ?? new NullLogger(),
-                ]),
-                ...$components,
-            ],
-        );
-    }
-
     /**
      * @test
      */
     public function executes_in_kernel_context(): void
     {
-        stream_wrapper_unregister('file');
-        stream_wrapper_restore('file');
-
-        $kernel = new Kernel($this->createComponents());
+        $kernel = TestKernel::create();
         $runtime = new TestRuntime();
+        ;
 
-        self::assertSame(420, $kernel->execute($runtime));
+        self::assertSame(420, $runtime->withKernel($kernel)->run());
     }
-}
 
-/**
- * @internal
- */
-final class TestRuntime extends Runtime
-{
-    protected function execute(Kernel $kernel): int
+    /**
+     * @test
+     */
+    public function run_initializes_kernel(): void
     {
-        return 420;
+        $runtime = new TestRuntime();
+        $runtime->run();
+
+        self::assertTrue(isset($runtime->kernel));
     }
 }

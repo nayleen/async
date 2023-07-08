@@ -6,22 +6,40 @@ namespace Nayleen\Async;
 
 use Amp\Cancellation;
 use Amp\NullCancellation;
-use Amp\Parallel\Worker\Task;
 use Amp\Sync\Channel;
-
-use function Amp\async;
 
 /**
  * @api
  */
-abstract class Runtime implements Task
+abstract class Runtime
 {
-    abstract protected function execute(Kernel $kernel): mixed;
+    public readonly Tasks $tasks;
 
-    public function run(?Channel $channel = null, Cancellation $cancellation = new NullCancellation()): mixed
+    protected Kernel $kernel;
+
+    public function __construct()
     {
-        $kernel = new Kernel(channel: $channel, cancellation: $cancellation);
+        $this->tasks = new Tasks();
+    }
 
-        return $kernel->run(fn () => async($this->execute(...), $kernel));
+    abstract protected function execute(Cancellation $cancellation): mixed;
+
+    final public function run(?Channel $channel = null, Cancellation $cancellation = new NullCancellation()): mixed
+    {
+        $this->kernel ??= new Kernel(channel: $channel, cancellation: $cancellation);
+        $this->tasks->schedule($this->kernel);
+
+        return $this->execute($this->kernel->cancellation());
+    }
+
+    /**
+     * @internal
+     */
+    final public function withKernel(Kernel $kernel): static
+    {
+        $copy = clone $this;
+        $copy->kernel = $kernel;
+
+        return $copy;
     }
 }

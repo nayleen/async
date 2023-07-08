@@ -22,13 +22,6 @@ namespace PHPSTORM_META
     );
 
     override(
-        \Nayleen\Async\Kernel::make(0),
-        map([
-            '' => '@',
-        ])
-    );
-
-    override(
         \Psr\Container\ContainerInterface::get(0),
         map([
             '' => '@',

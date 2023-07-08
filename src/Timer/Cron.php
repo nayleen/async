@@ -23,7 +23,7 @@ abstract class Cron extends Timer
         $this->cronExpression = CronExpression::factory($expression);
     }
 
-    final protected function interval(): int
+    protected function interval(): int
     {
         $next = $this->cronExpression->getNextRunDate(
             $now = $this->clock->now(),
@@ -36,6 +36,7 @@ abstract class Cron extends Timer
     public function start(Kernel $kernel): void
     {
         parent::start($kernel);
+
         $this->clock = $kernel->clock();
     }
 }

@@ -15,7 +15,7 @@ use Nayleen\Async\Worker;
 /**
  * @api
  */
-final class Http extends Worker
+class Http extends Worker
 {
     public function __construct(
         private readonly HttpServer $server,

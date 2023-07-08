@@ -12,25 +12,28 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @api
  */
-final class Application extends BaseApplication
+class Application extends BaseApplication
 {
     public function __construct(private readonly Kernel $kernel)
     {
         $container = $kernel->container();
 
-        parent::__construct(
-            $container->get('async.app_name'),
-            $container->get('async.app_version'),
-        );
+        $name = $container->get('async.app_name');
+        assert(is_string($name) && $name !== '');
+
+        $version = $container->get('async.app_version');
+        assert(is_string($version) && $version !== '');
+
+        parent::__construct($name, $version);
     }
 
-    public function run(InputInterface $input = null, OutputInterface $output = null): int
+    public function run(?InputInterface $input = null, ?OutputInterface $output = null): int
     {
         $this->setAutoExit(false);
 
-        return parent::run(
-            $this->kernel->make(InputInterface::class),
-            $this->kernel->make(OutputInterface::class),
-        );
+        $input ??= $this->kernel->container()->get(InputInterface::class);
+        $output ??= $this->kernel->container()->get(OutputInterface::class);
+
+        return parent::run($input, $output);
     }
 }

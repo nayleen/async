@@ -7,7 +7,7 @@ namespace Nayleen\Async\Bus\Queue;
 /**
  * @api
  */
-final class InMemoryQueue implements Queue
+class InMemoryQueue implements Queue
 {
     /**
      * @var string[]

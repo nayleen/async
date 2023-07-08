@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Console;
 
-use Nayleen\Async\Kernel;
+use Amp\Cancellation;
 use Nayleen\Async\Runtime as BaseRuntime;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @api
  */
-final class Runtime extends BaseRuntime
+class Runtime extends BaseRuntime
 {
     /**
      * @paran non-empty-string|null $defaultCommand
@@ -22,12 +22,14 @@ final class Runtime extends BaseRuntime
         private readonly ?InputInterface $input = null,
         private readonly ?OutputInterface $output = null,
     ) {
+        parent::__construct();
+
         assert($this->defaultCommand !== '');
     }
 
-    protected function execute(Kernel $kernel): int
+    protected function execute(Cancellation $cancellation): int
     {
-        $console = $kernel->make(Application::class);
+        $console = $this->kernel->container()->get(Application::class);
 
         if (isset($this->defaultCommand)) {
             assert($this->defaultCommand !== '' && $console->has($this->defaultCommand));
@@ -35,8 +37,8 @@ final class Runtime extends BaseRuntime
         }
 
         return $console->run(
-            $this->input ?? $kernel->make(InputInterface::class),
-            $this->output ?? $kernel->make(OutputInterface::class),
+            $this->input ?? $this->kernel->container()->get(InputInterface::class),
+            $this->output ?? $this->kernel->container()->get(OutputInterface::class),
         );
     }
 }

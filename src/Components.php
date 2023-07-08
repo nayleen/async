@@ -13,7 +13,7 @@ use Traversable;
 /**
  * @api
  */
-final class Components implements IteratorAggregate
+class Components implements IteratorAggregate
 {
     /**
      * @var Component[]

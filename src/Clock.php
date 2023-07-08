@@ -13,13 +13,13 @@ use Symfony\Component\Clock\MonotonicClock;
 /**
  * @api
  */
-final class Clock implements ClockInterface
+class Clock implements ClockInterface
 {
     private readonly ClockInterface $clock;
 
     private readonly DateTimeZone $timezone;
 
-    public function __construct(
+    final public function __construct(
         private readonly EventLoop\Driver $loop,
         ?ClockInterface $clock = null,
         string|DateTimeZone|null $timezone = null,
@@ -41,9 +41,7 @@ final class Clock implements ClockInterface
     public function sleep(float|int $seconds): void
     {
         $suspension = $this->loop->getSuspension();
-        $callbackId = $this->loop->unreference(
-            $this->loop->delay($seconds, static fn () => $suspension->resume()),
-        );
+        $callbackId = $this->loop->unreference($this->loop->delay($seconds, $suspension->resume(...)));
 
         try {
             $suspension->suspend();
@@ -59,7 +57,7 @@ final class Clock implements ClockInterface
 
     public function withTimeZone(DateTimeZone|string $timezone): static
     {
-        return new self(
+        return new static(
             $this->loop,
             $this->clock->withTimeZone($timezone),
             $timezone,

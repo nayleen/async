@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @api
  */
-final class Output extends BaseOutput
+class Output extends BaseOutput
 {
     public function __construct(
         private readonly Channel $channel,

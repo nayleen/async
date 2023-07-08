@@ -5,36 +5,31 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Command;
 
 use Amp\PHPUnit\AsyncTestCase;
+use Monolog\Handler\TestHandler;
+use Monolog\Level;
+use Monolog\Logger;
 use Nayleen\Async\Bus\Message;
 use OutOfBoundsException;
-use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
 /**
  * @internal
  */
-class CommandBusMiddlewareTest extends AsyncTestCase
+final class CommandBusMiddlewareTest extends AsyncTestCase
 {
     /**
      * @test
      */
     public function passes_to_found_handler(): void
     {
-        $level = LogLevel::DEBUG;
+        $levelName = LogLevel::DEBUG;
+        $level = Level::fromName($levelName);
 
         $message = $this->createMock(Message::class);
         $message->method('name')->willReturn('message');
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger
-            ->expects(self::exactly(4))
-            ->method('log')
-            ->withConsecutive(
-                [$level, 'Started executing command handler', ['command' => $message]],
-                [$level, 'Processing...'],
-                [$level, 'Finished executing command handler', ['command' => $message]],
-                [$level, 'Executing next handler...'],
-            );
+        $logger = new Logger('test');
+        $logger->pushHandler($testHandler = new TestHandler());
 
         $handlers = new Handlers(
             [
@@ -44,10 +39,15 @@ class CommandBusMiddlewareTest extends AsyncTestCase
             ],
         );
 
-        $middleware = new CommandBusMiddleware($handlers, $logger, $level);
+        $middleware = new CommandBusMiddleware($handlers, $logger, $levelName);
         $middleware->handle($message, function () use ($logger, $level): void {
             $logger->log($level, 'Executing next handler...');
         });
+
+        self::assertTrue($testHandler->hasRecord(['message' => 'Started executing command handler', 'command' => $message], $level));
+        self::assertTrue($testHandler->hasRecord('Processing...', $level));
+        self::assertTrue($testHandler->hasRecord(['message' => 'Finished executing command handler', 'command' => $message], $level));
+        self::assertTrue($testHandler->hasRecord('Executing next handler...', $level));
     }
 
     /**

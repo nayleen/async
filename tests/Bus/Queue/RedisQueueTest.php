@@ -5,29 +5,28 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Queue;
 
 use Amp\PHPUnit\AsyncTestCase;
-use Amp\Redis\Redis;
-use Amp\Redis\RedisList;
+use Nayleen\Async\Bus\Queue\Redis\Connection;
 
 /**
  * @internal
  */
-class RedisQueueTest extends AsyncTestCase
+final class RedisQueueTest extends AsyncTestCase
 {
     /**
      * @test
      */
     public function can_consume_queue(): void
     {
-        $list = $this->createMock(RedisList::class);
-        $list->expects(self::once())->method('popHead')->willReturn('message');
+        $list = 'test';
+        $expectedMessage = 'message';
 
-        $redis = $this->createMock(Redis::class);
-        $redis->expects(self::once())->method('getList')->willReturn($list);
+        $connection = $this->createMock(Connection::class);
+        $connection->expects(self::once())->method('popListHead')->with($list)->willReturn($expectedMessage);
 
-        $queue = new RedisQueue($redis, 'test');
+        $queue = new RedisQueue($connection, $list);
         $message = $queue->consume();
 
-        self::assertSame('message', $message);
+        self::assertSame($expectedMessage, $message);
     }
 
     /**
@@ -35,14 +34,14 @@ class RedisQueueTest extends AsyncTestCase
      */
     public function can_enqueue(): void
     {
-        $list = $this->createMock(RedisList::class);
-        $list->expects(self::once())->method('pushTail')->with('message');
+        $list = 'test';
+        $message = 'message';
 
-        $redis = $this->createMock(Redis::class);
-        $redis->expects(self::once())->method('getList')->willReturn($list);
+        $connection = $this->createMock(Connection::class);
+        $connection->expects(self::once())->method('pushListTail')->with($list, $message);
 
-        $queue = new RedisQueue($redis, 'test');
-        $queue->enqueue('message');
+        $queue = new RedisQueue($connection, $list);
+        $queue->enqueue($message);
     }
 
     /**
@@ -50,7 +49,7 @@ class RedisQueueTest extends AsyncTestCase
      */
     public function returns_name(): void
     {
-        $queue = new RedisQueue($this->createMock(Redis::class), 'test');
+        $queue = new RedisQueue($this->createMock(Connection::class), 'test');
         self::assertSame('test', $queue->name());
     }
 }

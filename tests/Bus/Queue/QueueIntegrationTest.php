@@ -13,11 +13,12 @@ use Amp\Serialization\Serializer;
 use Generator;
 use Nayleen\Async\Bus\Bus;
 use Nayleen\Async\Bus\Message;
+use Nayleen\Async\Bus\Queue\Redis\Connection;
 
 /**
  * @internal
  */
-class QueueIntegrationTest extends AsyncTestCase
+final class QueueIntegrationTest extends AsyncTestCase
 {
     /**
      * @test
@@ -76,6 +77,6 @@ class QueueIntegrationTest extends AsyncTestCase
     public function queueImplementations(): Generator
     {
         yield 'in_memory' => [new InMemoryQueue('test-queue')];
-        yield 'redis' => [new RedisQueue(new Redis(new RemoteExecutor(RedisConfig::fromUri('redis://redis'))), 'test-queue')];
+        yield 'redis' => [new RedisQueue(new Connection(new Redis(new RemoteExecutor(RedisConfig::fromUri('redis://redis')))), 'test-queue')];
     }
 }

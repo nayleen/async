@@ -10,7 +10,7 @@ use OutOfBoundsException;
 /**
  * @api
  */
-final class QueueMap
+class QueueMap
 {
     /**
      * @var array<string, Queue>

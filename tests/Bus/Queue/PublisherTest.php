@@ -11,7 +11,7 @@ use Nayleen\Async\Bus\Message;
 /**
  * @internal
  */
-class PublisherTest extends AsyncTestCase
+final class PublisherTest extends AsyncTestCase
 {
     /**
      * @test

@@ -11,7 +11,7 @@ use Psr\Log\LogLevel;
 /**
  * @api
  */
-final class LoggingMiddleware implements Middleware
+class LoggingMiddleware implements Middleware
 {
     public function __construct(
         private readonly LoggerInterface $logger,
@@ -21,8 +21,8 @@ final class LoggingMiddleware implements Middleware
 
     public function handle(Message $message, callable $next): void
     {
-        $this->logger->log($this->level, 'Started handling message', ['message' => $message]);
+        $this->logger->log($this->level, 'Started handling message', ['processed_message' => $message]);
         $next($message);
-        $this->logger->log($this->level, 'Finished handling message', ['message' => $message]);
+        $this->logger->log($this->level, 'Finished handling message', ['processed_message' => $message]);
     }
 }

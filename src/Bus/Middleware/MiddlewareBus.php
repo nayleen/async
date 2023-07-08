@@ -12,7 +12,7 @@ use Nayleen\Async\Bus\Message;
 /**
  * @api
  */
-final class MiddlewareBus implements Bus
+class MiddlewareBus implements Bus
 {
     /**
      * @var Middleware[]

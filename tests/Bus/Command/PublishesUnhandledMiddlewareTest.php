@@ -14,7 +14,7 @@ use RuntimeException;
 /**
  * @internal
  */
-class PublishesUnhandledMiddlewareTest extends AsyncTestCase
+final class PublishesUnhandledMiddlewareTest extends AsyncTestCase
 {
     /**
      * @test

@@ -10,7 +10,7 @@ use Nayleen\Async\Recommender\Performance;
 /**
  * @internal
  */
-final class Bootstrapper extends Component
+class Bootstrapper extends Component
 {
     private const NAME = 'bootstrap';
 
@@ -29,9 +29,6 @@ final class Bootstrapper extends Component
         return self::NAME;
     }
 
-    /**
-     * @param ContainerBuilder $containerBuilder
-     */
     public function register(ContainerBuilder $containerBuilder): void
     {
         // set container builder defaults

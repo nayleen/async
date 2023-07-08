@@ -4,39 +4,27 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Queue;
 
-use Amp\Redis\Redis;
-use Amp\Redis\RedisList;
+use Nayleen\Async\Bus\Queue\Redis\Connection;
 
 /**
  * @api
  */
-final class RedisQueue implements Queue
+class RedisQueue implements Queue
 {
-    private ?RedisList $list = null;
-
     public function __construct(
-        private readonly Redis $redis,
+        private readonly Connection $connection,
         private readonly string $name,
     ) {
     }
 
-    private function list(): RedisList
-    {
-        if (!isset($this->list)) {
-            $this->list = $this->redis->getList($this->name);
-        }
-
-        return $this->list;
-    }
-
     public function consume(): ?string
     {
-        return $this->list()->popHead();
+        return $this->connection->popListHead($this->name);
     }
 
     public function enqueue(string $message): void
     {
-        $this->list()->pushTail($message);
+        $this->connection->pushListTail($this->name, $message);
     }
 
     public function name(): string

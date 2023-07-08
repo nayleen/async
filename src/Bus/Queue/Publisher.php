@@ -10,7 +10,7 @@ use Nayleen\Async\Bus\Message;
 /**
  * @api
  */
-final class Publisher
+class Publisher
 {
     public function __construct(private readonly Serializer $serializer)
     {

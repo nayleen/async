@@ -21,7 +21,7 @@ normalize:
 	@docker-compose run --rm php php vendor/bin/php-cs-fixer fix 2>/dev/null
 
 phpunit: composer
-	@docker-compose run --rm php php vendor/bin/phpunit 2>/dev/null
+	@docker-compose run --rm -eXDEBUG_MODE=debug php php vendor/bin/phpunit 2>/dev/null
 
 static: composer
 	@docker-compose run --rm php php vendor/bin/phpstan 2>/dev/null

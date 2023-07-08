@@ -17,7 +17,7 @@ use Revolt\EventLoop;
 /**
  * @internal
  */
-class IntervalTest extends TestCase
+final class IntervalTest extends TestCase
 {
     private LoggerInterface&MockObject $logger;
 

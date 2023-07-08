@@ -11,7 +11,7 @@ use OutOfBoundsException;
 /**
  * @api
  */
-final class Handlers
+class Handlers
 {
     use Validator;
 

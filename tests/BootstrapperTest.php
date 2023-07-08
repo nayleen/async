@@ -15,7 +15,7 @@ use Revolt\EventLoop;
 /**
  * @internal
  */
-class BootstrapperTest extends TestCase
+final class BootstrapperTest extends TestCase
 {
     /**
      * @test

@@ -10,20 +10,21 @@ use Amp\Sync\Channel;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Worker;
 
-final class Task implements TaskInterface
+class Task implements TaskInterface
 {
     /**
      * @param class-string<Worker> $worker
      */
     public function __construct(private readonly string $worker)
     {
+
     }
 
     public function run(Channel $channel, Cancellation $cancellation): mixed
     {
         $kernel = new Kernel(channel: $channel, cancellation: $cancellation);
 
-        $worker = $kernel->make($this->worker);
+        $worker = $kernel->container()->get($this->worker);
         assert($worker instanceof Worker);
 
         $worker->run($kernel);

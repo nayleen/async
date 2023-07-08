@@ -14,7 +14,7 @@ use OutOfBoundsException;
 /**
  * @internal
  */
-class PublishesToConfiguredQueueMiddlewareTest extends AsyncTestCase
+final class PublishesToConfiguredQueueMiddlewareTest extends AsyncTestCase
 {
     /**
      * @test

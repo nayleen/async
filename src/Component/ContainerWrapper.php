@@ -11,7 +11,7 @@ use Psr\Container\ContainerInterface;
 /**
  * @api
  */
-abstract class ContainerWrapper extends Component
+final class ContainerWrapper extends Component
 {
     private ContainerInterface $container;
 
@@ -22,8 +22,7 @@ abstract class ContainerWrapper extends Component
 
     public static function create(ContainerInterface $container): self
     {
-        $instance = new class() extends ContainerWrapper {
-        };
+        $instance = new self();
         $instance->container = $container;
         $instance->name = sprintf('container.%s', spl_object_hash($container));
 

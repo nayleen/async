@@ -11,7 +11,7 @@ use Nayleen\Async\Component;
 /**
  * @api
  */
-abstract class DependencyProvider extends Component
+final class DependencyProvider extends Component
 {
     /**
      * @var array<array-key, DefinitionSource|mixed[]|string>
@@ -30,8 +30,7 @@ abstract class DependencyProvider extends Component
     {
         assert(func_num_args() > 0);
 
-        $instance = new class() extends DependencyProvider {
-        };
+        $instance = new self();
         $instance->definitions = $definitions;
         $instance->name = uniqid('dependencies.', true);
 

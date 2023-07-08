@@ -14,14 +14,14 @@ use Stringable;
  */
 abstract class Component implements Stringable
 {
-    final public function __construct()
+    public function __construct()
     {
     }
 
     /**
      * @param non-empty-string ...$filenames
      */
-    final protected function load(ContainerBuilder $containerBuilder, string ...$filenames): void
+    protected function load(ContainerBuilder $containerBuilder, string ...$filenames): void
     {
         foreach ($filenames as $filename) {
             foreach (Safe\glob($filename) as $file) {
@@ -65,7 +65,7 @@ abstract class Component implements Stringable
     /**
      * @return non-empty-string
      */
-    final public function __toString(): string
+    public function __toString(): string
     {
         return $this->name();
     }

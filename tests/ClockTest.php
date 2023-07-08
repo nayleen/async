@@ -13,7 +13,7 @@ use Symfony\Component\Clock\ClockInterface;
 /**
  * @internal
  */
-class ClockTest extends TestCase
+final class ClockTest extends TestCase
 {
     /**
      * @test

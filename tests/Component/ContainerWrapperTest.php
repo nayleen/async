@@ -11,7 +11,7 @@ use Psr\Container\ContainerInterface;
 /**
  * @internal
  */
-class ContainerWrapperTest extends TestCase
+final class ContainerWrapperTest extends TestCase
 {
     /**
      * @test

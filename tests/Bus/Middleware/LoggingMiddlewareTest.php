@@ -5,37 +5,38 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Middleware;
 
 use Amp\PHPUnit\AsyncTestCase;
+use Monolog\Handler\TestHandler;
+use Monolog\Level;
+use Monolog\Logger;
 use Nayleen\Async\Bus\Message;
-use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
 /**
  * @internal
  */
-class LoggingMiddlewareTest extends AsyncTestCase
+final class LoggingMiddlewareTest extends AsyncTestCase
 {
     /**
      * @test
      */
     public function invokes_logger(): void
     {
-        $level = LogLevel::DEBUG;
+        $levelName = LogLevel::DEBUG;
+        $level = Level::fromName($levelName);
+
         $message = $this->createMock(Message::class);
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger
-            ->expects(self::exactly(3))
-            ->method('log')
-            ->withConsecutive(
-                [$level, 'Started handling message', ['message' => $message]],
-                [$level, 'Processing...', ['message' => $message]],
-                [$level, 'Finished handling message', ['message' => $message]],
-            );
+        $logger = new Logger('test');
+        $logger->pushHandler($testHandler = new TestHandler());
 
-        $middleware = new LoggingMiddleware($logger, $level);
+        $middleware = new LoggingMiddleware($logger, $levelName);
         $middleware->handle(
             $message,
             $this->createCallback(1, fn (Message $message) => $logger->log($level, 'Processing...', ['message' => $message])),
         );
+
+        self::assertTrue($testHandler->hasRecord(['message' => 'Started handling message', 'processed_message' => $message], $level));
+        self::assertTrue($testHandler->hasRecord(['message' => 'Processing...', 'processed_message' => $message], $level));
+        self::assertTrue($testHandler->hasRecord(['message' => 'Finished handling message', 'processed_message' => $message], $level));
     }
 }

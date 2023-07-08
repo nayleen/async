@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
-class DependencyProviderTest extends TestCase
+final class DependencyProviderTest extends TestCase
 {
     /**
      * @test

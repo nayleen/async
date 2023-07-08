@@ -16,7 +16,7 @@ use function Amp\delay;
 /**
  * @api
  */
-final class Consumer
+class Consumer
 {
     private const DEFAULT_CONSUME_DELAY = 0.050; // ms
 

@@ -13,7 +13,7 @@ use OutOfBoundsException;
 /**
  * @api
  */
-final class PublishesUnhandledMiddleware implements Middleware
+class PublishesUnhandledMiddleware implements Middleware
 {
     public function __construct(
         private readonly Publisher $publisher,

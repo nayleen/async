@@ -5,9 +5,7 @@ declare(strict_types = 1);
 namespace Nayleen\Async;
 
 use Amp\ByteStream;
-use Amp\Cluster\Internal\ClusterLogHandler;
 use Amp\Log;
-use Amp\Sync\Channel;
 use DI;
 use Monolog\ErrorHandler;
 use Monolog\Logger;
@@ -27,16 +25,11 @@ return [
         string $logLevel = LogLevel::DEBUG,
         ?string $name = null,
     ): Logger {
-        $isClusterWorker = (bool) $container->get('async.cluster.is_worker');
-
-        if ($isClusterWorker) {
-            $logHandler = new ClusterLogHandler($container->get(Channel::class), $logLevel, false);
-        } else {
-            $logHandler = new Log\StreamHandler($stream, $logLevel);
-            $logHandler->setFormatter($container->get(Log\ConsoleFormatter::class));
-        }
-
         $logger = new Logger($name ?? (string) $container->get('async.app_name'));
+
+        $logHandler = new Log\StreamHandler($stream, $logLevel);
+        $logHandler->setFormatter($container->get(Log\ConsoleFormatter::class));
+
         $logger->pushHandler($logHandler);
 
         return $logger;

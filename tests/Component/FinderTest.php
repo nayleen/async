@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
-class FinderTest extends TestCase
+final class FinderTest extends TestCase
 {
     /**
      * @test
