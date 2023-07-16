@@ -6,18 +6,24 @@ namespace PHPSTORM_META
         \DI\Container::get(0),
         map([
             '' => '@',
+            'async.app_name' => \string,
+            'async.app_version' => \string,
+            'async.cache.redis' => \bool,
             'async.debug' => \bool,
+            'async.dir.base' => \string,
+            'async.dir.cache' => \string,
             'async.env' => \string,
-            'async.logger.stderr' => \Psr\Log\LoggerInterface::class,
-            'async.logger.stdout' => \Psr\Log\LoggerInterface::class,
-            'async.worker_pool' => \Amp\Parallel\Worker\WorkerPool::class,
-        ])
-    );
-
-    override(
-        \DI\Container::make(0),
-        map([
-            '' => '@',
+            'async.exception_handler' => \callable,
+            'async.logger.date_format' => \string,
+            'async.logger.format' => \string,
+            'async.logger.level' => \int|\string|\Monolog\Level::class,
+            'async.redis_supported' => \bool,
+            'async.worker_pool.size' => \int,
+            'async.logger.debug' => \Psr\Log\LoggerInterface::class,
+            'async.logger' => \Psr\Log\LoggerInterface::class,
+            'async.stderr' => \Amp\ByteStream\WritableResourceStream::class,
+            'async.stdin' => \Amp\ByteStream\ReadableResourceStream::class,
+            'async.stdout' => \Amp\ByteStream\WritableResourceStream::class,
         ])
     );
 

@@ -12,7 +12,6 @@ use Amp\Sync\Channel;
 use Closure;
 use DI;
 use Monolog\ErrorHandler;
-use Psr\Container\ContainerInterface;
 use Revolt\EventLoop;
 use Throwable;
 
@@ -20,7 +19,9 @@ return [
     // app config
     'async.app_name' => DI\env('ASYNC_APP_NAME', 'Kernel'),
     'async.app_version' => DI\env('ASYNC_APP_VERSION', 'UNKNOWN'),
-    'async.debug' => DI\factory(static fn (string $env): bool => (bool) (getenv('ASYNC_DEBUG') ?: $env !== 'prod'))->parameter('env', DI\get('async.env')),
+    'async.debug' => DI\factory(
+        static fn (string $env): bool => (bool) (getenv('ASYNC_DEBUG') ?: $env !== 'prod'),
+    )->parameter('env', DI\get('async.env')),
     'async.env' => strtolower((getenv('ASYNC_ENV') ?: 'prod')),
 
     // directories
@@ -44,7 +45,7 @@ return [
 
     Channel::class => DI\decorate(static function (
         ?Channel $channel,
-        ContainerInterface $container,
+        DI\Container $container,
     ): Channel {
         return $channel ?? new ByteStream\StreamChannel(
             $container->get('async.stdin'),

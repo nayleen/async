@@ -43,7 +43,12 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Nayleen\\Async\\": "tests/"
+            "Nayleen\\Async\\": [
+                "tests/",
+                "tests/Functional",
+                "tests/Integration",
+                "tests/Unit"
+            ]
         }
     },
     "config": {

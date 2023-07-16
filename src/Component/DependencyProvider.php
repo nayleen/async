@@ -11,7 +11,7 @@ use Nayleen\Async\Component;
 /**
  * @api
  */
-final class DependencyProvider extends Component
+class DependencyProvider extends Component
 {
     /**
      * @var array<array-key, DefinitionSource|mixed[]|string>

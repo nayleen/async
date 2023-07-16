@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Handler;
 
+use Closure;
 use Nayleen\Async\Bus\Message;
 use ReflectionFunction;
 use ReflectionNamedType;
@@ -11,16 +12,16 @@ use ReflectionNamedType;
 /**
  * @internal
  */
-trait Validator
+abstract class Validator
 {
-    private function validateHandler(callable $handler): bool
+    public static function validate(Closure|Handler $handler): bool
     {
         // class-based handler implementing the interface always satisfies requirements
         if ($handler instanceof Handler) {
             return true;
         }
 
-        $reflection = new ReflectionFunction($handler(...));
+        $reflection = new ReflectionFunction($handler);
 
         // handlers need to only accept a Message as its only parameter
         $parameters = $reflection->getParameters();

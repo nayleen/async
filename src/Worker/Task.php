@@ -4,26 +4,24 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Worker;
 
-use Amp\Cancellation;
-use Amp\Parallel\Worker\Task as TaskInterface;
-use Amp\Sync\Channel;
 use Nayleen\Async\Kernel;
+use Nayleen\Async\Task as BaseTask;
 use Nayleen\Async\Worker;
 
-class Task implements TaskInterface
+/**
+ * @api
+ */
+class Task extends BaseTask
 {
     /**
      * @param class-string<Worker> $worker
      */
     public function __construct(private readonly string $worker)
     {
-
     }
 
-    public function run(Channel $channel, Cancellation $cancellation): mixed
+    protected function execute(Kernel $kernel): mixed
     {
-        $kernel = new Kernel(channel: $channel, cancellation: $cancellation);
-
         $worker = $kernel->container()->get($this->worker);
         assert($worker instanceof Worker);
 

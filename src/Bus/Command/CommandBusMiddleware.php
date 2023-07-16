@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Command;
 
+use Closure;
 use Nayleen\Async\Bus\Message;
 use Nayleen\Async\Bus\Middleware\Middleware;
 use Psr\Log\LoggerInterface;
@@ -23,9 +24,9 @@ class CommandBusMiddleware implements Middleware
     }
 
     /**
-     * @param callable(Message): void $next
+     * @param Closure(Message): void $next
      */
-    public function handle(Message $message, callable $next): void
+    public function handle(Message $message, Closure $next): void
     {
         $handler = $this->handlers->find($message);
 

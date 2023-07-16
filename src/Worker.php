@@ -19,7 +19,7 @@ abstract class Worker
 
     protected function start(Kernel $kernel): void
     {
-        $kernel->cancellation()->subscribe($this->stop(...));
+        $kernel->cancellation->subscribe($this->stop(...));
 
         $this->timers->start($kernel);
     }
@@ -27,7 +27,7 @@ abstract class Worker
     public function run(Kernel $kernel): void
     {
         $this->start($kernel);
-        $this->execute($kernel->cancellation());
+        $this->execute($kernel->cancellation);
     }
 
     public function stop(): void

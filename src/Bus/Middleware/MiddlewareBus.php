@@ -34,7 +34,7 @@ class MiddlewareBus implements Bus
     /**
      * @return Closure(Message): void
      */
-    private function createStack(int $index = 0): callable
+    private function createStack(int $index = 0): Closure
     {
         if (!isset($this->middlewares[$index])) {
             return static function (Message $message): void {

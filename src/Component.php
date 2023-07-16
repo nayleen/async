@@ -4,9 +4,10 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use DI\ContainerBuilder;
-use InvalidArgumentException;
-use Safe;
+use Amp\ForbidCloning;
+use Amp\ForbidSerialization;
+use DI;
+use Nayleen\Async\Component\Configuration\FileLoader;
 use Stringable;
 
 /**
@@ -14,6 +15,9 @@ use Stringable;
  */
 abstract class Component implements Stringable
 {
+    use ForbidCloning;
+    use ForbidSerialization;
+
     public function __construct()
     {
     }
@@ -21,26 +25,9 @@ abstract class Component implements Stringable
     /**
      * @param non-empty-string ...$filenames
      */
-    protected function load(ContainerBuilder $containerBuilder, string ...$filenames): void
+    final protected function load(DI\ContainerBuilder $containerBuilder, string ...$filenames): void
     {
-        foreach ($filenames as $filename) {
-            foreach (Safe\glob($filename) as $file) {
-                $definitions = (static function () use ($file): array {
-                    assert(
-                        file_exists($file) && is_file($file),
-                        new InvalidArgumentException(sprintf(
-                            '%s config file "%s" does not exist!',
-                            static::class,
-                            $file,
-                        )),
-                    );
-
-                    return (array) require $file;
-                })();
-
-                $containerBuilder->addDefinitions($definitions);
-            }
-        }
+        FileLoader::load($containerBuilder, ...$filenames);
     }
 
     public function boot(Kernel $kernel): void
@@ -52,7 +39,7 @@ abstract class Component implements Stringable
      */
     abstract public function name(): string;
 
-    abstract public function register(ContainerBuilder $containerBuilder): void;
+    abstract public function register(DI\ContainerBuilder $containerBuilder): void;
 
     public function reload(Kernel $kernel): void
     {

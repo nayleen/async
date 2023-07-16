@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Command;
 
+use Closure;
 use Nayleen\Async\Bus\Handler\Validator;
 use Nayleen\Async\Bus\Message;
 use OutOfBoundsException;
@@ -13,15 +14,13 @@ use OutOfBoundsException;
  */
 class Handlers
 {
-    use Validator;
-
     /**
-     * @var array<string, callable(Message): void>
+     * @var array<string, Closure(Message): void>
      */
     private array $handlers = [];
 
     /**
-     * @param array<string, callable(Message): void> $handlers
+     * @param array<string, Closure(Message): void> $handlers
      */
     public function __construct(array $handlers = [])
     {
@@ -31,18 +30,18 @@ class Handlers
     }
 
     /**
-     * @param callable(Message): void $handler
+     * @param Closure(Message): void $handler
      */
-    public function add(string $name, callable $handler): void
+    public function add(string $name, Closure $handler): void
     {
-        assert($this->validateHandler($handler));
+        assert(Validator::validate($handler));
         $this->handlers[$name] = $handler;
     }
 
     /**
-     * @return callable(Message): void
+     * @return Closure(Message): void
      */
-    public function find(Message $message): callable
+    public function find(Message $message): Closure
     {
         return $this->handlers[$message->name()] ?? throw new OutOfBoundsException();
     }

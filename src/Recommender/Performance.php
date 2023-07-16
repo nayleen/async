@@ -21,12 +21,18 @@ class Performance
     public static function recommend(Kernel $kernel): void
     {
         if ($kernel->environment() === 'prod') {
-            $log = fn (string $message, array $context = []) => $kernel->write(self::LOG_LEVEL, $message, $context);
+            $log = static fn (string $message, array $context = []) => $kernel->write(
+                self::LOG_LEVEL,
+                $message,
+                $context,
+            );
 
             if (self::assertionsEnabled()) {
                 $log('Running kernel in production mode with assertions enabled is not recommended');
                 $log("You'll experience worse performance and see debugging log messages like this one");
-                $log('Disable assertions (zend.assertions=-1) globally in php.ini or by passing it to your CLI options');
+                $log(
+                    'Disable assertions (zend.assertions=-1) globally in php.ini or by passing it to your CLI options',
+                );
             }
 
             if (self::xdebugEnabled()) {

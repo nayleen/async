@@ -27,8 +27,10 @@ class Consumer
     ) {
     }
 
-    public function consume(Queue $queue, Cancellation $cancellation = new NullCancellation()): void
-    {
+    public function consume(
+        Queue $queue,
+        Cancellation $cancellation = new NullCancellation(),
+    ): void {
         try {
             while (!$cancellation->isRequested()) {
                 $cancellation->throwIfRequested();

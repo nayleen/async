@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Event;
 
+use Closure;
 use Nayleen\Async\Bus\Handler\Validator;
 use Nayleen\Async\Bus\Message;
 
@@ -12,15 +13,13 @@ use Nayleen\Async\Bus\Message;
  */
 class Handlers
 {
-    use Validator;
-
     /**
-     * @var array<string, array<array-key, callable(Message): void>>
+     * @var array<string, array<array-key, Closure(Message): void>>
      */
     private array $handlers = [];
 
     /**
-     * @param array<string, list<callable(Message): void>> $handlers
+     * @param array<string, list<Closure(Message): void>> $handlers
      */
     public function __construct(array $handlers = [])
     {
@@ -32,11 +31,11 @@ class Handlers
     }
 
     /**
-     * @param callable(Message): void $handler
+     * @param Closure(Message): void $handler
      */
-    public function add(string $name, callable $handler): void
+    public function add(string $name, Closure $handler): void
     {
-        assert($this->validateHandler($handler));
+        assert(Validator::validate($handler));
 
         if (!isset($this->handlers[$name])) {
             $this->handlers[$name] = [];
@@ -46,7 +45,7 @@ class Handlers
     }
 
     /**
-     * @return array<array-key, callable(Message): void>
+     * @return array<array-key, Closure(Message): void>
      */
     public function filter(Message $message): array
     {

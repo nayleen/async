@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
+use Amp\ForbidCloning;
+use Amp\ForbidSerialization;
 use DateTimeImmutable;
 use DateTimeZone;
 use Revolt\EventLoop;
@@ -12,14 +14,18 @@ use Symfony\Component\Clock\MonotonicClock;
 
 /**
  * @api
+ * @phpstan-consistent-constructor
  */
 class Clock implements ClockInterface
 {
+    use ForbidCloning;
+    use ForbidSerialization;
+
     private readonly ClockInterface $clock;
 
     private readonly DateTimeZone $timezone;
 
-    final public function __construct(
+    public function __construct(
         private readonly EventLoop\Driver $loop,
         ?ClockInterface $clock = null,
         string|DateTimeZone|null $timezone = null,

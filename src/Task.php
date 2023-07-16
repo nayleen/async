@@ -4,32 +4,20 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Amp\Cancellation;
-use Amp\NullCancellation;
+use Amp\Future;
 use Amp\Parallel\Worker\Task as TaskInterface;
-use Amp\Sync\Channel;
+use Closure;
+use Nayleen\Async\Task\AnonymousTask;
 
-abstract class Task implements TaskInterface
+abstract class Task extends Runtime implements TaskInterface
 {
-    protected Kernel $kernel;
-
-    abstract protected function execute(Cancellation $cancellation): mixed;
-
-    final public function run(?Channel $channel = null, Cancellation $cancellation = new NullCancellation()): mixed
-    {
-        $this->kernel ??= new Kernel(channel: $channel, cancellation: $cancellation);
-
-        return $this->execute($this->kernel->cancellation());
-    }
-
     /**
-     * @internal
+     * @template TResult of mixed
+     * @param Closure(Kernel): (Future<TResult>|TResult) $closure
+     * @return AnonymousTask<TResult>
      */
-    final public function withKernel(Kernel $kernel): static
+    public static function create(Closure $closure): AnonymousTask
     {
-        $copy = clone $this;
-        $copy->kernel = $kernel;
-
-        return $copy;
+        return new AnonymousTask($closure);
     }
 }

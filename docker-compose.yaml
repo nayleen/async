@@ -7,7 +7,7 @@ services:
         environment:
             - PHP_EXTENSION_MSGPACK=1
             - PHP_EXTENSION_XDEBUG=1
-            - XDEBUG_MODE=off
+            - XDEBUG_MODE=debug
         init: true
         links:
             - redis

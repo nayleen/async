@@ -8,10 +8,12 @@ use Amp\Cancellation;
 use Amp\CancelledException;
 use Amp\CompositeCancellation;
 use Amp\DeferredCancellation;
+use Amp\ForbidCloning;
+use Amp\ForbidSerialization;
 use Amp\Future;
 use Amp\NullCancellation;
 use Amp\Sync\Channel;
-use DI;
+use DI\Container;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\Finder;
 use Nayleen\Async\Exception\ReloadException;
@@ -26,11 +28,14 @@ use Revolt\EventLoop;
  */
 class Kernel
 {
-    private readonly Cancellation $cancellation;
+    use ForbidCloning;
+    use ForbidSerialization;
 
-    private DI\Container $container;
+    private Container $container;
 
     private readonly DeferredCancellation $deferredCancellation;
+
+    public readonly Cancellation $cancellation;
 
     public readonly Components $components;
 
@@ -44,22 +49,25 @@ class Kernel
         ?Channel $channel = null,
         Cancellation $cancellation = new NullCancellation(),
     ) {
+        $this->deferredCancellation = new DeferredCancellation();
+        $this->cancellation = new CompositeCancellation(
+            $this->deferredCancellation->getCancellation(),
+            $cancellation,
+        );
+        $this->scheduler = new Scheduler($this);
+
         $this->components = new Components(
             [
                 Bootstrapper::class,
-                DependencyProvider::create([Channel::class => $channel]),
+                DependencyProvider::create([
+                    self::class => $this,
+                    Cancellation::class => $this->cancellation,
+                    Channel::class => $channel,
+                    Scheduler::class => $this->scheduler,
+                ]),
                 ...$components,
             ],
         );
-
-        $this->deferredCancellation = new DeferredCancellation();
-        $this->cancellation = new CompositeCancellation($this->deferredCancellation->getCancellation(), $cancellation);
-        $this->scheduler = new Scheduler($this);
-    }
-
-    public function cancellation(): Cancellation
-    {
-        return $this->cancellation;
     }
 
     public function clock(): Clock
@@ -67,15 +75,13 @@ class Kernel
         return $this->container()->get(Clock::class);
     }
 
-    public function container(): DI\Container
+    public function container(): Container
     {
         if (isset($this->container)) {
             return $this->container;
         }
 
-        $this->container = $this->components->compile(new DI\ContainerBuilder());
-        $this->container->set(self::class, $this);
-
+        $this->container = $this->components->compile();
         $this->components->boot($this);
 
         return $this->container;
@@ -109,22 +115,15 @@ class Kernel
     public function run(callable $callback): mixed
     {
         reload:
-        $loop = $this->loop();
-
         try {
-            $future = $callback($this);
-            $return = $future?->await($this->cancellation());
+            $return = $callback($this);
 
-            $loop->run();
-
-            $this->scheduler->shutdown();
-            $this->components->shutdown($this);
+            if ($return instanceof Future) {
+                $return = $return->await($this->cancellation);
+            }
         } catch (CancelledException) {
         } catch (ReloadException) {
-            $this->scheduler->shutdown();
             $this->components->reload($this);
-            gc_collect_cycles();
-
             goto reload;
         } catch (StopException $stop) {
             if ($stop->signal !== null) {
@@ -135,6 +134,8 @@ class Kernel
             assert($this->writeDebug('Stopping Kernel'));
             $this->deferredCancellation->cancel($stop);
         }
+
+        $this->components->shutdown($this);
 
         return $return ?? null;
     }
@@ -152,7 +153,7 @@ class Kernel
         /**
          * @var LoggerInterface $stdOut
          */
-        $stdOut = $this->container()->get('async.logger.stdout');
+        $stdOut = $this->container()->get('async.logger');
         $stdOut->log($level, $message, $context);
 
         return true;
@@ -166,7 +167,7 @@ class Kernel
         /**
          * @var LoggerInterface $stdErr
          */
-        $stdErr = $this->container()->get('async.logger.stderr');
+        $stdErr = $this->container()->get('async.logger.debug');
         $stdErr->log(LogLevel::DEBUG, $message, $context);
 
         return true;

@@ -8,7 +8,7 @@ use DI\ContainerBuilder;
 use Nayleen\Async\Recommender\Performance;
 
 /**
- * @internal
+ * @api
  */
 class Bootstrapper extends Component
 {
@@ -31,13 +31,19 @@ class Bootstrapper extends Component
 
     public function register(ContainerBuilder $containerBuilder): void
     {
-        // set container builder defaults
-        $containerBuilder->useAttributes(false);
-        $containerBuilder->useAutowiring(true);
-
         $configPath = dirname(__DIR__) . '/config';
         assert(file_exists($configPath) && is_dir($configPath));
 
         $this->load($containerBuilder, $configPath . '/*.php');
+    }
+
+    public function reload(Kernel $kernel): void
+    {
+        $kernel->scheduler->shutdown();
+    }
+
+    public function shutdown(Kernel $kernel): void
+    {
+        $kernel->scheduler->shutdown();
     }
 }

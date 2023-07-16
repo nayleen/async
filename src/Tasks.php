@@ -4,62 +4,39 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Amp\Parallel\Worker\Execution;
+use Amp\Parallel\Worker\Task;
 use Nayleen\Async\Task\Scheduler;
-use Nayleen\Async\Task\Status;
-use SplObjectStorage;
-
-use function Amp\async;
 
 /**
  * @internal
  */
-final class Tasks
+class Tasks
 {
     /**
-     * @var SplObjectStorage<Task, ?Execution>
+     * @var array<string, Task>
      */
-    private SplObjectStorage $executions;
+    private array $tasks = [];
 
-    private const DEFAULT_STATUS_INTERVAL = 2.0;
-
-    public function __construct()
+    public function __construct(Task ...$tasks)
     {
-        $this->executions = new SplObjectStorage();
-    }
-
-    private function submit(Scheduler $scheduler): void
-    {
-        foreach ($this->executions as $task => $execution) {
-            $this->executions[$task] = match (Status::determine($execution)) {
-                Status::RUNNING => $execution,
-                default => $scheduler->submit($task),
-            };
-        }
+        $this->add(...$tasks);
     }
 
     public function add(Task ...$tasks): void
     {
         foreach ($tasks as $task) {
-            $this->executions[$task] = null;
+            $this->tasks[spl_object_hash($task)] = $task;
         }
     }
 
-    public function schedule(Kernel $kernel, float|int $statusInterval = self::DEFAULT_STATUS_INTERVAL): void
+    public function schedule(Scheduler $scheduler): void
     {
-        if ($this->executions->count() === 0) {
+        if (count($this->tasks) === 0) {
             return;
         }
 
-        $loop = $kernel->loop();
-
-        $callbackId = $loop->unreference(
-            $loop->repeat(
-                $statusInterval,
-                fn () => $this->submit($kernel->scheduler),
-            ),
-        );
-
-        $kernel->cancellation()->subscribe(static fn () => $loop->cancel($callbackId));
+        foreach ($this->tasks as $task) {
+            $scheduler->submit($task, monitor: true);
+        }
     }
 }

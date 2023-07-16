@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
+use Amp\ForbidCloning;
+use Amp\ForbidSerialization;
 use ArrayIterator;
 use DI;
 use IteratorAggregate;
@@ -15,6 +17,9 @@ use Traversable;
  */
 class Components implements IteratorAggregate
 {
+    use ForbidCloning;
+    use ForbidSerialization;
+
     /**
      * @var Component[]
      */
@@ -70,8 +75,10 @@ class Components implements IteratorAggregate
         }
     }
 
-    public function compile(DI\ContainerBuilder $containerBuilder): DI\Container
+    public function compile(): DI\Container
     {
+        $containerBuilder = new DI\ContainerBuilder();
+
         foreach ($this->components as $component) {
             $component->register($containerBuilder);
         }

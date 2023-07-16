@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Command;
 
+use Closure;
 use Nayleen\Async\Bus\Message;
 use Nayleen\Async\Bus\Middleware\Middleware;
 use Nayleen\Async\Bus\Queue\Publisher;
@@ -21,7 +22,7 @@ class PublishesUnhandledMiddleware implements Middleware
     ) {
     }
 
-    public function handle(Message $message, callable $next): void
+    public function handle(Message $message, Closure $next): void
     {
         try {
             $next($message);

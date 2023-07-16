@@ -11,7 +11,9 @@ use Nayleen\Async\Serialization\IgbinarySerializer;
 
 return [
     // serialization services
-    CompressingSerializer::class => static fn (Serializer $serializer): CompressingSerializer => new CompressingSerializer($serializer),
+    CompressingSerializer::class => static fn (
+        Serializer $serializer,
+    ): CompressingSerializer => new CompressingSerializer($serializer),
 
     Serializer::class => static function (): Serializer {
         // prefer igbinary over native serializer
