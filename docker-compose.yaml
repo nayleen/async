@@ -2,8 +2,10 @@ services:
   php:
     image: thecodingmachine/php:8.1-v4-cli
     container_name: php
+    depends_on:
+      redis:
+        condition: service_started
     environment:
-      - PHP_EXTENSION_MSGPACK=1
       - PHP_EXTENSION_XDEBUG=1
       - XDEBUG_MODE=off
     init: true
