@@ -1,16 +1,18 @@
 name: ci
 
 on:
-    push:
-        branches: [main]
+  push:
+    branches:
+      - main
 
-    pull_request:
-        branches: [main]
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
-            - run: docker-compose pull --quiet
-            - run: make ci
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker-compose pull --quiet
+      - run: make ci

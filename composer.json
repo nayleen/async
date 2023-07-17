@@ -1,70 +1,70 @@
 {
-    "name": "nayleen/async",
-    "description": "Building blocks for async applications.",
-    "license": "MIT",
-    "require": {
-        "php": ">=8.1",
-        "ext-pcntl": "*",
-        "ext-posix": "*",
-        "amphp/amp": "^3",
-        "amphp/log": "^2",
-        "amphp/parallel": "^2",
-        "dragonmantank/cron-expression": "^2",
-        "monolog/monolog": "^2|^3",
-        "nayleen/finder": "~0",
-        "php-di/php-di": "^7",
-        "revolt/event-loop": "^1",
-        "symfony/clock": "^6"
-    },
-    "require-dev": {
-        "amphp/cache": "^2",
-        "amphp/http": "^2",
-        "amphp/http-server": "3.x-dev",
-        "amphp/process": "^2",
-        "amphp/redis": "^2",
-        "bnf/phpstan-psr-container": "^1.0",
-        "nayleen/codestandard": "dev-latest",
-        "nayleen/development-dependencies": "^3",
-        "roave/better-reflection": "^6",
-        "roave/security-advisories": "dev-latest"
-    },
-    "suggest": {
-        "ext-igbinary": "For igbinary serialization",
-        "amphp/http-server": "To run http server workers",
-        "amphp/redis": "To use Redis as the backing queue for busses or as worker cache",
-        "amphp/websocket-server": "For websocket request handler support"
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "autoload": {
-        "psr-4": {
-            "Nayleen\\Async\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Nayleen\\Async\\": [
-                "tests/",
-                "tests/Functional",
-                "tests/Integration",
-                "tests/Unit"
-            ]
-        }
-    },
-    "config": {
-        "allow-plugins": {
-            "ergebnis/composer-normalize": true,
-            "phpstan/extension-installer": true
-        },
-        "lock": false,
-        "preferred-install": {
-            "*": "dist"
-        },
-        "sort-packages": true
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-main": "0.5.x-dev"
-        }
+  "name": "nayleen/async",
+  "description": "Building blocks for async applications.",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.1",
+    "ext-pcntl": "*",
+    "ext-posix": "*",
+    "amphp/amp": "^3",
+    "amphp/log": "^2",
+    "amphp/parallel": "^2",
+    "dragonmantank/cron-expression": "^2",
+    "monolog/monolog": "^2|^3",
+    "nayleen/finder": "~0",
+    "php-di/php-di": "^7",
+    "revolt/event-loop": "^1",
+    "symfony/clock": "^6"
+  },
+  "require-dev": {
+    "amphp/cache": "^2",
+    "amphp/http": "^2",
+    "amphp/http-server": "3.x-dev",
+    "amphp/process": "^2",
+    "amphp/redis": "^2",
+    "bnf/phpstan-psr-container": "^1.0",
+    "nayleen/codestandard": "dev-latest",
+    "nayleen/development-dependencies": "^3",
+    "roave/better-reflection": "^6",
+    "roave/security-advisories": "dev-latest"
+  },
+  "suggest": {
+    "ext-igbinary": "For igbinary serialization",
+    "amphp/http-server": "To run http server workers",
+    "amphp/redis": "To use Redis as the backing queue for busses or as worker cache",
+    "amphp/websocket-server": "For websocket request handler support"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "Nayleen\\Async\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Nayleen\\Async\\": [
+        "tests/",
+        "tests/Functional",
+        "tests/Integration",
+        "tests/Unit"
+      ]
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "ergebnis/composer-normalize": true,
+      "phpstan/extension-installer": true
+    },
+    "lock": false,
+    "preferred-install": {
+      "*": "dist"
+    },
+    "sort-packages": true
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "0.5.x-dev"
+    }
+  }
 }

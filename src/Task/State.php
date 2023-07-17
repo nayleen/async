@@ -11,6 +11,10 @@ use Amp\Parallel\Worker\Execution;
  */
 enum State
 {
+    case FINISHED;
+    case RUNNING;
+    case STARTING;
+
     public static function determine(?Execution $execution): self
     {
         return match (true) {
@@ -19,8 +23,4 @@ enum State
             default => self::RUNNING,
         };
     }
-
-    case FINISHED;
-    case RUNNING;
-    case STARTING;
 }
