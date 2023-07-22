@@ -9,9 +9,6 @@ use DomainException;
 use Nayleen\Async\Bus\Bus;
 use Nayleen\Async\Bus\Message;
 
-/**
- * @api
- */
 class MiddlewareBus implements Bus
 {
     /**

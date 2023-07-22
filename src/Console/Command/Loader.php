@@ -9,9 +9,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 
-/**
- * @api
- */
 class Loader implements CommandLoaderInterface
 {
     /**

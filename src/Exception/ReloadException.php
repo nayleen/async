@@ -6,9 +6,6 @@ namespace Nayleen\Async\Exception;
 
 use RuntimeException;
 
-/**
- * @api
- */
 class ReloadException extends RuntimeException
 {
 }

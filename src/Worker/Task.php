@@ -8,9 +8,6 @@ use Nayleen\Async\Kernel;
 use Nayleen\Async\Task as BaseTask;
 use Nayleen\Async\Worker;
 
-/**
- * @api
- */
 class Task extends BaseTask
 {
     /**

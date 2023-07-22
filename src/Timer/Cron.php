@@ -9,9 +9,6 @@ use Nayleen\Async\Clock;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Timer;
 
-/**
- * @api
- */
 abstract class Cron extends Timer
 {
     private Clock $clock;

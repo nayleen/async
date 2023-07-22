@@ -15,8 +15,6 @@ use Symfony\Component\Console\Command\Command;
 use Traversable;
 
 /**
- * @api
- *
  * @template-implements FinderInterface<Command>
  * @template-implements IteratorAggregate<class-string<Command>>
  */

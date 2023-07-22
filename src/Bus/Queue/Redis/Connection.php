@@ -6,9 +6,6 @@ namespace Nayleen\Async\Bus\Queue\Redis;
 
 use Amp\Redis\Redis;
 
-/**
- * @api
- */
 class Connection
 {
     public function __construct(private readonly Redis $redis)

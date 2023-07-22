@@ -23,9 +23,6 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Revolt\EventLoop;
 
-/**
- * @api
- */
 class Kernel
 {
     use ForbidCloning;

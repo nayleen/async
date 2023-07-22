@@ -12,9 +12,6 @@ use IteratorAggregate;
 use Nayleen\Async\Component\HasDependencies;
 use Traversable;
 
-/**
- * @api
- */
 class Components implements IteratorAggregate
 {
     use ForbidCloning;

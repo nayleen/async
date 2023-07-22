@@ -7,9 +7,6 @@ namespace Nayleen\Async;
 use DI\ContainerBuilder;
 use Nayleen\Async\Recommender\Performance;
 
-/**
- * @api
- */
 class Bootstrapper extends Component
 {
     private const NAME = 'bootstrap';

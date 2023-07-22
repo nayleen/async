@@ -7,9 +7,6 @@ namespace Nayleen\Async\Bus\Middleware;
 use Closure;
 use Nayleen\Async\Bus\Message;
 
-/**
- * @api
- */
 interface Middleware
 {
     /**

@@ -10,9 +10,6 @@ use Nayleen\Async\Bus\Queue\Queue;
 use Nayleen\Async\Timers;
 use Nayleen\Async\Worker;
 
-/**
- * @api
- */
 class Consumer extends Worker
 {
     public function __construct(

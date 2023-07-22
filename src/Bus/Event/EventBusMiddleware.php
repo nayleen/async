@@ -11,9 +11,6 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Psr\Log\NullLogger;
 
-/**
- * @api
- */
 class EventBusMiddleware implements Middleware
 {
     public function __construct(

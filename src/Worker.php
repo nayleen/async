@@ -6,9 +6,6 @@ namespace Nayleen\Async;
 
 use Amp\Cancellation;
 
-/**
- * @api
- */
 abstract class Worker
 {
     public function __construct(private readonly Timers $timers = new Timers())

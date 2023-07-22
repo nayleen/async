@@ -13,7 +13,6 @@ use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Clock\MonotonicClock;
 
 /**
- * @api
  * @phpstan-consistent-constructor
  */
 class Clock implements ClockInterface

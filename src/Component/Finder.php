@@ -15,8 +15,6 @@ use Nayleen\Finder\Finder as FinderInterface;
 use Traversable;
 
 /**
- * @api
- *
  * @template-implements FinderInterface<Component>
  * @template-implements IteratorAggregate<class-string<Component>>
  */

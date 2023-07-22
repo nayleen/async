@@ -9,9 +9,6 @@ use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
 use Amp\Sync\Channel;
 
-/**
- * @api
- */
 abstract class Application extends Runtime
 {
     use ForbidCloning;

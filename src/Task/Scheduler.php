@@ -17,9 +17,6 @@ use Amp\TimeoutCancellation;
 use Nayleen\Async\Kernel;
 use SplObjectStorage;
 
-/**
- * @api
- */
 class Scheduler
 {
     use ForbidCloning;

@@ -10,9 +10,6 @@ use DI;
 use Nayleen\Async\Component\Configuration\FileLoader;
 use Stringable;
 
-/**
- * @api
- */
 abstract class Component implements Stringable
 {
     use ForbidCloning;

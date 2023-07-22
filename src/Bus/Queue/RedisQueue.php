@@ -6,9 +6,6 @@ namespace Nayleen\Async\Bus\Queue;
 
 use Nayleen\Async\Bus\Queue\Redis\Connection;
 
-/**
- * @api
- */
 class RedisQueue implements Queue
 {
     public function __construct(

@@ -12,9 +12,6 @@ use Amp\Http\Server\RequestHandler;
 use Nayleen\Async\Timers;
 use Nayleen\Async\Worker;
 
-/**
- * @api
- */
 class Http extends Worker
 {
     public function __construct(

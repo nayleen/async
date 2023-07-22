@@ -13,9 +13,6 @@ use Nayleen\Async\Bus\Message;
 
 use function Amp\delay;
 
-/**
- * @api
- */
 class Consumer
 {
     private const DEFAULT_CONSUME_DELAY = 0.050; // ms

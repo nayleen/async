@@ -6,9 +6,6 @@ namespace Nayleen\Async\Timer;
 
 use Nayleen\Async\Timer;
 
-/**
- * @api
- */
 abstract class Interval extends Timer
 {
     public function __construct(private readonly float|int $interval)

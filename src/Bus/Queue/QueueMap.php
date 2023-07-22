@@ -7,9 +7,6 @@ namespace Nayleen\Async\Bus\Queue;
 use Nayleen\Async\Bus\Message;
 use OutOfBoundsException;
 
-/**
- * @api
- */
 class QueueMap
 {
     /**

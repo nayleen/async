@@ -8,9 +8,6 @@ use DI\ContainerBuilder;
 use DI\Definition\Source\DefinitionSource;
 use Nayleen\Async\Component;
 
-/**
- * @api
- */
 class DependencyProvider extends Component
 {
     /**

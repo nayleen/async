@@ -9,9 +9,6 @@ use Nayleen\Async\Bus\Message;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
-/**
- * @api
- */
 class LoggingMiddleware implements Middleware
 {
     public function __construct(
