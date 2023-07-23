@@ -15,13 +15,13 @@ class IgbinarySerializer implements Serializer
 
     private function isSupported(): bool
     {
-        return self::$isSupported = extension_loaded('igbinary');
+        return self::$isSupported ??= extension_loaded('igbinary');
     }
 
     public function serialize(mixed $data): string
     {
         assert(
-            isset(self::$isSupported) || self::isSupported(),
+            self::isSupported(),
             new SerializationException('ext-igbinary is not installed'),
         );
 
@@ -30,11 +30,9 @@ class IgbinarySerializer implements Serializer
         });
 
         try {
-            try {
-                $serialized = igbinary_serialize($data);
-            } catch (Throwable $throwable) {
-                throw new SerializationException('The given data could not be serialized', previous: $throwable);
-            }
+            $serialized = igbinary_serialize($data);
+        } catch (Throwable $throwable) {
+            throw new SerializationException('The given data could not be serialized', previous: $throwable);
         } finally {
             set_error_handler($oldErrorHandler);
         }
@@ -47,24 +45,18 @@ class IgbinarySerializer implements Serializer
     public function unserialize(string $data): mixed
     {
         assert(
-            isset(self::$isSupported) || self::isSupported(),
+            self::isSupported(),
             new SerializationException('ext-igbinary is not installed'),
         );
 
-        $oldErrorHandler = set_error_handler(static function (int $code, string $message): never {
-            throw new RuntimeException($message, $code);
-        });
-
         try {
             return igbinary_unserialize($data);
-        } catch (RuntimeException $previous) {
+        } catch (Throwable $previous) {
             throw new SerializationException(
                 sprintf('Exception thrown when unserializing data: %s', $previous->getMessage()),
                 $previous->getCode(),
                 $previous,
             );
-        } finally {
-            set_error_handler($oldErrorHandler);
         }
     }
 }

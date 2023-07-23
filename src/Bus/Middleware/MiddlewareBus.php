@@ -54,11 +54,7 @@ class MiddlewareBus implements Bus
 
     public function handle(Message $message): void
     {
-        if (!isset($this->stack)) {
-            $this->stack = $this->createStack();
-        }
-
-        ($this->stack)($message);
+        ($this->stack ??= $this->createStack())($message);
     }
 
     public function prepend(Middleware $middleware): void
