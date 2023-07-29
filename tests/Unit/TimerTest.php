@@ -97,6 +97,6 @@ final class TimerTest extends AsyncTestCase
         $this->loop->expects(self::once())->method('disable');
         $this->loop->expects(self::once())->method('delay')->with(60, self::anything());
 
-        $this->createTimer($this->createKernel())->suspendFor(60);
+        $this->createTimer($this->createKernel())->suspend(60);
     }
 }

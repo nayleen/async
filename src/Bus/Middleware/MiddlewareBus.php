@@ -5,10 +5,13 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Middleware;
 
 use Closure;
-use DomainException;
+use LogicException;
 use Nayleen\Async\Bus\Bus;
 use Nayleen\Async\Bus\Message;
 
+/**
+ * @phpstan-consistent-constructor
+ */
 class MiddlewareBus implements Bus
 {
     /**
@@ -45,9 +48,10 @@ class MiddlewareBus implements Bus
 
     public function append(Middleware $middleware): void
     {
-        if (isset($this->stack)) {
-            throw new DomainException();
-        }
+        assert(
+            !isset($this->stack),
+            new LogicException('Stack has been finalized'),
+        );
 
         $this->middlewares[] = $middleware;
     }
@@ -59,9 +63,10 @@ class MiddlewareBus implements Bus
 
     public function prepend(Middleware $middleware): void
     {
-        if (isset($this->stack)) {
-            throw new DomainException();
-        }
+        assert(
+            !isset($this->stack),
+            new LogicException('Stack has been finalized'),
+        );
 
         array_unshift($this->middlewares, $middleware);
     }

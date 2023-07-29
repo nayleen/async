@@ -5,14 +5,10 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Timer;
 
 use Cron\CronExpression;
-use Nayleen\Async\Clock;
-use Nayleen\Async\Kernel;
 use Nayleen\Async\Timer;
 
 abstract class Cron extends Timer
 {
-    private Clock $clock;
-
     private readonly CronExpression $cronExpression;
 
     public function __construct(string $expression)
@@ -20,20 +16,13 @@ abstract class Cron extends Timer
         $this->cronExpression = CronExpression::factory($expression);
     }
 
-    protected function interval(): int
+    protected function interval(): float
     {
         $next = $this->cronExpression->getNextRunDate(
-            $now = $this->clock->now(),
-            timeZone: $this->clock->timezone()->getName(),
+            $now = $this->kernel->clock()->now(),
+            timeZone: $this->kernel->clock()->timezone()->getName(),
         );
 
-        return (int) $next->format('U') - (int) $now->format('U');
-    }
-
-    public function start(Kernel $kernel): void
-    {
-        parent::start($kernel);
-
-        $this->clock = $kernel->clock();
+        return (float) $next->format('U.v') - (float) $now->format('U.v');
     }
 }

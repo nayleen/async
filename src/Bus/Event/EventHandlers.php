@@ -8,10 +8,10 @@ use Closure;
 use Nayleen\Async\Bus\Handler\Validator;
 use Nayleen\Async\Bus\Message;
 
-class Handlers
+class EventHandlers
 {
     /**
-     * @var array<string, array<array-key, Closure(Message): void>>
+     * @var array<string, array<int, Closure(Message): void>>
      */
     private array $handlers = [];
 

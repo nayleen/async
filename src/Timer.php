@@ -4,8 +4,6 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Revolt\EventLoop;
-
 /**
  * @internal
  */
@@ -13,7 +11,7 @@ abstract class Timer
 {
     private string $callbackId;
 
-    private EventLoop\Driver $loop;
+    protected Kernel $kernel;
 
     public function __destruct()
     {
@@ -26,36 +24,38 @@ abstract class Timer
 
     public function disable(): void
     {
-        $this->loop->disable($this->callbackId);
+        $this->kernel->loop()->disable($this->callbackId);
     }
 
     public function enable(): void
     {
-        $this->loop->enable($this->callbackId);
+        $this->kernel->loop()->enable($this->callbackId);
     }
 
     public function run(): void
     {
         $this->execute();
-        $this->suspendFor($this->interval());
+        $this->suspend($this->interval());
     }
 
     public function start(Kernel $kernel): void
     {
-        $this->loop = $kernel->loop();
-        $this->callbackId = $this->loop->unreference($this->loop->defer($this->run(...)));
+        $this->kernel = $kernel;
+        $this->callbackId = $this->kernel->loop()->unreference(
+            $this->kernel->loop()->defer($this->run(...)),
+        );
     }
 
     public function stop(): void
     {
-        $this->loop->cancel($this->callbackId);
+        $this->kernel->loop()->cancel($this->callbackId);
     }
 
-    public function suspendFor(float|int $duration): void
+    public function suspend(float|int $duration): void
     {
         $this->disable();
-        $this->loop->unreference(
-            $this->loop->delay((float) $duration, $this->enable(...)),
+        $this->kernel->loop()->unreference(
+            $this->kernel->loop()->delay((float) $duration, $this->enable(...)),
         );
     }
 }

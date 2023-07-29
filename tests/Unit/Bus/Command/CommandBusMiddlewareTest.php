@@ -31,7 +31,7 @@ final class CommandBusMiddlewareTest extends AsyncTestCase
         $logger = new Logger('test');
         $logger->pushHandler($handler = new TestHandler());
 
-        $handlers = new Handlers(
+        $handlers = new CommandHandlers(
             [
                 'message' => static function (Message $message) use ($logger, $level): void {
                     $logger->log($level, 'Processing...');
@@ -64,7 +64,7 @@ final class CommandBusMiddlewareTest extends AsyncTestCase
         $message = $this->createMock(Message::class);
         $message->method('name')->willReturn('message');
 
-        $middleware = new CommandBusMiddleware(new Handlers());
+        $middleware = new CommandBusMiddleware(new CommandHandlers());
         $middleware->handle($message, function (): void {
         });
     }

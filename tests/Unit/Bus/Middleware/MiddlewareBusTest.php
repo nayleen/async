@@ -5,8 +5,7 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Middleware;
 
 use Amp\PHPUnit\AsyncTestCase;
-use Closure;
-use DomainException;
+use LogicException;
 use Nayleen\Async\Bus\Message;
 
 /**
@@ -16,19 +15,7 @@ final class MiddlewareBusTest extends AsyncTestCase
 {
     private function createMiddleware(int $expectedIndex, Results $results = new Results()): Middleware
     {
-        return new class($results, $expectedIndex) implements Middleware {
-            public function __construct(
-                private readonly Results $results,
-                private readonly int $expectedIndex,
-            ) {
-            }
-
-            public function handle(Message $message, Closure $next): void
-            {
-                $this->results->list[] = $this->expectedIndex;
-                $next($message);
-            }
-        };
+        return new TestMiddleware($results, $expectedIndex);
     }
 
     /**
@@ -36,7 +23,7 @@ final class MiddlewareBusTest extends AsyncTestCase
      */
     public function cannot_append_after_stack_has_been_created(): void
     {
-        $this->expectException(DomainException::class);
+        $this->expectException(LogicException::class);
 
         $bus = new MiddlewareBus();
         $bus->handle($this->createMock(Message::class));
@@ -49,7 +36,7 @@ final class MiddlewareBusTest extends AsyncTestCase
      */
     public function cannot_prepend_after_stack_has_been_created(): void
     {
-        $this->expectException(DomainException::class);
+        $this->expectException(LogicException::class);
 
         $bus = new MiddlewareBus();
         $bus->handle($this->createMock(Message::class));
@@ -89,15 +76,4 @@ final class MiddlewareBusTest extends AsyncTestCase
 
         self::assertSame([1, 2], $results->list);
     }
-}
-
-/**
- * @internal
- */
-final class Results
-{
-    /**
-     * @var int[]
-     */
-    public array $list = [];
 }

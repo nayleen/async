@@ -9,7 +9,7 @@ use Nayleen\Async\Bus\Handler\Validator;
 use Nayleen\Async\Bus\Message;
 use OutOfBoundsException;
 
-class Handlers
+class CommandHandlers
 {
     /**
      * @var array<string, Closure(Message): void>

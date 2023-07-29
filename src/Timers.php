@@ -49,10 +49,10 @@ class Timers
         }
     }
 
-    public function suspendFor(float|int $duration): void
+    public function suspend(float|int $duration): void
     {
         foreach ($this->timers as $timer) {
-            $timer->suspendFor($duration);
+            $timer->suspend($duration);
         }
     }
 }

@@ -30,9 +30,12 @@ final class EventBusMiddlewareTest extends AsyncTestCase
 
         $logger = new Logger('test');
         $logger->pushHandler($logHandler = new TestHandler());
-        $handler = static fn (Message $message) => $logger->log($levelName, 'Processing...');
+        $handler = static function (Message $message) use ($levelName, $logger): void {
+            static $i = 0;
+            $logger->log($levelName, 'Process #' . ++$i . '...');
+        };
 
-        $handlers = new Handlers(
+        $handlers = new EventHandlers(
             [
                 'message' => [$handler, $handler, $handler],
             ],
@@ -44,9 +47,9 @@ final class EventBusMiddlewareTest extends AsyncTestCase
         self::assertTrue(
             $logHandler->hasRecord(['message' => 'Started notifying event handlers', 'event' => $message], $level),
         );
-        self::assertTrue($logHandler->hasRecord('Processing...', $level));
-        self::assertTrue($logHandler->hasRecord('Processing...', $level));
-        self::assertTrue($logHandler->hasRecord('Processing...', $level));
+        self::assertTrue($logHandler->hasRecord('Process #1...', $level));
+        self::assertTrue($logHandler->hasRecord('Process #2...', $level));
+        self::assertTrue($logHandler->hasRecord('Process #3...', $level));
         self::assertTrue(
             $logHandler->hasRecord(['message' => 'Finished notifying event handlers', 'event' => $message], $level),
         );
@@ -61,7 +64,7 @@ final class EventBusMiddlewareTest extends AsyncTestCase
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::once())->method('log');
 
-        $middleware = new EventBusMiddleware(new Handlers(), $logger);
+        $middleware = new EventBusMiddleware(new EventHandlers(), $logger);
         $middleware->handle(
             $this->createMock(Message::class),
             fn () => $logger->log(LogLevel::DEBUG, 'Executing next handler...'),

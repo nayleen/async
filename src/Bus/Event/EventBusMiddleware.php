@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Event;
 
 use Closure;
+use Monolog\Level;
 use Nayleen\Async\Bus\Message;
 use Nayleen\Async\Bus\Middleware\Middleware;
 use Psr\Log\LoggerInterface;
@@ -14,9 +15,9 @@ use Psr\Log\NullLogger;
 class EventBusMiddleware implements Middleware
 {
     public function __construct(
-        private readonly Handlers $handlers,
+        private readonly EventHandlers $handlers,
         private readonly LoggerInterface $logger = new NullLogger(),
-        private readonly string $level = LogLevel::DEBUG,
+        private readonly int|string|Level $level = LogLevel::DEBUG,
     ) {
     }
 

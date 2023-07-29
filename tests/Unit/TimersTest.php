@@ -75,9 +75,9 @@ final class TimersTest extends AsyncTestCase
      */
     public function suspend_for_proxies_to_timers(): void
     {
-        $this->cron->expects(self::once())->method('suspendFor')->with(60);
-        $this->interval->expects(self::once())->method('suspendFor')->with(60);
+        $this->cron->expects(self::once())->method('suspend')->with(60);
+        $this->interval->expects(self::once())->method('suspend')->with(60);
 
-        $this->createTimers()->suspendFor(60);
+        $this->createTimers()->suspend(60);
     }
 }

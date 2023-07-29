@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Middleware;
 
 use Closure;
+use Monolog\Level;
 use Nayleen\Async\Bus\Message;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -13,14 +14,17 @@ class LoggingMiddleware implements Middleware
 {
     public function __construct(
         private readonly LoggerInterface $logger,
-        private readonly string $level = LogLevel::DEBUG,
+        private readonly int|string|Level $level = LogLevel::DEBUG,
     ) {
     }
 
     public function handle(Message $message, Closure $next): void
     {
-        $this->logger->log($this->level, 'Started handling message', ['processed_message' => $message]);
-        $next($message);
-        $this->logger->log($this->level, 'Finished handling message', ['processed_message' => $message]);
+        try {
+            $this->logger->log($this->level, 'Started handling message', ['message' => $message]);
+            $next($message);
+        } finally {
+            $this->logger->log($this->level, 'Finished handling message', ['message' => $message]);
+        }
     }
 }
