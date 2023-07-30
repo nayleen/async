@@ -18,7 +18,7 @@ use Amp\Sync\Channel;
 abstract class Runtime
 {
     /**
-     * @internal
+     * @psalm-internal Nayleen\Async
      */
     public Kernel $kernel;
 
