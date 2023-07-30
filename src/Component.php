@@ -34,7 +34,10 @@ abstract class Component implements Stringable
     /**
      * @return non-empty-string
      */
-    abstract public function name(): string;
+    public function name(): string
+    {
+        return static::class;
+    }
 
     abstract public function register(DI\ContainerBuilder $containerBuilder): void;
 

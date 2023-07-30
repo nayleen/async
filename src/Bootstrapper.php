@@ -9,8 +9,6 @@ use Nayleen\Async\Recommender\Performance;
 
 class Bootstrapper extends Component
 {
-    private const NAME = 'bootstrap';
-
     public function boot(Kernel $kernel): void
     {
         Performance::recommend($kernel);
@@ -19,11 +17,6 @@ class Bootstrapper extends Component
         $loop->unreference($loop->onSignal(SIGUSR1, static fn () => $kernel->reload()));
         $loop->unreference($loop->onSignal(SIGINT, static fn () => $kernel->stop(SIGINT)));
         $loop->unreference($loop->onSignal(SIGTERM, static fn () => $kernel->stop(SIGTERM)));
-    }
-
-    public function name(): string
-    {
-        return self::NAME;
     }
 
     public function register(ContainerBuilder $containerBuilder): void
