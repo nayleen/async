@@ -2,10 +2,13 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async;
+namespace Nayleen\Async\Test;
+
+use Nayleen\Async\Application;
+use Nayleen\Async\Kernel;
 
 /**
- * @internal
+ * @psalm-internal Nayleen\Async
  */
 final class TestApplication extends Application
 {

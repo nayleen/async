@@ -8,7 +8,7 @@ use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Clock;
 use Nayleen\Async\Exception\StopException;
 use Nayleen\Async\Kernel;
-use Nayleen\Async\TestKernel;
+use Nayleen\Async\Test\TestKernel;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Revolt\EventLoop;

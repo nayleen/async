@@ -7,7 +7,7 @@ namespace Nayleen\Async\Worker\Queue;
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Bus\Queue\Consumer as QueueConsumer;
 use Nayleen\Async\Bus\Queue\Queue;
-use Nayleen\Async\TestKernel;
+use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal

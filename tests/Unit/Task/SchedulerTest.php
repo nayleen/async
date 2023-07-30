@@ -6,7 +6,7 @@ namespace Nayleen\Async\Task;
 
 use Amp\Parallel\Worker\WorkerPool;
 use Amp\PHPUnit\AsyncTestCase;
-use Nayleen\Async\TestKernel;
+use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal

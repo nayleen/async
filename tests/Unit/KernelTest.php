@@ -6,6 +6,7 @@ namespace Nayleen\Async;
 
 use Amp\Future;
 use Amp\PHPUnit\AsyncTestCase;
+use Nayleen\Async\Test\TestKernel;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 

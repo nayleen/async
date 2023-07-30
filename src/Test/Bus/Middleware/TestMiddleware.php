@@ -2,13 +2,14 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Bus\Middleware;
+namespace Nayleen\Async\Test\Bus\Middleware;
 
 use Closure;
 use Nayleen\Async\Bus\Message;
+use Nayleen\Async\Bus\Middleware\Middleware;
 
 /**
- * @internal
+ * @psalm-internal Nayleen\Async
  */
 final class TestMiddleware implements Middleware
 {

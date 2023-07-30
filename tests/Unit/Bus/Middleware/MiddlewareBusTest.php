@@ -7,6 +7,8 @@ namespace Nayleen\Async\Bus\Middleware;
 use Amp\PHPUnit\AsyncTestCase;
 use LogicException;
 use Nayleen\Async\Bus\Message;
+use Nayleen\Async\Test\Bus\Middleware\Results;
+use Nayleen\Async\Test\Bus\Middleware\TestMiddleware;
 
 /**
  * @internal

@@ -2,10 +2,10 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Bus\Middleware;
+namespace Nayleen\Async\Test\Bus\Middleware;
 
 /**
- * @internal
+ * @psalm-internal Nayleen\Async
  */
 final class Results
 {

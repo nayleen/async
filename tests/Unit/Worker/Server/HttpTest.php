@@ -8,7 +8,7 @@ use Amp\Http\Server\ErrorHandler;
 use Amp\Http\Server\HttpServer;
 use Amp\Http\Server\RequestHandler;
 use Amp\PHPUnit\AsyncTestCase;
-use Nayleen\Async\TestKernel;
+use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal

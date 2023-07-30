@@ -2,12 +2,13 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async;
+namespace Nayleen\Async\Test;
 
 use Amp\Cancellation;
+use Nayleen\Async\Worker;
 
 /**
- * @internal
+ * @psalm-internal Nayleen\Async
  */
 final class NoopWorker extends Worker
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async;
+namespace Nayleen\Async\Test;
 
 use Amp\ByteStream\WritableBuffer;
 use Amp\ByteStream\WritableStream;
@@ -10,10 +10,12 @@ use Amp\Cancellation;
 use Amp\NullCancellation;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\Finder;
+use Nayleen\Async\Components;
+use Nayleen\Async\Kernel;
 use Revolt\EventLoop;
 
 /**
- * @internal
+ * @psalm-internal Nayleen\Async
  */
 final class TestKernel extends Kernel
 {

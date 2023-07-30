@@ -7,6 +7,7 @@ namespace Nayleen\Async;
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Exception\ReloadException;
 use Nayleen\Async\Exception\StopException;
+use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal

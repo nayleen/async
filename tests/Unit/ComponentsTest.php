@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Nayleen\Async;
 
 use Amp\PHPUnit\AsyncTestCase;
+use Nayleen\Async\Test\TestComponent;
 
 /**
  * @internal

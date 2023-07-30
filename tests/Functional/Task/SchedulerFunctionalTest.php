@@ -2,15 +2,14 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Functional\Task;
+namespace Nayleen\Async\Task;
 
 use Amp\ByteStream\WritableBuffer;
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Task;
-use Nayleen\Async\Task\Scheduler;
-use Nayleen\Async\TestKernel;
-use Nayleen\Async\TestTask;
+use Nayleen\Async\Test\TestKernel;
+use Nayleen\Async\Test\TestTask;
 
 use function Amp\delay;
 

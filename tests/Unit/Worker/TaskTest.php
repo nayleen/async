@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Worker;
 
 use Amp\PHPUnit\AsyncTestCase;
-use Nayleen\Async\TestKernel;
+use Nayleen\Async\Test\TestKernel;
 use Nayleen\Async\Worker;
 
 /**

@@ -8,6 +8,7 @@ use Amp\PHPUnit\AsyncTestCase;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use Nayleen\Async\Component\DependencyProvider;
+use Nayleen\Async\Test\TestComponent;
 
 /**
  * @internal

@@ -7,9 +7,6 @@ namespace Nayleen\Async;
 use Amp\Parallel\Worker\Task;
 use Nayleen\Async\Task\Scheduler;
 
-/**
- * @internal
- */
 class Tasks
 {
     /**
