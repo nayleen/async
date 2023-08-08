@@ -106,9 +106,9 @@ class Scheduler
 
         if ($monitor) {
             $watcher = $this->kernel->loop()->repeat($this->monitorInterval, fn () => $this->monitor($task));
-            $future->finally(fn () => $this->kernel->loop()->cancel($watcher));
+            $future->ignore()->finally(fn () => $this->kernel->loop()->cancel($watcher));
         }
 
-        return $future->ignore();
+        return $future;
     }
 }

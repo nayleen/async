@@ -8,8 +8,8 @@ use Amp\PHPUnit\AsyncTestCase;
 use Generator;
 use Nayleen\Async\Bootstrapper;
 use Nayleen\Async\Component;
-use Nayleen\Finder\Engine\Engine;
-use Nayleen\Finder\Expectation\Expectation;
+use Nayleen\Finder\Engine;
+use Nayleen\Finder\Expectation;
 
 /**
  * @internal
@@ -32,7 +32,7 @@ final class FinderTest extends AsyncTestCase
     public function provideFinderCases(): Generator
     {
         $engineMock = new class() implements Engine {
-            public function find(Expectation $expectation): Generator
+            public function find(Expectation $expectation): iterable
             {
                 yield Bootstrapper::class;
             }

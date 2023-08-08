@@ -6,13 +6,12 @@ namespace Nayleen\Async\Recommender;
 
 use Nayleen\Async\Kernel;
 use Psr\Log\LogLevel;
-
-use function Safe\ini_get;
+use Safe;
 
 /**
  * @internal
  */
-class Performance
+final class Performance
 {
     private const LOG_LEVEL = LogLevel::NOTICE;
 
@@ -35,6 +34,11 @@ class Performance
                 );
             }
 
+            if (self::containerCompilationDisabled()) {
+                $log('Running kernel in production mode without container compilation is not recommended');
+                $log("You'll experience worse performance, especially in terms of Task scheduling");
+            }
+
             if (self::xdebugEnabled()) {
                 $log('The "xdebug" extension is enabled, which has a major impact on performance');
             }
@@ -43,7 +47,18 @@ class Performance
 
     private static function assertionsEnabled(): bool
     {
-        return ini_get('zend.assertions') === '1';
+        return Safe\ini_get('zend.assertions') === '1';
+    }
+
+    private static function containerCompilationDisabled(): bool
+    {
+        $envValue = getenv('ASYNC_COMPILE_CONTAINER');
+
+        if ($envValue === false) {
+            return false;
+        }
+
+        return !filter_var($envValue, FILTER_VALIDATE_BOOLEAN);
     }
 
     private static function xdebugEnabled(): bool

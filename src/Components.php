@@ -65,8 +65,6 @@ class Components implements IteratorAggregate
 
     public function boot(Kernel $kernel): void
     {
-        assert($kernel->writeDebug('Booting Kernel', ['loop_driver' => $kernel->loop()::class]));
-
         foreach ($this->components as $component) {
             $component->boot($kernel);
         }
@@ -101,8 +99,6 @@ class Components implements IteratorAggregate
 
     public function reload(Kernel $kernel): void
     {
-        assert($kernel->writeDebug('Reloading Kernel'));
-
         foreach ($this->components as $component) {
             $component->reload($kernel);
         }
@@ -110,8 +106,6 @@ class Components implements IteratorAggregate
 
     public function shutdown(Kernel $kernel): void
     {
-        assert($kernel->writeDebug('Shutting down Kernel'));
-
         foreach (array_reverse($this->components) as $component) {
             $component->shutdown($kernel);
         }

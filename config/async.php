@@ -19,6 +19,9 @@ return [
     // app config
     'async.app_name' => DI\env('ASYNC_APP_NAME', 'Kernel'),
     'async.app_version' => DI\env('ASYNC_APP_VERSION', 'UNKNOWN'),
+    'async.compile_container' => DI\factory(
+        static fn (string $env): bool => true
+    )->parameter('env', DI\env('ASYNC_COMPILE_CONTAINER', '1')),
     'async.debug' => DI\factory(
         static fn (string $env): bool => (bool) (getenv('ASYNC_DEBUG') ?: $env !== 'prod'),
     )->parameter('env', DI\get('async.env')),
@@ -26,7 +29,8 @@ return [
 
     // directories
     'async.dir.base' => DI\env('ASYNC_DIR'),
-    'async.dir.cache' => DI\env('ASYNC_TMP_DIR', sys_get_temp_dir()),
+    'async.dir.cache' => DI\env('ASYNC_CACHE_DIR', sys_get_temp_dir()),
+    'async.dir.tmp' => DI\env('ASYNC_TMP_DIR', sys_get_temp_dir()),
 
     // app services
     'async.exception_handler' => static function (ErrorHandler $errorHandler): callable {

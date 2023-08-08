@@ -13,7 +13,7 @@ use Amp\ForbidSerialization;
 use Amp\Future;
 use Amp\NullCancellation;
 use Amp\Sync\Channel;
-use DI\Container;
+use DI;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\Finder;
 use Nayleen\Async\Exception\ReloadException;
@@ -28,7 +28,7 @@ class Kernel
     use ForbidCloning;
     use ForbidSerialization;
 
-    private Container $container;
+    private DI\Container $container;
 
     private readonly DeferredCancellation $deferredCancellation;
 
@@ -72,13 +72,15 @@ class Kernel
         return $this->container()->get(Clock::class);
     }
 
-    public function container(): Container
+    public function container(): DI\Container
     {
         if (isset($this->container)) {
             return $this->container;
         }
 
         $this->container = $this->components->compile();
+
+        assert($this->writeDebug('Booting Kernel', ['loop_driver' => $this->loop()::class]));
         $this->components->boot($this);
 
         return $this->container;
@@ -120,6 +122,7 @@ class Kernel
             }
         } catch (CancelledException) {
         } catch (ReloadException) {
+            assert($this->writeDebug('Reloading Kernel'));
             $this->components->reload($this);
             goto reload;
         } catch (StopException $stop) {
@@ -132,6 +135,7 @@ class Kernel
             $this->deferredCancellation->cancel($stop);
         }
 
+        assert($this->writeDebug('Shutting down Kernel'));
         $this->components->shutdown($this);
 
         return $return ?? null;

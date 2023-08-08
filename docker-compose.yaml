@@ -7,7 +7,7 @@ services:
         condition: service_started
     environment:
       - PHP_EXTENSION_XDEBUG=1
-      - XDEBUG_MODE=off
+      - XDEBUG_MODE=debug
     init: true
     networks:
       - async

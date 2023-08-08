@@ -33,7 +33,6 @@ final class ComponentsFunctionalTest extends AsyncTestCase
         $kernel = new Kernel($components);
         $components->shutdown($kernel);
 
-        self::assertTrue($handler->hasDebugThatMatches('/Shutting down Kernel/'));
         self::assertTrue($handler->hasDebugThatMatches('/Shutting down Dependency/'));
     }
 }
