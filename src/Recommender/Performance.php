@@ -34,11 +34,6 @@ final class Performance
                 );
             }
 
-            if (self::containerCompilationDisabled()) {
-                $log('Running kernel in production mode without container compilation is not recommended');
-                $log("You'll experience worse performance, especially in terms of Task scheduling");
-            }
-
             if (self::xdebugEnabled()) {
                 $log('The "xdebug" extension is enabled, which has a major impact on performance');
             }
@@ -50,17 +45,6 @@ final class Performance
         return Safe\ini_get('zend.assertions') === '1';
     }
 
-    private static function containerCompilationDisabled(): bool
-    {
-        $envValue = getenv('ASYNC_COMPILE_CONTAINER');
-
-        if ($envValue === false) {
-            return false;
-        }
-
-        return !filter_var($envValue, FILTER_VALIDATE_BOOLEAN);
-    }
-
     private static function xdebugEnabled(): bool
     {
         // check for runtime environment variable first
@@ -68,6 +52,6 @@ final class Performance
             return !in_array($envMode, self::XDEBUG_DISABLED_MODES, true);
         }
 
-        return !in_array(ini_get('xdebug.mode'), self::XDEBUG_DISABLED_MODES, true);
+        return !in_array(Safe\ini_get('xdebug.mode'), self::XDEBUG_DISABLED_MODES, true);
     }
 }

@@ -13,57 +13,26 @@ use Safe;
  */
 final class PerformanceTest extends AsyncTestCase
 {
-    private string|false $originalCompileContainerEnvValue;
     private string|false $originalXdebugEnvValue;
 
     protected function tearDown(): void
     {
         parent::tearDown();
 
-        if (isset($this->originalCompileContainerEnvValue)) {
-            Safe\putenv(
-                'ASYNC_COMPILE_CONTAINER' .
-                ($this->originalCompileContainerEnvValue === false
-                    ? ''
-                    : '=' . $this->originalCompileContainerEnvValue),
-            );
-        }
-
         if (isset($this->originalXdebugEnvValue)) {
             Safe\putenv(
-                'XDEBUG_MODE' .
-                ($this->originalXdebugEnvValue === false
+                'XDEBUG_MODE'
+                . ($this->originalXdebugEnvValue === false
                     ? ''
                     : '=' . $this->originalXdebugEnvValue),
             );
         }
     }
 
-    private function setCompileContainerToggle(bool $enabled): void
-    {
-        $this->originalCompileContainerEnvValue = getenv('ASYNC_COMPILE_CONTAINER');
-        Safe\putenv('ASYNC_COMPILE_CONTAINER=' . (int) $enabled);
-    }
-
     private function setXdebugMode(string $xdebugMode): void
     {
         $this->originalXdebugEnvValue = getenv('XDEBUG_MODE');
         Safe\putenv('XDEBUG_MODE=' . $xdebugMode);
-    }
-
-    /**
-     * @test
-     */
-    public function logs_container_compilation_being_disabled(): void
-    {
-        $this->setCompileContainerToggle(false);
-        $this->setXdebugMode('off');
-
-        $kernel = $this->createMock(Kernel::class);
-        $kernel->expects(self::once())->method('environment')->willReturn('prod');
-        $kernel->expects(self::exactly(5))->method('write');
-
-        Performance::recommend($kernel);
     }
 
     /**

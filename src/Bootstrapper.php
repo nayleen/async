@@ -9,21 +9,6 @@ use Nayleen\Async\Recommender\Performance;
 
 class Bootstrapper extends Component
 {
-    private function enableCompilation(ContainerBuilder $containerBuilder): void
-    {
-        $container = (clone $containerBuilder)->build();
-
-        $compile = (bool) $container->get('async.compile_container');
-        $debug = (bool) $container->get('async.debug');
-
-        if ($compile && !$debug) {
-            $cacheDir = $container->get('async.dir.cache');
-            assert(is_dir($cacheDir));
-
-            $containerBuilder->enableCompilation($cacheDir);
-        }
-    }
-
     public function boot(Kernel $kernel): void
     {
         Performance::recommend($kernel);
@@ -40,8 +25,6 @@ class Bootstrapper extends Component
         assert(file_exists($configPath) && is_dir($configPath));
 
         $this->load($containerBuilder, $configPath . '/*.php');
-
-        $this->enableCompilation($containerBuilder);
     }
 
     public function reload(Kernel $kernel): void
