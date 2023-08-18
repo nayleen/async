@@ -15,9 +15,9 @@ use Nayleen\Async\Kernel;
  */
 final class TestComponent extends Component implements HasDependencies
 {
-    public static function dependencies(): array
+    public static function dependencies(): iterable
     {
-        return [Bootstrapper::class];
+        yield Bootstrapper::class;
     }
 
     public function name(): string

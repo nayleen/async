@@ -9,7 +9,7 @@ use Nayleen\Async\Component;
 interface HasDependencies
 {
     /**
-     * @return class-string<Component>[]
+     * @return iterable<class-string<Component>>
      */
-    public static function dependencies(): array;
+    public static function dependencies(): iterable;
 }
