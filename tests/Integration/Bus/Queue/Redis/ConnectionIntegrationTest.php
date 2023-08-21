@@ -5,9 +5,8 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Bus\Queue\Redis;
 
 use Amp\PHPUnit\AsyncTestCase;
-use Amp\Redis\Redis;
-use Amp\Redis\RedisConfig;
-use Amp\Redis\RemoteExecutor;
+
+use function Amp\Redis\createRedisClient;
 
 /**
  * @internal
@@ -22,9 +21,7 @@ final class ConnectionIntegrationTest extends AsyncTestCase
         $list = 'test';
         $expectedMessage = 'message';
 
-        $redis = new Redis(new RemoteExecutor(RedisConfig::fromUri('redis://redis')));
-
-        $connection = new Connection($redis);
+        $connection = new Connection(createRedisClient('redis://redis'));
         $connection->pushListTail($list, $expectedMessage);
 
         $message = $connection->popListHead($list);

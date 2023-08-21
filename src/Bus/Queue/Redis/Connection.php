@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Bus\Queue\Redis;
 
-use Amp\Redis\Redis;
+use Amp\Redis\RedisClient;
 
 class Connection
 {
-    public function __construct(private readonly Redis $redis)
+    public function __construct(private readonly RedisClient $redis)
     {
     }
 

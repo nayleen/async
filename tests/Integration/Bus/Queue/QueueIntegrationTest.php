@@ -6,14 +6,13 @@ namespace Nayleen\Async\Bus\Queue;
 
 use Amp\DeferredCancellation;
 use Amp\PHPUnit\AsyncTestCase;
-use Amp\Redis\Redis;
-use Amp\Redis\RedisConfig;
-use Amp\Redis\RemoteExecutor;
 use Amp\Serialization\Serializer;
 use Generator;
 use Nayleen\Async\Bus\Bus;
 use Nayleen\Async\Bus\Message;
 use Nayleen\Async\Bus\Queue\Redis\Connection;
+
+use function Amp\Redis\createRedisClient;
 
 /**
  * @internal
@@ -83,7 +82,7 @@ final class QueueIntegrationTest extends AsyncTestCase
         yield 'in_memory' => [new InMemoryQueue('test-queue')];
         yield 'redis' => [
             new RedisQueue(
-                new Connection(new Redis(new RemoteExecutor(RedisConfig::fromUri('redis://redis')))),
+                new Connection(createRedisClient('redis://redis')),
                 'test-queue',
             ),
         ];

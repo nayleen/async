@@ -7,9 +7,8 @@ namespace Nayleen\Async;
 use Amp\Cache\AtomicCache;
 use Amp\Cache\Cache;
 use Amp\Cache\LocalCache;
-use Amp\Redis\QueryExecutor;
-use Amp\Redis\Redis;
 use Amp\Redis\RedisCache;
+use Amp\Redis\RedisClient;
 use Amp\Redis\Sync\RedisMutex;
 use Amp\Redis\Sync\RedisMutexOptions;
 use Amp\Serialization\Serializer;
@@ -35,7 +34,7 @@ return [
         }
 
         return new RedisCache(
-            $container->get(Redis::class),
+            $container->get(RedisClient::class),
             $container->get(Serializer::class),
         );
     })->parameter('redisEnabled', DI\get('async.cache.redis')),
@@ -49,7 +48,7 @@ return [
         }
 
         return new RedisMutex(
-            $container->get(QueryExecutor::class),
+            $container->get(RedisClient::class),
             $container->get(RedisMutexOptions::class),
             $container->get(LoggerInterface::class),
         );
