@@ -12,6 +12,7 @@ use Amp\Sync\Channel;
 use Closure;
 use DI;
 use Monolog\ErrorHandler;
+use Nayleen\Async\Task\Scheduler;
 use Revolt\EventLoop;
 use Throwable;
 
@@ -71,6 +72,14 @@ return [
     })
         ->parameter('errorHandler', DI\get('async.exception_handler'))
         ->parameter('debug', DI\get('async.debug')),
+
+    Scheduler::class => DI\factory(static function (DI\Container $container): Scheduler {
+        $builder = new Scheduler\Builder($container->get(Kernel::class));
+        // $builder = $builder->withErrorHandler($container->get('async.exception_handler'));
+        $builder = $builder->withMaxAttempts(3);
+
+        return $builder->build();
+    }),
 
     ServerSocketFactory::class => static fn (): ServerSocketFactory => new ResourceServerSocketFactory(),
 ];

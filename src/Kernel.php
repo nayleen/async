@@ -36,8 +36,6 @@ class Kernel
 
     public readonly Components $components;
 
-    public readonly Scheduler $scheduler;
-
     /**
      * @param iterable<class-string<Component>|Component> $components
      */
@@ -51,7 +49,6 @@ class Kernel
             $this->deferredCancellation->getCancellation(),
             $cancellation,
         );
-        $this->scheduler = new Scheduler($this);
 
         $this->components = new Components(
             [
@@ -60,7 +57,6 @@ class Kernel
                     self::class => $this,
                     Cancellation::class => $this->cancellation,
                     Channel::class => $channel,
-                    Scheduler::class => $this->scheduler,
                 ]),
                 ...$components,
             ],
@@ -139,6 +135,11 @@ class Kernel
         $this->components->shutdown($this);
 
         return $return ?? null;
+    }
+
+    public function scheduler(): Scheduler
+    {
+        return $this->container()->get(Scheduler::class);
     }
 
     public function stop(?int $signal = null): never

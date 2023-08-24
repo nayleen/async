@@ -8,6 +8,7 @@ use Amp\ByteStream\WritableBuffer;
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Task;
+use Nayleen\Async\Task\Scheduler\DefaultScheduler;
 use Nayleen\Async\Test\TestKernel;
 use Nayleen\Async\Test\TestTask;
 
@@ -16,14 +17,14 @@ use function Amp\delay;
 /**
  * @internal
  */
-final class SchedulerFunctionalTest extends AsyncTestCase
+final class DefaultSchedulerFunctionalTest extends AsyncTestCase
 {
     /**
      * @test
      */
     public function can_execute_task(): void
     {
-        $scheduler = new Scheduler(TestKernel::create());
+        $scheduler = new DefaultScheduler(TestKernel::create());
         self::assertSame(69, $scheduler->execute(new TestTask()));
     }
 
@@ -32,7 +33,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
      */
     public function can_monitor_task(): void
     {
-        $scheduler = new Scheduler(TestKernel::create());
+        $scheduler = new DefaultScheduler(TestKernel::create());
 
         $task = Task::create(function () {
             $result = 0;
@@ -54,7 +55,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
     {
         $stdErr = new WritableBuffer();
 
-        $scheduler = new Scheduler(TestKernel::create(stdErr: $stdErr));
+        $scheduler = new DefaultScheduler(TestKernel::create(stdErr: $stdErr));
         $task = Task::create(fn (Kernel $kernel) => $kernel->writeDebug('Child says uhoh!'));
 
         $scheduler->submit($task)->finally(fn () => $stdErr->close());
@@ -69,7 +70,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
     {
         $stdOut = new WritableBuffer();
 
-        $scheduler = new Scheduler(TestKernel::create(stdOut: $stdOut));
+        $scheduler = new DefaultScheduler(TestKernel::create(stdOut: $stdOut));
         $task = Task::create(fn (Kernel $kernel) => $kernel->write('info', 'Child says hi!'));
 
         $scheduler->submit($task)->finally(fn () => $stdOut->close());
@@ -83,7 +84,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
     public function resubmitting_cancels_previous_execution(): void
     {
         $delay = 0.001;
-        $scheduler = new Scheduler(TestKernel::create(), $delay);
+        $scheduler = new DefaultScheduler(TestKernel::create(), $delay);
 
         $task = Task::create(function () use ($delay) {
             $result = 0;

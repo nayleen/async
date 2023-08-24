@@ -21,7 +21,7 @@ abstract class Application extends Runtime
     protected function initialize(?Channel $channel, Cancellation $cancellation): Kernel
     {
         $kernel = parent::initialize($channel, $cancellation);
-        $this->tasks->schedule($kernel->scheduler);
+        $this->tasks->schedule($kernel->scheduler());
 
         return $kernel;
     }

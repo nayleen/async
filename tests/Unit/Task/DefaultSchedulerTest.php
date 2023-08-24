@@ -6,12 +6,13 @@ namespace Nayleen\Async\Task;
 
 use Amp\Parallel\Worker\WorkerPool;
 use Amp\PHPUnit\AsyncTestCase;
+use Nayleen\Async\Task\Scheduler\DefaultScheduler;
 use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal
  */
-final class SchedulerTest extends AsyncTestCase
+final class DefaultSchedulerTest extends AsyncTestCase
 {
     /**
      * @test
@@ -23,7 +24,7 @@ final class SchedulerTest extends AsyncTestCase
 
         $kernel = TestKernel::create()->withDependency(WorkerPool::class, $workerPool);
 
-        $scheduler = new Scheduler($kernel);
+        $scheduler = new DefaultScheduler($kernel);
         $scheduler->kill();
     }
 
@@ -37,7 +38,7 @@ final class SchedulerTest extends AsyncTestCase
 
         $kernel = TestKernel::create()->withDependency(WorkerPool::class, $workerPool);
 
-        $scheduler = new Scheduler($kernel);
+        $scheduler = new DefaultScheduler($kernel);
         $scheduler->shutdown();
     }
 }

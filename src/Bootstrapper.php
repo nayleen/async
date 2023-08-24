@@ -29,12 +29,12 @@ class Bootstrapper extends Component
 
     public function reload(Kernel $kernel): void
     {
-        $kernel->scheduler->shutdown();
+        $kernel->scheduler()->shutdown();
         $kernel->loop()->queue(gc_collect_cycles(...));
     }
 
     public function shutdown(Kernel $kernel): void
     {
-        $kernel->scheduler->shutdown();
+        $kernel->scheduler()->shutdown();
     }
 }
