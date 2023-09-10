@@ -12,14 +12,22 @@ class Connection
     {
     }
 
+    /**
+     * @param non-empty-string $list
+     */
     public function popListHead(string $list): ?string
     {
+        assert($list !== '');
+
         return $this->redis->getList($list)->popHead();
     }
 
+    /**
+     * @param non-empty-string $list
+     */
     public function pushListTail(string $list, string ...$values): void
     {
-        assert(count($values) > 0);
+        assert($list !== '' && count($values) > 0);
         $this->redis->getList($list)->pushTail(...$values);
     }
 }

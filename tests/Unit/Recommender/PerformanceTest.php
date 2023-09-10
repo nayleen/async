@@ -5,7 +5,9 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Recommender;
 
 use Amp\PHPUnit\AsyncTestCase;
-use Nayleen\Async\Kernel;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
+use Nayleen\Async\Test\TestKernel;
 use Safe;
 
 /**
@@ -40,11 +42,16 @@ final class PerformanceTest extends AsyncTestCase
      */
     public function logs_nothing_in_non_production_mode(): void
     {
-        $kernel = $this->createMock(Kernel::class);
-        $kernel->expects(self::once())->method('environment')->willReturn('dev');
-        $kernel->expects(self::never())->method('write');
+        $logger = new Logger('test');
+        $logger->pushHandler($handler = new TestHandler());
+
+        $kernel = TestKernel::create()
+            ->withDependency('async.env', 'dev')
+            ->withDependency(Logger::class, $logger);
 
         Performance::recommend($kernel);
+
+        self::assertFalse($handler->hasNoticeRecords());
     }
 
     /**
@@ -54,11 +61,18 @@ final class PerformanceTest extends AsyncTestCase
     {
         $this->setXdebugMode('off');
 
-        $kernel = $this->createMock(Kernel::class);
-        $kernel->expects(self::once())->method('environment')->willReturn('prod');
-        $kernel->expects(self::exactly(3))->method('write');
+        $logger = new Logger('test');
+        $logger->pushHandler($handler = new TestHandler());
+
+        $kernel = TestKernel::create()
+            ->withDependency('async.env', 'prod')
+            ->withDependency(Logger::class, $logger);
 
         Performance::recommend($kernel);
+
+        self::assertTrue($handler->hasNoticeThatContains('Running kernel in production mode with assertions enabled is not recommended'));
+        self::assertTrue($handler->hasNoticeThatContains("You'll experience worse performance and see debugging log messages like this one"));
+        self::assertTrue($handler->hasNoticeThatContains('Set zend.assertions = -1 globally in php.ini or by passing it to your CLI options'));
     }
 
     /**
@@ -68,11 +82,16 @@ final class PerformanceTest extends AsyncTestCase
     {
         $this->setXdebugMode('debug');
 
-        $kernel = $this->createMock(Kernel::class);
-        $kernel->expects(self::once())->method('environment')->willReturn('prod');
-        $kernel->expects(self::exactly(4))->method('write');
+        $logger = new Logger('test');
+        $logger->pushHandler($handler = new TestHandler());
+
+        $kernel = TestKernel::create()
+            ->withDependency('async.env', 'prod')
+            ->withDependency(Logger::class, $logger);
 
         Performance::recommend($kernel);
+
+        self::assertTrue($handler->hasNoticeThatContains('The "xdebug" extension is enabled, which has a major impact on performance'));
     }
 
     /**
@@ -83,10 +102,15 @@ final class PerformanceTest extends AsyncTestCase
         $this->originalXdebugEnvValue = getenv('XDEBUG_MODE');
         Safe\putenv('XDEBUG_MODE');
 
-        $kernel = $this->createMock(Kernel::class);
-        $kernel->expects(self::once())->method('environment')->willReturn('prod');
-        $kernel->expects(self::exactly(4))->method('write');
+        $logger = new Logger('test');
+        $logger->pushHandler($handler = new TestHandler());
+
+        $kernel = TestKernel::create()
+            ->withDependency('async.env', 'prod')
+            ->withDependency(Logger::class, $logger);
 
         Performance::recommend($kernel);
+
+        self::assertTrue($handler->hasNoticeThatContains('The "xdebug" extension is enabled, which has a major impact on performance'));
     }
 }

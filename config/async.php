@@ -12,7 +12,8 @@ use Amp\Sync\Channel;
 use Closure;
 use DI;
 use Monolog\ErrorHandler;
-use Nayleen\Async\Task\Scheduler;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Revolt\EventLoop;
 use Throwable;
 
@@ -41,9 +42,9 @@ return [
         return $exceptionHandler;
     },
 
-    'async.stderr' => static fn (): ByteStream\WritableResourceStream => ByteStream\getStderr(),
-    'async.stdin' => static fn (): ByteStream\ReadableResourceStream => ByteStream\getStdin(),
-    'async.stdout' => static fn (): ByteStream\WritableResourceStream => ByteStream\getStdout(),
+    'async.stderr' => static fn (): ByteStream\WritableStream => ByteStream\getStderr(),
+    'async.stdin' => static fn (): ByteStream\ReadableStream => ByteStream\getStdin(),
+    'async.stdout' => static fn (): ByteStream\WritableStream => ByteStream\getStdout(),
 
     Channel::class => DI\decorate(static function (
         ?Channel $channel,
@@ -55,6 +56,14 @@ return [
             $container->get(Serializer::class),
         );
     }),
+
+    ErrorHandler::class => static function (LoggerInterface $logger): ErrorHandler {
+        $errorHandler = new ErrorHandler($logger);
+        $errorHandler->registerErrorHandler(errorTypes: error_reporting());
+        $errorHandler->registerFatalHandler();
+
+        return $errorHandler;
+    },
 
     EventLoop\Driver::class => DI\factory(static function (Closure $errorHandler, bool $debug): EventLoop\Driver {
         $driver = (new EventLoop\DriverFactory())->create();
@@ -73,13 +82,16 @@ return [
         ->parameter('errorHandler', DI\get('async.exception_handler'))
         ->parameter('debug', DI\get('async.debug')),
 
-    Scheduler::class => DI\factory(static function (DI\Container $container): Scheduler {
-        $builder = new Scheduler\Builder($container->get(Kernel::class));
-        // $builder = $builder->withErrorHandler($container->get('async.exception_handler'));
-        $builder = $builder->withMaxAttempts(3);
-
-        return $builder->build();
-    }),
+    IO::class => DI\factory(static function (
+        ByteStream\ReadableStream $input,
+        ByteStream\WritableStream $output,
+        Logger $logger,
+    ): IO {
+        return new IO($input, $output, $logger);
+    })
+        ->parameter('input', DI\get('async.stdin'))
+        ->parameter('output', DI\get('async.stdout'))
+        ->parameter('logger', DI\get(Logger::class)),
 
     ServerSocketFactory::class => static fn (): ServerSocketFactory => new ResourceServerSocketFactory(),
 ];

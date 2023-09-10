@@ -8,6 +8,8 @@ use Amp\ByteStream\WritableBuffer;
 use Amp\ByteStream\WritableStream;
 use Amp\Cancellation;
 use Amp\NullCancellation;
+use Monolog\Handler\NullHandler;
+use Monolog\Logger;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\Finder;
 use Nayleen\Async\Components;
@@ -19,7 +21,7 @@ use Revolt\EventLoop;
  */
 final class TestKernel extends Kernel
 {
-    private function __construct(
+    public function __construct(
         iterable $components = new Finder(),
         Cancellation $cancellation = new NullCancellation(),
     ) {
@@ -32,8 +34,12 @@ final class TestKernel extends Kernel
         WritableStream $stdOut = new WritableBuffer(),
         WritableStream $stdErr = new WritableBuffer(),
     ): self {
+        $logger = new Logger('TestKernel');
+        $logger->pushHandler(new NullHandler());
+
         return (new self(cancellation: $cancellation))
             ->withDependency(EventLoop\Driver::class, $loop ?? EventLoop::getDriver())
+            ->withDependency(Logger::class, $logger)
             ->withDependency('async.stderr', $stdErr)
             ->withDependency('async.stdout', $stdOut);
     }
@@ -43,8 +49,8 @@ final class TestKernel extends Kernel
         return new self(
             new Components(
                 [
-                    DependencyProvider::create([$name => $value]),
                     ...$this->components,
+                    DependencyProvider::create([$name => $value]),
                 ],
             ),
         );

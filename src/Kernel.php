@@ -19,21 +19,25 @@ use Nayleen\Async\Component\Finder;
 use Nayleen\Async\Exception\ReloadException;
 use Nayleen\Async\Exception\StopException;
 use Nayleen\Async\Task\Scheduler;
-use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
 use Revolt\EventLoop;
+use Throwable;
 
 class Kernel
 {
     use ForbidCloning;
     use ForbidSerialization;
 
+    private readonly Cancellation $cancellation;
+
     private DI\Container $container;
 
     private readonly DeferredCancellation $deferredCancellation;
 
-    public readonly Cancellation $cancellation;
+    private readonly Scheduler $scheduler;
 
+    /**
+     * @internal Nayleen\Async
+     */
     public readonly Components $components;
 
     /**
@@ -61,6 +65,12 @@ class Kernel
                 ...$components,
             ],
         );
+        $this->scheduler = new Scheduler($this);
+    }
+
+    public function cancellation(): Cancellation
+    {
+        return $this->cancellation;
     }
 
     public function clock(): Clock
@@ -76,7 +86,7 @@ class Kernel
 
         $this->container = $this->components->compile();
 
-        assert($this->writeDebug('Booting Kernel', ['loop_driver' => $this->loop()::class]));
+        assert($this->io()->debug('Booting Kernel', ['loop_driver' => $this->loop()::class]));
         $this->components->boot($this);
 
         return $this->container;
@@ -93,14 +103,25 @@ class Kernel
         return $env;
     }
 
+    public function handle(Throwable $throwable): void
+    {
+        /**
+         * @var callable(Throwable): void $exceptionHandler
+         */
+        $exceptionHandler = $this->container()->get('async.exception_handler');
+        assert(is_callable($exceptionHandler));
+
+        $exceptionHandler($throwable);
+    }
+
+    public function io(): IO
+    {
+        return $this->container()->get(IO::class);
+    }
+
     public function loop(): EventLoop\Driver
     {
         return $this->container()->get(EventLoop\Driver::class);
-    }
-
-    public function reload(): never
-    {
-        throw new ReloadException();
     }
 
     /**
@@ -118,20 +139,20 @@ class Kernel
             }
         } catch (CancelledException) {
         } catch (ReloadException) {
-            assert($this->writeDebug('Reloading Kernel'));
+            assert($this->io()->debug('Reloading Kernel'));
             $this->components->reload($this);
             goto reload;
         } catch (StopException $stop) {
             if ($stop->signal !== null) {
-                assert($this->writeDebug('Received signal ' . $stop->signal));
+                assert($this->io()->debug('Received signal ' . $stop->signal));
                 $return ??= $stop->signal;
             }
 
-            assert($this->writeDebug('Stopping Kernel'));
+            assert($this->io()->debug('Stopping Kernel'));
             $this->deferredCancellation->cancel($stop);
         }
 
-        assert($this->writeDebug('Shutting down Kernel'));
+        assert($this->io()->debug('Shutting down Kernel'));
         $this->components->shutdown($this);
 
         return $return ?? null;
@@ -139,39 +160,6 @@ class Kernel
 
     public function scheduler(): Scheduler
     {
-        return $this->container()->get(Scheduler::class);
-    }
-
-    public function stop(?int $signal = null): never
-    {
-        throw new StopException($signal);
-    }
-
-    /**
-     * @param mixed[] $context
-     */
-    public function write(string $level, string $message, array $context = []): bool
-    {
-        /**
-         * @var LoggerInterface $stdOut
-         */
-        $stdOut = $this->container()->get('async.logger');
-        $stdOut->log($level, $message, $context);
-
-        return true;
-    }
-
-    /**
-     * @param mixed[] $context
-     */
-    public function writeDebug(string $message, array $context = []): bool
-    {
-        /**
-         * @var LoggerInterface $stdErr
-         */
-        $stdErr = $this->container()->get('async.logger.debug');
-        $stdErr->log(LogLevel::DEBUG, $message, $context);
-
-        return true;
+        return $this->scheduler;
     }
 }

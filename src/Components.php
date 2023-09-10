@@ -63,6 +63,24 @@ class Components implements IteratorAggregate
         return $component;
     }
 
+    private function optimize(DI\ContainerBuilder $containerBuilder): DI\ContainerBuilder
+    {
+        $tmpContainer = (clone $containerBuilder)->build();
+
+        $debug = (bool) $tmpContainer->get('async.debug');
+        $env = $tmpContainer->get('async.env');
+        assert(is_string($env) && $env !== '');
+
+        if ($env !== 'prod' || $debug) {
+            return $containerBuilder;
+        }
+
+        $cacheDir = $tmpContainer->get('async.dir.cache');
+        assert(is_string($cacheDir) && file_exists($cacheDir) && is_dir($cacheDir));
+
+        return $containerBuilder->enableCompilation($cacheDir);
+    }
+
     public function boot(Kernel $kernel): void
     {
         foreach ($this->components as $component) {
@@ -78,7 +96,7 @@ class Components implements IteratorAggregate
             $component->register($containerBuilder);
         }
 
-        return $containerBuilder->build();
+        return $this->optimize($containerBuilder)->build();
     }
 
     /**

@@ -27,6 +27,6 @@ return [
     'async.redis_supported' => DI\factory(static fn (): bool => class_exists(Redis\RedisClient::class)),
 
     // redis services
-    Redis\RedisClient::class => DI\factory(Redis\createRedisClient(...))
+    Redis\RedisClient::class => DI\factory(static fn (string $dsn): Redis\RedisClient => Redis\createRedisClient($dsn))
         ->parameter('dsn', DI\get('async.redis_dsn')),
 ];

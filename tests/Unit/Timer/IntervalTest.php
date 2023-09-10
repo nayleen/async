@@ -5,11 +5,11 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Timer;
 
 use Amp\PHPUnit\AsyncTestCase;
+use Monolog\Logger;
 use Nayleen\Async\Exception\StopException;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Test\TestKernel;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use Revolt\EventLoop;
 
 /**
@@ -17,7 +17,7 @@ use Revolt\EventLoop;
  */
 final class IntervalTest extends AsyncTestCase
 {
-    private LoggerInterface&MockObject $logger;
+    private Logger&MockObject $logger;
 
     private EventLoop\Driver&MockObject $loop;
 
@@ -25,7 +25,7 @@ final class IntervalTest extends AsyncTestCase
     {
         parent::setUp();
 
-        $this->logger = $this->createMock(LoggerInterface::class);
+        $this->logger = $this->createMock(Logger::class);
 
         $this->loop = $this->createMock(EventLoop\Driver::class);
         $this->loop->expects(self::once())->method('defer')->willReturn('a');
@@ -37,9 +37,8 @@ final class IntervalTest extends AsyncTestCase
         $interval = new class($this->logger) extends Interval {
             private int $invocations = 0;
 
-            public function __construct(
-                private readonly LoggerInterface $logger,
-            ) {
+            public function __construct(private readonly Logger $logger)
+            {
                 parent::__construct(60);
             }
 
@@ -70,7 +69,7 @@ final class IntervalTest extends AsyncTestCase
             $this->loop->expects(self::once())->method('delay')->with($expectedDelay, self::anything());
             $this->logger->expects(self::once())->method('alert')->with('Executing interval timer');
 
-            $kernel = TestKernel::create($this->loop)->withDependency('async.logger', $this->logger);
+            $kernel = TestKernel::create($this->loop)->withDependency(Logger::class, $this->logger);
 
             $this->createInterval($kernel)->run();
         } catch (StopException) {

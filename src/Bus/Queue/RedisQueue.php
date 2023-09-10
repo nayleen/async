@@ -8,10 +8,14 @@ use Nayleen\Async\Bus\Queue\Redis\Connection;
 
 class RedisQueue implements Queue
 {
+    /**
+     * @param non-empty-string $name
+     */
     public function __construct(
         private readonly Connection $connection,
         private readonly string $name,
     ) {
+        assert($name !== '');
     }
 
     public function consume(): ?string
@@ -24,6 +28,9 @@ class RedisQueue implements Queue
         $this->connection->pushListTail($this->name, $message);
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function name(): string
     {
         return $this->name;

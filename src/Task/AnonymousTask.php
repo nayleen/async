@@ -17,7 +17,7 @@ use Nayleen\Async\Task;
  */
 final class AnonymousTask extends Task
 {
-    private SerializableClosure $code;
+    private readonly SerializableClosure $code;
 
     /**
      * @param Closure(Kernel): (Future<TResult>|TResult) $closure

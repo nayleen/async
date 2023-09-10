@@ -34,7 +34,7 @@ final class TasksTest extends AsyncTestCase
         $tasks = new Tasks($task);
 
         $scheduler = $this->createMock(Scheduler::class);
-        $scheduler->expects(self::once())->method('submit')->with($task, null, true)->willReturn(Future::complete());
+        $scheduler->expects(self::once())->method('submit')->with($task)->willReturn(Future::complete());
 
         $tasks->schedule($scheduler);
     }

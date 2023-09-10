@@ -33,7 +33,7 @@ class Tasks
         }
 
         foreach ($this->tasks as $task) {
-            $scheduler->submit($task, monitor: true);
+            $scheduler->submit($task);
         }
     }
 }

@@ -21,11 +21,11 @@ namespace PHPSTORM_META
             'async.logger.level' => \int|\string|\Monolog\Level::class,
             'async.redis_supported' => \bool,
             'async.worker_pool.size' => \int,
-            'async.logger.debug' => \Psr\Log\LoggerInterface::class,
-            'async.logger' => \Psr\Log\LoggerInterface::class,
             'async.stderr' => \Amp\ByteStream\WritableResourceStream::class,
             'async.stdin' => \Amp\ByteStream\ReadableResourceStream::class,
             'async.stdout' => \Amp\ByteStream\WritableResourceStream::class,
+            'async.worker.context' => \string,
+            'async.worker.context_id' => \int,
         ])
     );
 

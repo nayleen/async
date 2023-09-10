@@ -31,6 +31,6 @@ final class TestComponent extends Component implements HasDependencies
 
     public function shutdown(Kernel $kernel): void
     {
-        $kernel->writeDebug('Shutting down Dependency');
+        $kernel->io()->debug('Shutting down Dependency');
     }
 }

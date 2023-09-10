@@ -9,6 +9,7 @@ use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Test\TestComponent;
+use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal
@@ -26,11 +27,11 @@ final class ComponentsFunctionalTest extends AsyncTestCase
         $components = new Components([
             new TestComponent(),
             DependencyProvider::create([
-                'async.logger.debug' => $logger,
+                Logger::class => $logger,
             ]),
         ]);
 
-        $kernel = new Kernel($components);
+        $kernel = new TestKernel($components);
         $components->shutdown($kernel);
 
         self::assertTrue($handler->hasDebugThatMatches('/Shutting down Dependency/'));

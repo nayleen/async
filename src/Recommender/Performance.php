@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Recommender;
 
 use Nayleen\Async\Kernel;
-use Psr\Log\LogLevel;
 use Safe;
 
 /**
@@ -13,29 +12,19 @@ use Safe;
  */
 final class Performance
 {
-    private const LOG_LEVEL = LogLevel::NOTICE;
-
     private const XDEBUG_DISABLED_MODES = ['', 'off'];
 
     public static function recommend(Kernel $kernel): void
     {
         if ($kernel->environment() === 'prod') {
-            $log = static fn (string $message, array $context = []) => $kernel->write(
-                self::LOG_LEVEL,
-                $message,
-                $context,
-            );
-
             if (self::assertionsEnabled()) {
-                $log('Running kernel in production mode with assertions enabled is not recommended');
-                $log("You'll experience worse performance and see debugging log messages like this one");
-                $log(
-                    'Disable assertions (zend.assertions=-1) globally in php.ini or by passing it to your CLI options',
-                );
+                $kernel->io()->notice('Running kernel in production mode with assertions enabled is not recommended');
+                $kernel->io()->notice("You'll experience worse performance and see debugging log messages like this one");
+                $kernel->io()->notice('Set zend.assertions = -1 globally in php.ini or by passing it to your CLI options');
             }
 
             if (self::xdebugEnabled()) {
-                $log('The "xdebug" extension is enabled, which has a major impact on performance');
+                $kernel->io()->notice('The "xdebug" extension is enabled, which has a major impact on performance');
             }
         }
     }

@@ -5,9 +5,8 @@ declare(strict_types = 1);
 namespace Nayleen\Async;
 
 use Amp\PHPUnit\AsyncTestCase;
-use Nayleen\Async\Component\DependencyProvider;
+use Nayleen\Async\Test\TestKernel;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\NullLogger;
 use Revolt\EventLoop;
 
 /**
@@ -24,21 +23,6 @@ final class TimerTest extends AsyncTestCase
         $this->loop = $this->createMock(EventLoop\Driver::class);
         $this->loop->method('defer')->willReturn('a');
         $this->loop->method('unreference')->willReturnArgument(0);
-    }
-
-    private function createKernel(): Kernel
-    {
-        return new Kernel(
-            new Components(
-                [
-                    DependencyProvider::create([
-                        EventLoop\Driver::class => $this->loop,
-                        'async.logger.debug' => new NullLogger(),
-                        'async.logger' => new NullLogger(),
-                    ]),
-                ],
-            ),
-        );
     }
 
     private function createTimer(Kernel $kernel): Timer
@@ -66,7 +50,7 @@ final class TimerTest extends AsyncTestCase
     {
         $this->loop->expects(self::once())->method('disable');
 
-        $this->createTimer($this->createKernel())->disable();
+        $this->createTimer(TestKernel::create($this->loop))->disable();
     }
 
     /**
@@ -76,7 +60,7 @@ final class TimerTest extends AsyncTestCase
     {
         $this->loop->expects(self::once())->method('enable');
 
-        $this->createTimer($this->createKernel())->enable();
+        $this->createTimer(TestKernel::create($this->loop))->enable();
     }
 
     /**
@@ -86,7 +70,7 @@ final class TimerTest extends AsyncTestCase
     {
         $this->loop->expects(self::atLeast(1))->method('cancel');
 
-        $this->createTimer($this->createKernel())->stop();
+        $this->createTimer(TestKernel::create($this->loop))->stop();
     }
 
     /**
@@ -97,6 +81,6 @@ final class TimerTest extends AsyncTestCase
         $this->loop->expects(self::once())->method('disable');
         $this->loop->expects(self::once())->method('delay')->with(60, self::anything());
 
-        $this->createTimer($this->createKernel())->suspend(60);
+        $this->createTimer(TestKernel::create($this->loop))->suspend(60);
     }
 }

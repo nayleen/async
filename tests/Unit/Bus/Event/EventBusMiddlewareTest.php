@@ -9,7 +9,6 @@ use Monolog\Handler\TestHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Nayleen\Async\Bus\Message;
-use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
 /**
@@ -61,7 +60,7 @@ final class EventBusMiddlewareTest extends AsyncTestCase
      */
     public function passes_to_next_handler_when_no_handlers_found(): void
     {
-        $logger = $this->createMock(LoggerInterface::class);
+        $logger = $this->createMock(Logger::class);
         $logger->expects(self::once())->method('log');
 
         $middleware = new EventBusMiddleware(new EventHandlers(), $logger);
