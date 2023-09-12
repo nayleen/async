@@ -21,9 +21,15 @@ return [
     // app config
     'async.app_name' => DI\env('ASYNC_APP_NAME', 'Kernel'),
     'async.app_version' => DI\env('ASYNC_APP_VERSION', 'UNKNOWN'),
-    'async.debug' => DI\factory(
-        static fn (string $env): bool => (bool) (getenv('ASYNC_DEBUG') ?: $env !== 'prod'),
-    )->parameter('env', DI\get('async.env')),
+    'async.debug' => DI\factory(static function (string $env): bool {
+        $debug = getenv('ASYNC_DEBUG');
+
+        if ($debug === false) {
+            return $env !== 'prod';
+        }
+
+        return filter_var($debug, FILTER_VALIDATE_BOOL);
+    })->parameter('env', DI\get('async.env')),
     'async.env' => strtolower((getenv('ASYNC_ENV') ?: 'prod')),
 
     // directories

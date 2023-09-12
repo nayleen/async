@@ -31,6 +31,7 @@
 
     <php>
         <env name="AMP_DEBUG" value="true" />
+        <env name="ASYNC_DEBUG" value="true" />
         <env name="ASYNC_DIR" value="/usr/src/app" />
         <env name="ASYNC_ENV" value="test" />
         <env name="REVOLT_DEBUG" value="true" />
