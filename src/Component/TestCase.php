@@ -53,7 +53,11 @@ abstract class TestCase extends AsyncTestCase
         $container = $this->container();
 
         self::assertTrue($container->has($name), sprintf('[%s] is not registered in the container', $name));
-        self::assertInstanceOf($type ?? $name, $container->get($name));
+
+        $type ??= $name;
+        assert(class_exists($type) || interface_exists($type));
+
+        self::assertInstanceOf($type, $container->get($name));
     }
 
     abstract protected function component(): Component;

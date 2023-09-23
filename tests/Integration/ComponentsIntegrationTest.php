@@ -26,7 +26,7 @@ final class ComponentsIntegrationTest extends AsyncTestCase
         $components = TestKernel::create()->components;
         $components->compile();
 
-        self::assertTrue(file_exists('/tmp/CompiledContainer.php'), 'Container was not dumped');
+        self::assertFileExists('/tmp/CompiledContainer.php', 'Container was not dumped');
 
         Safe\putenv('ASYNC_DEBUG=' . $originalDebugValue);
         Safe\putenv('ASYNC_ENV=' . $originalEnvValue);
