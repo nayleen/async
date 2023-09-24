@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Recommender;
 
+use Nayleen\Async\Environment;
 use Nayleen\Async\Kernel;
 use Safe;
 
@@ -37,8 +38,10 @@ final class Performance
     private static function xdebugEnabled(): bool
     {
         // check for runtime environment variable first
-        if (($envMode = getenv('XDEBUG_MODE')) !== false) {
-            return !in_array($envMode, self::XDEBUG_DISABLED_MODES, true);
+        $envSetting = Environment::get('XDEBUG_MODE', null);
+
+        if (isset($envSetting)) {
+            return !in_array($envSetting, self::XDEBUG_DISABLED_MODES, true);
         }
 
         return !in_array(Safe\ini_get('xdebug.mode'), self::XDEBUG_DISABLED_MODES, true);

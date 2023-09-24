@@ -6,7 +6,9 @@ services:
       redis:
         condition: service_started
     environment:
+      - PHP_EXTENSION_APCU=1
       - PHP_EXTENSION_XDEBUG=1
+      - PHP_INI_APC__ENABLE_CLI=1
       - XDEBUG_MODE=debug
     init: true
     networks:

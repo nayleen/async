@@ -8,6 +8,7 @@ use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
 use ArrayIterator;
 use DI;
+use DI\Definition\Source\SourceCache;
 use IteratorAggregate;
 use Nayleen\Async\Component\HasDependencies;
 use Traversable;
@@ -77,6 +78,10 @@ class Components implements IteratorAggregate
 
         $cacheDir = $tmpContainer->get('async.dir.cache');
         assert(is_string($cacheDir) && file_exists($cacheDir) && is_dir($cacheDir));
+
+        if (SourceCache::isSupported()) {
+            $containerBuilder->enableDefinitionCache();
+        }
 
         return $containerBuilder->enableCompilation($cacheDir);
     }

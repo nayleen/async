@@ -22,7 +22,7 @@ return [
     'async.app_name' => DI\env('ASYNC_APP_NAME', 'Kernel'),
     'async.app_version' => DI\env('ASYNC_APP_VERSION', 'UNKNOWN'),
     'async.debug' => DI\factory(static function (string $env): bool {
-        $debug = getenv('ASYNC_DEBUG');
+        $debug = Environment::get('ASYNC_DEBUG', false);
 
         if ($debug === false) {
             return $env !== 'prod';
@@ -30,7 +30,7 @@ return [
 
         return filter_var($debug, FILTER_VALIDATE_BOOL);
     })->parameter('env', DI\get('async.env')),
-    'async.env' => strtolower((getenv('ASYNC_ENV') ?: 'prod')),
+    'async.env' => strtolower(Environment::get('ASYNC_ENV', 'prod')),
 
     // directories
     'async.dir.base' => DI\env('ASYNC_DIR'),
@@ -71,22 +71,16 @@ return [
         return $errorHandler;
     },
 
-    EventLoop\Driver::class => DI\factory(static function (Closure $errorHandler, bool $debug): EventLoop\Driver {
-        $driver = (new EventLoop\DriverFactory())->create();
-
-        if (!($driver instanceof EventLoop\Driver\TracingDriver) && $debug) {
-            $driver = new EventLoop\Driver\TracingDriver($driver);
-        }
-
+    EventLoop\Driver::class => DI\factory(static function (Closure $errorHandler): EventLoop\Driver {
         /**
          * @var Closure(Throwable): void $errorHandler
          */
+        $driver = (new EventLoop\DriverFactory())->create();
         $driver->setErrorHandler($errorHandler);
 
         return $driver;
     })
-        ->parameter('errorHandler', DI\get('async.exception_handler'))
-        ->parameter('debug', DI\get('async.debug')),
+        ->parameter('errorHandler', DI\get('async.exception_handler')),
 
     IO::class => DI\factory(static function (
         ByteStream\ReadableStream $input,

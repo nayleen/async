@@ -15,24 +15,6 @@ use Nayleen\Async\Components;
 
 abstract class TestCase extends AsyncTestCase
 {
-    private function container(): Container
-    {
-        $logger = new Logger('TestKernel');
-        $logger->pushHandler(new NullHandler());
-
-        $components = new Components([
-            new Bootstrapper(),
-            $this->component(),
-            DependencyProvider::create([
-                'async.stderr' => new WritableBuffer(),
-                'async.stdout' => new WritableBuffer(),
-                Logger::class => $logger,
-            ]),
-        ]);
-
-        return $components->compile();
-    }
-
     final protected function assertContainerHasParameter(string $name, ?string $type = null): void
     {
         $container = $this->container();
@@ -61,4 +43,22 @@ abstract class TestCase extends AsyncTestCase
     }
 
     abstract protected function component(): Component;
+
+    final protected function container(): Container
+    {
+        $logger = new Logger('TestKernel');
+        $logger->pushHandler(new NullHandler());
+
+        $components = new Components([
+            new Bootstrapper(),
+            $this->component(),
+            DependencyProvider::create([
+                'async.stderr' => new WritableBuffer(),
+                'async.stdout' => new WritableBuffer(),
+                Logger::class => $logger,
+            ]),
+        ]);
+
+        return $components->compile();
+    }
 }

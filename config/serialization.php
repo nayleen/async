@@ -7,7 +7,6 @@ namespace Nayleen\Async;
 use Amp\Serialization\CompressingSerializer;
 use Amp\Serialization\NativeSerializer;
 use Amp\Serialization\Serializer;
-use Nayleen\Async\Serialization\IgbinarySerializer;
 
 return [
     // serialization services
@@ -15,12 +14,5 @@ return [
         Serializer $serializer,
     ): CompressingSerializer => new CompressingSerializer($serializer),
 
-    Serializer::class => static function (): Serializer {
-        // prefer igbinary over native serializer
-        if (extension_loaded('igbinary')) {
-            return new IgbinarySerializer();
-        }
-
-        return new NativeSerializer();
-    },
+    Serializer::class => static fn (): Serializer => new NativeSerializer(),
 ];
