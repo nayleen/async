@@ -13,7 +13,7 @@ abstract class Cron extends Timer
 
     public function __construct(string $expression)
     {
-        $this->cronExpression = CronExpression::factory($expression);
+        $this->cronExpression = new CronExpression($expression);
     }
 
     protected function interval(): float
