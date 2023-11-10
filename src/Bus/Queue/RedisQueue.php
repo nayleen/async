@@ -15,7 +15,7 @@ class RedisQueue implements Queue
         private readonly Connection $connection,
         private readonly string $name,
     ) {
-        assert($name !== '');
+        assert($this->name !== '');
     }
 
     public function consume(): ?string
