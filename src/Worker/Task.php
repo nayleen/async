@@ -13,9 +13,7 @@ class Task extends BaseTask
     /**
      * @param class-string<Worker> $worker
      */
-    public function __construct(private readonly string $worker)
-    {
-    }
+    public function __construct(private readonly string $worker) {}
 
     protected function execute(Kernel $kernel): mixed
     {

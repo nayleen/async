@@ -36,7 +36,7 @@ class Components implements IteratorAggregate
     /**
      * @param class-string<Component>|Component $component
      */
-    private function add(string|Component $component): void
+    private function add(Component|string $component): void
     {
         if ($this->has($component)) {
             return;
@@ -49,7 +49,7 @@ class Components implements IteratorAggregate
     /**
      * @param class-string<Component>|Component $component
      */
-    private function make(string|Component $component): Component
+    private function make(Component|string $component): Component
     {
         if (is_string($component)) {
             $component = new $component();
@@ -115,7 +115,7 @@ class Components implements IteratorAggregate
     /**
      * @param class-string<Component>|Component $component
      */
-    public function has(string|Component $component): bool
+    public function has(Component|string $component): bool
     {
         return isset($this->components[(string) $component]);
     }

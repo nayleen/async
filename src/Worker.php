@@ -8,9 +8,7 @@ use Amp\Cancellation;
 
 abstract class Worker
 {
-    public function __construct(private readonly Timers $timers = new Timers())
-    {
-    }
+    public function __construct(private readonly Timers $timers = new Timers()) {}
 
     abstract protected function execute(Cancellation $cancellation): void;
 

@@ -12,7 +12,5 @@ use Nayleen\Async\Worker;
  */
 final class NoopWorker extends Worker
 {
-    protected function execute(Cancellation $cancellation): void
-    {
-    }
+    protected function execute(Cancellation $cancellation): void {}
 }

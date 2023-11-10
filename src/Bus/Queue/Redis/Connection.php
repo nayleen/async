@@ -8,9 +8,7 @@ use Amp\Redis\RedisClient;
 
 class Connection
 {
-    public function __construct(private readonly RedisClient $redis)
-    {
-    }
+    public function __construct(private readonly RedisClient $redis) {}
 
     /**
      * @param non-empty-string $list

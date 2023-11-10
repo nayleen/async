@@ -27,7 +27,7 @@ class Clock implements ClockInterface
     public function __construct(
         private readonly EventLoop\Driver $loop,
         ?ClockInterface $clock = null,
-        string|DateTimeZone|null $timezone = null,
+        DateTimeZone|string|null $timezone = null,
     ) {
         $this->timezone = match (true) {
             $timezone === null => new DateTimeZone(date_default_timezone_get()),

@@ -65,7 +65,6 @@ final class CommandBusMiddlewareTest extends AsyncTestCase
         $message->method('name')->willReturn('message');
 
         $middleware = new CommandBusMiddleware(new CommandHandlers());
-        $middleware->handle($message, function (): void {
-        });
+        $middleware->handle($message, function (): void {});
     }
 }

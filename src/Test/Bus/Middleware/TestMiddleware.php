@@ -16,8 +16,7 @@ final class TestMiddleware implements Middleware
     public function __construct(
         private readonly Results $results,
         private readonly int $expectedIndex,
-    ) {
-    }
+    ) {}
 
     public function handle(Message $message, Closure $next): void
     {

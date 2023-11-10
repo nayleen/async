@@ -28,10 +28,9 @@ class IO
         public readonly ReadableStream $input,
         public readonly WritableStream $output,
         public readonly Logger $logger,
-    ) {
-    }
+    ) {}
 
-    private function normalize(int|string|Level $level): Level
+    private function normalize(int|Level|string $level): Level
     {
         if ($level instanceof Level) {
             return $level;
@@ -51,7 +50,7 @@ class IO
      * @param non-empty-string|Stringable $message
      * @param mixed[] $context
      */
-    public function log(int|string|Level $level, string|Stringable $message, array $context = []): bool
+    public function log(int|Level|string $level, string|Stringable $message, array $context = []): bool
     {
         $message = (string) $message;
 

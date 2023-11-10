@@ -23,7 +23,7 @@ class DependencyProvider extends Component
     /**
      * @param DefinitionSource|mixed[]|string ...$definitions
      */
-    public static function create(array|string|DefinitionSource ...$definitions): self
+    public static function create(array|DefinitionSource|string ...$definitions): self
     {
         assert(func_num_args() > 0);
 

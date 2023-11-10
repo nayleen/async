@@ -9,9 +9,7 @@ use Nayleen\Async\Bus\Message;
 
 class Publisher
 {
-    public function __construct(private readonly Serializer $serializer)
-    {
-    }
+    public function __construct(private readonly Serializer $serializer) {}
 
     public function publish(Queue $queue, Message $message): void
     {

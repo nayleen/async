@@ -17,8 +17,7 @@ class PublishesOnErrorMiddleware implements Middleware
         private readonly Publisher $publisher,
         private readonly Queue $queue,
         private readonly bool $rethrow = true,
-    ) {
-    }
+    ) {}
 
     public function handle(Message $message, Closure $next): void
     {

@@ -21,8 +21,7 @@ class Consumer
         private readonly Bus $bus,
         private readonly Serializer $serializer,
         private readonly float $consumeDelay = self::DEFAULT_CONSUME_DELAY,
-    ) {
-    }
+    ) {}
 
     public function consume(
         Queue $queue,

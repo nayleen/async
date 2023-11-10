@@ -15,9 +15,7 @@ abstract class Component implements Stringable
     use ForbidCloning;
     use ForbidSerialization;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * @param non-empty-string ...$filenames
@@ -27,9 +25,7 @@ abstract class Component implements Stringable
         FileLoader::load($containerBuilder, ...$filenames);
     }
 
-    public function boot(Kernel $kernel): void
-    {
-    }
+    public function boot(Kernel $kernel): void {}
 
     /**
      * @return non-empty-string
@@ -41,13 +37,9 @@ abstract class Component implements Stringable
 
     abstract public function register(DI\ContainerBuilder $containerBuilder): void;
 
-    public function reload(Kernel $kernel): void
-    {
-    }
+    public function reload(Kernel $kernel): void {}
 
-    public function shutdown(Kernel $kernel): void
-    {
-    }
+    public function shutdown(Kernel $kernel): void {}
 
     /**
      * @return non-empty-string

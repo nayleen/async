@@ -16,8 +16,7 @@ class PublishesUnhandledMiddleware implements Middleware
     public function __construct(
         private readonly Publisher $publisher,
         private readonly Queue $queue,
-    ) {
-    }
+    ) {}
 
     public function handle(Message $message, Closure $next): void
     {

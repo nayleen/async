@@ -21,9 +21,7 @@ final class ValidatorTest extends AsyncTestCase
         return [
             'handler instance' => [
                 'handler' => new class() implements Handler {
-                    public function __invoke(Message $message): void
-                    {
-                    }
+                    public function __invoke(Message $message): void {}
                 },
                 'result' => true,
             ],

@@ -28,9 +28,7 @@ final class TimerTest extends AsyncTestCase
     private function createTimer(Kernel $kernel): Timer
     {
         $timer = new class() extends Timer {
-            protected function execute(): void
-            {
-            }
+            protected function execute(): void {}
 
             protected function interval(): float|int
             {

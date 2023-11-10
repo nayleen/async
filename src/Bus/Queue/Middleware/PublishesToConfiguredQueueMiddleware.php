@@ -18,8 +18,7 @@ class PublishesToConfiguredQueueMiddleware implements Middleware
         private readonly Publisher $publisher,
         private readonly QueueMap $queueMap,
         private readonly ?Queue $fallback = null,
-    ) {
-    }
+    ) {}
 
     public function handle(Message $message, Closure $next): void
     {

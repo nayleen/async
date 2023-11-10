@@ -25,9 +25,7 @@ final class TestComponent extends Component implements HasDependencies
         return 'test';
     }
 
-    public function register(DI\ContainerBuilder $containerBuilder): void
-    {
-    }
+    public function register(DI\ContainerBuilder $containerBuilder): void {}
 
     public function shutdown(Kernel $kernel): void
     {

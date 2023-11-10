@@ -37,7 +37,7 @@ final class IOTest extends AsyncTestCase
      * @test
      * @dataProvider logLevels
      */
-    public function accepts_all_variants_of_log_level(int|string|Level $level): void
+    public function accepts_all_variants_of_log_level(int|Level|string $level): void
     {
         $logger = $this->createMock(Logger::class);
         $logger->expects(self::once())->method('log')->with(self::callback(fn (Level $level): bool => true), 'test');

@@ -11,9 +11,7 @@ class InMemoryQueue implements Queue
      */
     private array $queue = [];
 
-    public function __construct(private readonly string $name)
-    {
-    }
+    public function __construct(private readonly string $name) {}
 
     public function consume(): ?string
     {

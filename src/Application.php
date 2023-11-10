@@ -14,9 +14,7 @@ abstract class Application extends Runtime
     use ForbidCloning;
     use ForbidSerialization;
 
-    public function __construct(public readonly Tasks $tasks = new Tasks())
-    {
-    }
+    public function __construct(public readonly Tasks $tasks = new Tasks()) {}
 
     protected function initialize(?Channel $channel, Cancellation $cancellation): Kernel
     {

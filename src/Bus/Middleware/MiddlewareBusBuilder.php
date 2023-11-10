@@ -24,9 +24,8 @@ class MiddlewareBusBuilder
     public function __construct(
         private readonly string $class = MiddlewareBus::class,
         private readonly LoggerInterface $logger = new NullLogger(),
-        private readonly int|string|Level $level = LogLevel::DEBUG,
-    ) {
-    }
+        private readonly int|Level|string $level = LogLevel::DEBUG,
+    ) {}
 
     /**
      * @return TBus

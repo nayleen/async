@@ -14,9 +14,8 @@ class LoggingMiddleware implements Middleware
 {
     public function __construct(
         private readonly LoggerInterface $logger,
-        private readonly int|string|Level $level = LogLevel::DEBUG,
-    ) {
-    }
+        private readonly int|Level|string $level = LogLevel::DEBUG,
+    ) {}
 
     public function handle(Message $message, Closure $next): void
     {

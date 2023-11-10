@@ -16,7 +16,7 @@ return [
     // logger config
     'async.logger.date_format' => 'Y-m-d H:i:s.v',
     'async.logger.format' => "[%datetime%] [%channel%] [%level_name%]: %message% %context% %extra%\n",
-    'async.logger.level' => DI\factory(static fn (bool $debug): int|string|Level => $debug ? LogLevel::DEBUG : LogLevel::INFO)
+    'async.logger.level' => DI\factory(static fn (bool $debug): int|Level|string => $debug ? LogLevel::DEBUG : LogLevel::INFO)
         ->parameter('debug', DI\get('async.debug')),
     'async.logger.name' => static fn (DI\Container $container): string => $container->get('async.app_name'),
 

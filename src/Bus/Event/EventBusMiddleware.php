@@ -17,9 +17,8 @@ class EventBusMiddleware implements Middleware
     public function __construct(
         private readonly EventHandlers $handlers,
         private readonly LoggerInterface $logger = new NullLogger(),
-        private readonly int|string|Level $level = LogLevel::DEBUG,
-    ) {
-    }
+        private readonly int|Level|string $level = LogLevel::DEBUG,
+    ) {}
 
     /**
      * @param Closure(Message): void $next
