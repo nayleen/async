@@ -30,7 +30,7 @@ class Http extends Worker
 
     public function stop(): void
     {
-        $this->server->stop();
         parent::stop();
+        $this->server->stop();
     }
 }
