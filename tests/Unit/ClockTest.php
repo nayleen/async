@@ -20,15 +20,15 @@ final class ClockTest extends AsyncTestCase
      */
     public function can_overwrite_timezone(): void
     {
-        $timeZone = $this->createStub(DateTimeZone::class);
+        $timezone = $this->createStub(DateTimeZone::class);
 
         $wrappedClock = $this->createMock(ClockInterface::class);
-        $wrappedClock->expects(self::once())->method('withTimeZone')->with($timeZone);
+        $wrappedClock->expects(self::once())->method('withTimeZone')->with($timezone);
 
         $clock = new Clock($this->createStub(EventLoop\Driver::class), $wrappedClock);
-        $clock = $clock->withTimeZone($timeZone);
+        $clock = $clock->withTimeZone($timezone);
 
-        self::assertSame($timeZone, $clock->timezone());
+        self::assertSame($timezone, $clock->timezone());
     }
 
     /**
