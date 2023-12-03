@@ -27,10 +27,10 @@
     "roave/security-advisories": "dev-latest"
   },
   "suggest": {
-    "ext-apcu": "For ideal subtask startup performance",
     "amphp/http-server": "To run http server workers",
-    "amphp/redis": "To use Redis as the backing queue for busses or as worker cache",
-    "amphp/websocket-server": "For websocket request handler support"
+    "amphp/redis": "To use Redis as worker cache",
+    "amphp/websocket-server": "For websocket request handler support",
+    "nayleen/async-bus": "For distributed event processing"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
