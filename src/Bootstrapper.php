@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
+use Amp\Parallel\Context;
+use Amp\Parallel\Worker;
 use DI\ContainerBuilder;
 use Nayleen\Async\Exception\ReloadException;
 use Nayleen\Async\Exception\StopException;
@@ -19,6 +21,10 @@ class Bootstrapper extends Component
         $loop->unreference($loop->onSignal(SIGUSR1, static fn () => throw new ReloadException()));
         $loop->unreference($loop->onSignal(SIGINT, static fn () => throw new StopException(SIGINT)));
         $loop->unreference($loop->onSignal(SIGTERM, static fn () => throw new StopException(SIGTERM)));
+
+        Context\contextFactory($kernel->container()->get(Context\ContextFactory::class));
+        Worker\workerFactory($kernel->container()->get(Worker\WorkerFactory::class));
+        Worker\workerPool($kernel->container()->get(Worker\WorkerPool::class));
     }
 
     public function register(ContainerBuilder $containerBuilder): void
