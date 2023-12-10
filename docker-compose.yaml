@@ -6,6 +6,8 @@ services:
       redis:
         condition: service_started
     environment:
+      - PHP_EXTENSION_IGBINARY=1
+      - PHP_EXTENSION_MSGPACK=1
       - PHP_EXTENSION_XDEBUG=1
       - XDEBUG_MODE=debug
     init: true

@@ -14,5 +14,17 @@ return [
         Serializer $serializer,
     ): CompressingSerializer => new CompressingSerializer($serializer),
 
-    Serializer::class => static fn (): Serializer => new NativeSerializer(),
+    Serializer::class => static function (): Serializer {
+        // Prefer igbinary over msgpack over native PHP serialization
+        // if the respective extensions are loaded
+        if (extension_loaded('igbinary')) {
+            return new Serialization\IgbinarySerializer();
+        }
+
+        if (extension_loaded('msgpack')) {
+            return new Serialization\MessagePackSerializer();
+        }
+
+        return new NativeSerializer();
+    },
 ];
