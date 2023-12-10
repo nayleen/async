@@ -1,7 +1,7 @@
 services:
   php:
     image: thecodingmachine/php:8.1-v4-cli
-    container_name: php
+    container_name: async_php
     depends_on:
       redis:
         condition: service_started
@@ -17,7 +17,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: redis
+    container_name: async_redis
     networks:
       - async
     restart: "no"
