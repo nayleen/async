@@ -38,14 +38,14 @@ return [
     'async.dir.tmp' => DI\env('ASYNC_TMP_DIR', sys_get_temp_dir()),
 
     // app services
-    'async.exception_handler' => static function (ErrorHandler $errorHandler): callable {
+    'async.exception_handler' => static function (ErrorHandler $errorHandler): Closure {
         $errorHandler->registerExceptionHandler();
         $exceptionHandler = set_exception_handler(null);
         assert(is_callable($exceptionHandler));
 
         set_exception_handler($exceptionHandler);
 
-        return $exceptionHandler;
+        return $exceptionHandler(...);
     },
 
     'async.stderr' => static fn (): ByteStream\WritableStream => ByteStream\getStderr(),

@@ -10,22 +10,25 @@
     "amphp/log": "^2",
     "amphp/parallel": "^2",
     "amphp/serialization": "^1",
-    "dragonmantank/cron-expression": "^3",
-    "nayleen/finder": "~0",
-    "php-di/php-di": "^7",
+    "dragonmantank/cron-expression": "^3.3.2",
+    "laravel/serializable-closure": "^1.3",
+    "monolog/monolog": "^2.9 || ^3.3",
+    "nayleen/finder": "^0.2",
+    "php-di/php-di": "^7.0.6",
     "revolt/event-loop": "^1",
-    "roave/better-reflection": "^6.11",
-    "symfony/clock": "^6"
+    "roave/better-reflection": "^6.20",
+    "symfony/clock": "^6 || ^7"
   },
   "require-dev": {
     "amphp/cache": "^2",
     "amphp/http": "^2",
     "amphp/http-server": "^3",
     "amphp/redis": "^2",
-    "bnf/phpstan-psr-container": "^1.0",
+    "bnf/phpstan-psr-container": "^1",
     "jetbrains/phpstorm-stubs": "@dev",
     "nayleen/codestandard": "dev-latest",
-    "nayleen/development-dependencies": "^3",
+    "nayleen/development-dependencies": "^3.3",
+    "phpunit/phpunit": "^9.6",
     "roave/security-advisories": "dev-latest"
   },
   "suggest": {

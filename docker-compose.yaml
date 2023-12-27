@@ -1,15 +1,16 @@
 services:
   php:
-    image: thecodingmachine/php:8.1-v4-cli
+    image: thecodingmachine/php:${PHP_VERSION:-8.1}-v4-cli
     container_name: async_php
     depends_on:
       redis:
         condition: service_started
     environment:
+      - PHP_EXTENSION_APCU=1
       - PHP_EXTENSION_IGBINARY=1
       - PHP_EXTENSION_MSGPACK=1
       - PHP_EXTENSION_XDEBUG=1
-      - XDEBUG_MODE=debug
+      - XDEBUG_MODE=off
     init: true
     networks:
       - async

@@ -8,7 +8,6 @@ use Amp\ByteStream\ReadableStream;
 use Amp\ByteStream\WritableStream;
 use Amp\Cancellation;
 use Amp\NullCancellation;
-use Monolog\Level;
 use Monolog\Logger;
 use Stringable;
 
@@ -29,36 +28,6 @@ class IO
         public readonly WritableStream $output,
         public readonly Logger $logger,
     ) {}
-
-    private function normalize(int|Level|string $level): Level
-    {
-        if ($level instanceof Level) {
-            return $level;
-        }
-
-        if (is_int($level)) {
-            return Level::from($level);
-        }
-
-        $level = strtoupper($level);
-        assert(in_array($level, Level::NAMES, true));
-
-        return Level::fromName($level);
-    }
-
-    /**
-     * @param non-empty-string|Stringable $message
-     * @param mixed[] $context
-     */
-    public function log(int|Level|string $level, string|Stringable $message, array $context = []): bool
-    {
-        $message = (string) $message;
-
-        assert($message !== '');
-        $this->logger->log($this->normalize($level), $message, $context);
-
-        return true;
-    }
 
     public function read(Cancellation $cancellation = new NullCancellation()): ?string
     {
@@ -82,7 +51,8 @@ class IO
      */
     public function __call(string $method, array $arguments): bool
     {
-        $this->log($method, ...$arguments);
+        /** @phpstan-ignore-next-line */
+        $this->logger->log($method, ...$arguments);
 
         return true;
     }
