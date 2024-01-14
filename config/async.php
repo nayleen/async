@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Nayleen\Async;
 
 use Amp\ByteStream;
+use Amp\Cluster\Cluster;
 use Amp\Serialization\Serializer;
 use Amp\Socket\ResourceServerSocketFactory;
 use Amp\Socket\ServerSocketFactory;
@@ -21,6 +22,7 @@ return [
     // app config
     'async.app_name' => DI\env('ASYNC_APP_NAME', 'Kernel'),
     'async.app_version' => DI\env('ASYNC_APP_VERSION', 'UNKNOWN'),
+    'async.cluster_support' => DI\factory(static fn (): bool => class_exists(Cluster::class)),
     'async.debug' => DI\factory(static function (string $env): bool {
         $debug = Environment::get('ASYNC_DEBUG', false);
 
@@ -75,7 +77,7 @@ return [
         /**
          * @var Closure(Throwable): void $errorHandler
          */
-        $driver = (new EventLoop\DriverFactory())->create();
+        $driver = EventLoop::getDriver();
         $driver->setErrorHandler($errorHandler);
 
         return $driver;
@@ -93,5 +95,13 @@ return [
         ->parameter('output', DI\get('async.stdout'))
         ->parameter('logger', DI\get(Logger::class)),
 
-    ServerSocketFactory::class => static fn (): ServerSocketFactory => new ResourceServerSocketFactory(),
+    ServerSocketFactory::class => DI\factory(static function (bool $clusterSupport): ServerSocketFactory {
+        if ($clusterSupport) {
+            assert(class_exists(Cluster::class));
+
+            return Cluster::getServerSocketFactory();
+        }
+
+        return new ResourceServerSocketFactory();
+    })->parameter('clusterSupport', DI\get('async.cluster_support')),
 ];
