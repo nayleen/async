@@ -22,9 +22,9 @@ return [
         return $dsn;
     })
         ->parameter('dsn', DI\env('ASYNC_REDIS_DSN', null))
-        ->parameter('redisSupported', DI\get('async.redis_supported')),
+        ->parameter('redisSupported', DI\get('async.redis_support')),
 
-    'async.redis_supported' => DI\factory(static fn (): bool => class_exists(Redis\RedisClient::class)),
+    'async.redis_support' => DI\factory(static fn (): bool => class_exists(Redis\RedisClient::class)),
 
     // redis services
     Redis\RedisClient::class => DI\factory(static fn (string $dsn): Redis\RedisClient => Redis\createRedisClient($dsn))
