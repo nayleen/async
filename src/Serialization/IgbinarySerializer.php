@@ -22,10 +22,7 @@ final class IgbinarySerializer implements Serializer
     {
         try {
             $serialized = igbinary_serialize($data);
-
-            if (!is_string($serialized)) {
-                throw new SerializationException('Failed to serialize data');
-            }
+            assert(is_string($serialized));
 
             return $serialized;
         } catch (Throwable $throwable) {
@@ -37,10 +34,7 @@ final class IgbinarySerializer implements Serializer
     {
         try {
             $unserialized = igbinary_unserialize($data);
-
-            if ($unserialized === false) {
-                throw new SerializationException('Failed to unserialize data');
-            }
+            assert($unserialized !== false);
 
             return $unserialized;
         } catch (Throwable $throwable) {
