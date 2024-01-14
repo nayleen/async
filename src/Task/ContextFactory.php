@@ -25,11 +25,13 @@ final class ContextFactory implements ContextFactoryInterface
         private readonly ByteStream\WritableStream $stdErr,
         IpcHub $ipcHub,
     ) {
+        // @codeCoverageIgnoreStart
         if (ThreadContext::isSupported()) {
             $this->contextFactory = new ThreadContextFactory(ipcHub: $ipcHub);
         } else {
             $this->contextFactory = new ProcessContextFactory(ipcHub: $ipcHub);
         }
+        // @codeCoverageIgnoreEnd
     }
 
     public function start(array|string $script, ?Cancellation $cancellation = null): Context
