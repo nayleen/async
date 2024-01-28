@@ -11,7 +11,7 @@ use Safe;
 /**
  * @psalm-internal Nayleen\Async
  */
-final class Assertions implements Recommender
+final readonly class Assertions implements Recommender
 {
     public function __construct() {}
 

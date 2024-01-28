@@ -4,14 +4,10 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Component;
 
-use Amp\ByteStream\WritableBuffer;
 use Amp\PHPUnit\AsyncTestCase;
 use DI\Container;
-use Monolog\Handler\NullHandler;
-use Monolog\Logger;
-use Nayleen\Async\Bootstrapper;
 use Nayleen\Async\Component;
-use Nayleen\Async\Components;
+use Nayleen\Async\Test\TestKernel;
 
 abstract class TestCase extends AsyncTestCase
 {
@@ -46,19 +42,6 @@ abstract class TestCase extends AsyncTestCase
 
     final protected function container(): Container
     {
-        $logger = new Logger('TestKernel');
-        $logger->pushHandler(new NullHandler());
-
-        $components = new Components([
-            new Bootstrapper(),
-            $this->component(),
-            DependencyProvider::create([
-                'async.stderr' => new WritableBuffer(),
-                'async.stdout' => new WritableBuffer(),
-                Logger::class => $logger,
-            ]),
-        ]);
-
-        return $components->compile();
+        return (new TestKernel([$this->component()]))->components->compile();
     }
 }

@@ -9,7 +9,6 @@ use Amp\CompositeCancellation;
 use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
 use Amp\Future;
-use Amp\NullCancellation;
 use Amp\Parallel\Worker\Execution;
 use Amp\Parallel\Worker\Task as AmpTask;
 use Amp\Parallel\Worker\Worker;
@@ -35,9 +34,9 @@ class Scheduler
      */
     private SplObjectStorage $executions;
 
-    public const RETRY_COUNT_DEFAULT = 2;
+    public const int RETRY_COUNT_DEFAULT = 2;
 
-    public const RETRY_DELAY_DEFAULT = 2.0; // seconds
+    public const int|float RETRY_DELAY_DEFAULT = 2.0; // seconds
 
     public function __construct(
         private readonly Kernel $kernel,
@@ -67,10 +66,11 @@ class Scheduler
     {
         assert($timeout === null || $timeout >= 0);
 
-        return new CompositeCancellation(
-            $this->kernel->cancellation,
-            isset($timeout) ? new TimeoutCancellation($timeout) : new NullCancellation(),
-        );
+        if (!isset($timeout)) {
+            return $this->kernel->cancellation;
+        }
+
+        return new CompositeCancellation($this->kernel->cancellation, new TimeoutCancellation($timeout));
     }
 
     private function retry(AmpTask $task, Cancellation $cancellation, int $attempts = 1): mixed

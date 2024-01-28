@@ -11,9 +11,12 @@ use Safe;
 /**
  * @psalm-internal Nayleen\Async
  */
-final class Xdebug implements Recommender
+final readonly class Xdebug implements Recommender
 {
-    private const XDEBUG_DISABLED_MODES = ['', 'off'];
+    /**
+     * @var string[]
+     */
+    private const array XDEBUG_DISABLED_MODES = ['', 'off'];
 
     public function __construct() {}
 

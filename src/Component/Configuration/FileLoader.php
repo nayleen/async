@@ -11,7 +11,7 @@ use Safe;
 /**
  * @psalm-internal Nayleen\Async
  */
-final class FileLoader
+final readonly class FileLoader
 {
     /**
      * @param non-empty-string ...$filenames

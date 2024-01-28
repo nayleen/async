@@ -16,13 +16,13 @@ use Amp\Parallel\Ipc\IpcHub;
 
 use function Amp\async;
 
-class ContextFactory implements ContextFactoryInterface
+readonly class ContextFactory implements ContextFactoryInterface
 {
-    private readonly ContextFactoryInterface $contextFactory;
+    private ContextFactoryInterface $contextFactory;
 
     public function __construct(
-        private readonly ByteStream\WritableStream $stdOut,
-        private readonly ByteStream\WritableStream $stdErr,
+        private ByteStream\WritableStream $stdOut,
+        private ByteStream\WritableStream $stdErr,
         IpcHub $ipcHub,
     ) {
         // @codeCoverageIgnoreStart

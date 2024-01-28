@@ -8,7 +8,7 @@ use Amp\Serialization\SerializationException;
 use Amp\Serialization\Serializer;
 use Throwable;
 
-class IgbinarySerializer implements Serializer
+readonly class IgbinarySerializer implements Serializer
 {
     public function __construct()
     {

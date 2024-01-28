@@ -21,7 +21,7 @@ class Cluster extends Worker
     /**
      * @var non-empty-string
      */
-    private const RUNNER_SCRIPT = __DIR__ . '/Internal/cluster-runner.php';
+    private const string RUNNER_SCRIPT = __DIR__ . '/Internal/cluster-runner.php';
 
     /**
      * @param positive-int|null $count
