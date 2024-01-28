@@ -8,17 +8,17 @@ use DI\ContainerBuilder;
 use DI\Definition\Source\DefinitionSource;
 use Nayleen\Async\Component;
 
-class DependencyProvider extends Component
+readonly class DependencyProvider extends Component
 {
     /**
      * @var array<array-key, DefinitionSource|mixed[]|string>
      */
-    private array $definitions;
+    private array $definitions; // @phpstan-ignore-line
 
     /**
-     * @return non-empty-string
+     * @var non-empty-string
      */
-    private string $name;
+    private string $name; // @phpstan-ignore-line
 
     /**
      * @param DefinitionSource|mixed[]|string ...$definitions
@@ -28,8 +28,8 @@ class DependencyProvider extends Component
         assert(func_num_args() > 0);
 
         $instance = new self();
-        $instance->definitions = $definitions;
-        $instance->name = uniqid('dependencies.', true);
+        $instance->definitions = $definitions; // @phpstan-ignore-line
+        $instance->name = uniqid('dependencies.', true); // @phpstan-ignore-line
 
         return $instance;
     }

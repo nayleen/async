@@ -18,6 +18,9 @@ csdiff: composer
 csfix: composer
 	@docker-compose run --rm php php vendor/bin/php-cs-fixer fix 2>/dev/null
 
+down:
+	@docker-compose down -v 2>/dev/null
+
 normalize:
 	@docker-compose run --rm php composer normalize --quiet 2>/dev/null
 	@docker-compose run --rm php php vendor/bin/php-cs-fixer fix 2>/dev/null

@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Amp\Future;
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Test\TestKernel;
 
@@ -38,31 +37,16 @@ final class KernelTest extends AsyncTestCase
     /**
      * @test
      */
-    public function run_can_queue_callback_on_loop(): void
-    {
-        $started = false;
-        TestKernel::create()->run(function () use (&$started): void {
-            $started = true;
-        });
-
-        self::assertTrue($started);
-    }
-
-    /**
-     * @test
-     */
-    public function run_resolves_future_from_callback(): void
-    {
-        $return = TestKernel::create()->run(fn () => Future::complete(420));
-        self::assertSame(420, $return);
-    }
-
-    /**
-     * @test
-     */
     public function run_returns_value_from_callback(): void
     {
-        $return = TestKernel::create()->run(fn () => 420);
+        $started = false;
+        $return = TestKernel::create()->run(static function () use (&$started): int {
+            $started = true;
+
+            return 420;
+        });
+
         self::assertSame(420, $return);
+        self::assertTrue($started);
     }
 }

@@ -6,9 +6,12 @@ namespace Nayleen\Async;
 
 use Amp\ByteStream;
 use Amp\Cluster\Cluster;
+use Amp\Dns\DnsResolver;
 use Amp\Serialization\Serializer;
-use Amp\Socket\ResourceServerSocketFactory;
+use Amp\Socket\DnsSocketConnector;
+use Amp\Socket\RetrySocketConnector;
 use Amp\Socket\ServerSocketFactory;
+use Amp\Socket\SocketConnector;
 use Amp\Sync\Channel;
 use Closure;
 use DI;
@@ -18,21 +21,30 @@ use Psr\Log\LoggerInterface;
 use Revolt\EventLoop;
 use Throwable;
 
+use function Amp\Dns\createDefaultResolver;
+
 return [
     // app config
     'async.app_name' => DI\env('ASYNC_APP_NAME', 'Kernel'),
     'async.app_version' => DI\env('ASYNC_APP_VERSION', 'UNKNOWN'),
-    'async.cluster_support' => DI\factory(static fn (): bool => class_exists(Cluster::class)),
-    'async.debug' => DI\factory(static function (string $env): bool {
-        $debug = Environment::get('ASYNC_DEBUG', false);
+    'async.debug' => DI\factory(static function (string $env, string $debug): bool {
+        $debug = (bool) filter_var($debug, FILTER_VALIDATE_BOOL);
 
-        if ($debug === false) {
-            return $env !== 'prod';
-        }
+        return $debug || $env !== 'prod';
+    })
+        ->parameter('env', DI\get('async.env'))
+        ->parameter('debug', DI\env('ASYNC_DEBUG', '0')),
 
-        return filter_var($debug, FILTER_VALIDATE_BOOL);
-    })->parameter('env', DI\get('async.env')),
-    'async.env' => strtolower(Environment::get('ASYNC_ENV', 'prod')),
+    'async.env' => DI\factory(static fn (string $env): string => strtolower($env))
+        ->parameter('env', DI\env('ASYNC_ENV', 'prod')),
+
+    'async.run_recommendations' => DI\factory(static function (string $wantsRecommendations, bool $isWorker): bool {
+        $wantsRecommendations = (bool) filter_var($wantsRecommendations, FILTER_VALIDATE_BOOL);
+
+        return $wantsRecommendations && !$isWorker;
+    })
+        ->parameter('wantsRecommendations', DI\env('ASYNC_RECOMMENDATIONS', '1'))
+        ->parameter('isWorker', DI\get('async.worker')),
 
     // directories
     'async.dir.base' => DI\env('ASYNC_DIR'),
@@ -58,12 +70,22 @@ return [
         ?Channel $channel,
         DI\Container $container,
     ): Channel {
-        return $channel ?? new ByteStream\StreamChannel(
+        if ($channel !== null) {
+            return $channel;
+        }
+
+        if (Cluster::isWorker()) {
+            return Cluster::getChannel();
+        }
+
+        return new ByteStream\StreamChannel(
             $container->get('async.stdin'),
             $container->get('async.stdout'),
             $container->get(Serializer::class),
         );
     }),
+
+    DnsResolver::class => static fn (): DnsResolver => createDefaultResolver(),
 
     ErrorHandler::class => static function (LoggerInterface $logger): ErrorHandler {
         $errorHandler = new ErrorHandler($logger);
@@ -92,16 +114,9 @@ return [
         return new IO($input, $output, $logger);
     })
         ->parameter('input', DI\get('async.stdin'))
-        ->parameter('output', DI\get('async.stdout'))
-        ->parameter('logger', DI\get(Logger::class)),
+        ->parameter('output', DI\get('async.stdout')),
 
-    ServerSocketFactory::class => DI\factory(static function (bool $clusterSupport): ServerSocketFactory {
-        if ($clusterSupport) {
-            assert(class_exists(Cluster::class));
+    ServerSocketFactory::class => static fn (): ServerSocketFactory => Cluster::getServerSocketFactory(),
 
-            return Cluster::getServerSocketFactory();
-        }
-
-        return new ResourceServerSocketFactory();
-    })->parameter('clusterSupport', DI\get('async.cluster_support')),
+    SocketConnector::class => static fn (DnsResolver $dnsResolver): SocketConnector => new RetrySocketConnector(new DnsSocketConnector($dnsResolver)),
 ];

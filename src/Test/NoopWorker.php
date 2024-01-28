@@ -4,13 +4,13 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Test;
 
-use Amp\Cancellation;
-use Nayleen\Async\Worker;
+use Nayleen\Async\Task\Worker;
+use Nayleen\Async\Timers;
 
-/**
- * @psalm-internal Nayleen\Async
- */
 final class NoopWorker extends Worker
 {
-    protected function execute(Cancellation $cancellation): void {}
+    public function __construct()
+    {
+        parent::__construct(new Timers());
+    }
 }

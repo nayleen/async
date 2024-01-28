@@ -6,39 +6,35 @@ namespace Nayleen\Async;
 
 use Amp\Cancellation;
 use Amp\CancelledException;
-use Amp\CompositeCancellation;
-use Amp\DeferredCancellation;
 use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
-use Amp\Future;
 use Amp\NullCancellation;
 use Amp\Sync\Channel;
 use DI;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\Finder;
-use Nayleen\Async\Exception\ReloadException;
-use Nayleen\Async\Exception\StopException;
 use Nayleen\Async\Task\Scheduler;
 use Revolt\EventLoop;
-use Throwable;
 
-class Kernel
+use function Amp\async;
+
+readonly class Kernel
 {
     use ForbidCloning;
     use ForbidSerialization;
 
-    private readonly Cancellation $cancellation;
+    private DI\Container $container; // @phpstan-ignore-line
 
-    private DI\Container $container;
+    private Signals $signals;
 
-    private readonly DeferredCancellation $deferredCancellation;
-
-    private readonly Scheduler $scheduler;
+    public Cancellation $cancellation;
 
     /**
-     * @internal Nayleen\Async
+     * @psalm-internal Nayleen\Async
      */
-    public readonly Components $components;
+    public Components $components;
+
+    public Scheduler $scheduler;
 
     /**
      * @param iterable<class-string<Component>|Component> $components
@@ -46,14 +42,9 @@ class Kernel
     public function __construct(
         iterable $components = new Finder(),
         ?Channel $channel = null,
-        Cancellation $cancellation = new NullCancellation(),
+        ?Cancellation $cancellation = null,
     ) {
-        $this->deferredCancellation = new DeferredCancellation();
-        $this->cancellation = new CompositeCancellation(
-            $this->deferredCancellation->getCancellation(),
-            $cancellation,
-        );
-
+        $this->cancellation = $cancellation ?? new NullCancellation();
         $this->components = new Components(
             [
                 Bootstrapper::class,
@@ -66,11 +57,7 @@ class Kernel
             ],
         );
         $this->scheduler = new Scheduler($this);
-    }
-
-    public function cancellation(): Cancellation
-    {
-        return $this->cancellation;
+        $this->signals = new Signals($this);
     }
 
     public function clock(): Clock
@@ -84,34 +71,10 @@ class Kernel
             return $this->container;
         }
 
-        $this->container = $this->components->compile();
-
-        assert($this->io()->debug('Booting Kernel', ['loop_driver' => $this->loop()::class]));
+        $this->container = $this->components->compile(); // @phpstan-ignore-line
         $this->components->boot($this);
 
         return $this->container;
-    }
-
-    /**
-     * @return non-empty-string
-     */
-    public function environment(): string
-    {
-        $env = $this->container()->get('async.env');
-        assert(is_string($env) && $env !== '');
-
-        return $env;
-    }
-
-    public function handle(Throwable $throwable): void
-    {
-        /**
-         * @var callable(Throwable): void $exceptionHandler
-         */
-        $exceptionHandler = $this->container()->get('async.exception_handler');
-        assert(is_callable($exceptionHandler));
-
-        $exceptionHandler($throwable);
     }
 
     public function io(): IO
@@ -125,41 +88,24 @@ class Kernel
     }
 
     /**
-     * @template T of mixed
-     * @param callable(Kernel): (Future<T>|T) $callback
+     * @template TResult of mixed
+     * @param callable(Kernel): TResult $callback
+     * @return TResult|null
      */
     public function run(callable $callback): mixed
     {
-        reload:
         try {
-            $return = $callback($this);
-
-            if ($return instanceof Future) {
-                $return = $return->await($this->cancellation);
-            }
+            return async($callback(...), $this)->await($this->cancellation);
         } catch (CancelledException) {
-        } catch (ReloadException) {
-            assert($this->io()->debug('Reloading Kernel'));
-            $this->components->reload($this);
-            goto reload;
-        } catch (StopException $stop) {
-            if ($stop->signal !== null) {
-                assert($this->io()->debug('Received signal ' . $stop->signal));
-                $return ??= $stop->signal;
-            }
-
-            assert($this->io()->debug('Stopping Kernel'));
-            $this->deferredCancellation->cancel($stop);
+            return null;
+        } finally {
+            $this->components->shutdown($this);
         }
-
-        assert($this->io()->debug('Shutting down Kernel'));
-        $this->components->shutdown($this);
-
-        return $return ?? null;
     }
 
-    public function scheduler(): Scheduler
+    public function trap(int ...$signals): void
     {
-        return $this->scheduler;
+        assert(count($signals) > 0);
+        $this->signals->trap(...array_unique(array_values($signals)));
     }
 }

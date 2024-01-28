@@ -7,26 +7,27 @@ namespace Nayleen\Async;
 use Amp\Parallel\Worker\Task;
 use Nayleen\Async\Task\Scheduler;
 
-class Tasks
+readonly class Tasks
 {
     /**
-     * @var array<string, Task>
+     * @var Task[]
      */
-    private array $tasks = [];
+    private array $tasks;
 
     public function __construct(Task ...$tasks)
     {
-        $this->add(...$tasks);
-    }
-
-    public function add(Task ...$tasks): void
-    {
+        $map = [];
         foreach ($tasks as $task) {
-            $this->tasks[spl_object_hash($task)] = $task;
+            $hash = spl_object_hash($task);
+            assert($hash !== '');
+
+            $map[$hash] = $task;
         }
+
+        $this->tasks = array_values($map);
     }
 
-    public function schedule(Scheduler $scheduler): void
+    public function submit(Scheduler $scheduler): void
     {
         if (count($this->tasks) === 0) {
             return;

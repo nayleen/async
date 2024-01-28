@@ -22,7 +22,7 @@ final class TasksTest extends AsyncTestCase
         $scheduler->expects(self::never())->method('submit');
 
         $tasks = new Tasks();
-        $tasks->schedule($scheduler);
+        $tasks->submit($scheduler);
     }
 
     /**
@@ -36,6 +36,6 @@ final class TasksTest extends AsyncTestCase
         $scheduler = $this->createMock(Scheduler::class);
         $scheduler->expects(self::once())->method('submit')->with($task)->willReturn(Future::complete());
 
-        $tasks->schedule($scheduler);
+        $tasks->submit($scheduler);
     }
 }

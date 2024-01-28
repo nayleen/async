@@ -7,6 +7,7 @@ namespace Nayleen\Async;
 use Amp\Log\StreamHandler;
 use DI;
 use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -28,9 +29,18 @@ return [
 
     Logger::class => static function (DI\Container $container): Logger {
         $logger = new Logger((string) $container->get('async.app_name'));
+        $logger->useLoggingLoopDetection(false);
 
         $logHandler = new StreamHandler($container->get('async.stderr'), $container->get('async.logger.level'));
         $logHandler->setFormatter($container->get(LineFormatter::class));
+
+        if ((bool) $container->get('async.worker')) {
+            $logHandler = new FingersCrossedHandler(
+                $logHandler,
+                $container->get('async.worker.log_threshold'),
+                bubble: false,
+            );
+        }
 
         $logger->pushHandler($logHandler);
 

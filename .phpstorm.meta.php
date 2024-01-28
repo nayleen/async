@@ -30,6 +30,13 @@ namespace PHPSTORM_META
     );
 
     override(
+        \DI\Container::make(0),
+        map([
+            '' => '@',
+        ])
+    );
+
+    override(
         \Psr\Container\ContainerInterface::get(0),
         map([
             '' => '@',

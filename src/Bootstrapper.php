@@ -4,27 +4,39 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Amp\Parallel\Context;
-use Amp\Parallel\Worker;
+use Amp\Dns;
+use Amp\Parallel;
+use Amp\Socket;
 use DI\ContainerBuilder;
-use Nayleen\Async\Exception\ReloadException;
-use Nayleen\Async\Exception\StopException;
-use Nayleen\Async\Recommender\Performance;
+use Nayleen\Async\Component\Recommender;
 
-class Bootstrapper extends Component
+readonly class Bootstrapper extends Component
 {
+    private function setupLoop(Kernel $kernel): void
+    {
+        Dns\dnsResolver($kernel->container()->get(Dns\DnsResolver::class));
+        Parallel\Context\contextFactory($kernel->container()->get(Parallel\Context\ContextFactory::class));
+        Parallel\Worker\workerFactory($kernel->container()->get(Parallel\Worker\WorkerFactory::class));
+        Parallel\Worker\workerPool($kernel->container()->get(Parallel\Worker\WorkerPool::class));
+        Socket\socketConnector($kernel->container()->get(Socket\SocketConnector::class));
+    }
+
+    /**
+     * @return iterable<Recommender>
+     */
+    protected function recommenders(Kernel $kernel): iterable
+    {
+        yield new Recommender\Assertions();
+        yield new Recommender\Xdebug();
+    }
+
     public function boot(Kernel $kernel): void
     {
-        Performance::recommend($kernel);
+        assert($kernel->io()->info('Booting Kernel'));
 
-        $loop = $kernel->loop();
-        $loop->unreference($loop->onSignal(SIGUSR1, static fn () => throw new ReloadException()));
-        $loop->unreference($loop->onSignal(SIGINT, static fn () => throw new StopException(SIGINT)));
-        $loop->unreference($loop->onSignal(SIGTERM, static fn () => throw new StopException(SIGTERM)));
+        $this->setupLoop($kernel);
 
-        Context\contextFactory($kernel->container()->get(Context\ContextFactory::class));
-        Worker\workerFactory($kernel->container()->get(Worker\WorkerFactory::class));
-        Worker\workerPool($kernel->container()->get(Worker\WorkerPool::class));
+        parent::boot($kernel);
     }
 
     public function register(ContainerBuilder $containerBuilder): void
@@ -35,14 +47,10 @@ class Bootstrapper extends Component
         $this->load($containerBuilder, $configPath . '/*.php');
     }
 
-    public function reload(Kernel $kernel): void
-    {
-        $kernel->scheduler()->shutdown();
-        $kernel->loop()->queue(gc_collect_cycles(...));
-    }
-
     public function shutdown(Kernel $kernel): void
     {
-        $kernel->scheduler()->shutdown();
+        assert($kernel->io()->info('Shutting down Kernel'));
+
+        $kernel->scheduler->shutdown();
     }
 }

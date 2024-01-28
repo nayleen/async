@@ -4,45 +4,64 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Test;
 
-use Amp\ByteStream\WritableBuffer;
-use Amp\ByteStream\WritableStream;
+use Amp\ByteStream;
 use Amp\Cancellation;
 use Amp\NullCancellation;
-use Monolog\Handler\NullHandler;
+use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\Finder;
 use Nayleen\Async\Components;
 use Nayleen\Async\Kernel;
+use Psr\Log\LoggerInterface;
 use Revolt\EventLoop;
 
-/**
- * @psalm-internal Nayleen\Async
- */
-final class TestKernel extends Kernel
+final readonly class TestKernel extends Kernel
 {
+    public TestHandler $log;
+
     public function __construct(
         iterable $components = new Finder(),
         Cancellation $cancellation = new NullCancellation(),
+        ByteStream\WritableStream $stdOut = new ByteStream\WritableBuffer(),
+        ByteStream\WritableStream $stdErr = new ByteStream\WritableBuffer(),
+        ByteStream\ReadableStream $stdIn = new ByteStream\ReadableBuffer(),
     ) {
+        $logger = new Logger('TestKernel');
+        $logger->pushHandler($this->log = new TestHandler(bubble: false));
+
+        $components = [
+            ...$components,
+            DependencyProvider::create([
+                Logger::class => $logger,
+                LoggerInterface::class => $logger,
+                'async.stderr' => $stdErr,
+                'async.stdin' => $stdIn,
+                'async.stdout' => $stdOut,
+            ]),
+        ];
+
         parent::__construct($components, null, $cancellation);
     }
 
     public static function create(
         ?EventLoop\Driver $loop = null,
         Cancellation $cancellation = new NullCancellation(),
-        WritableStream $stdOut = new WritableBuffer(),
-        WritableStream $stdErr = new WritableBuffer(),
+        ByteStream\WritableStream $stdOut = new ByteStream\WritableBuffer(),
+        ByteStream\WritableStream $stdErr = new ByteStream\WritableBuffer(),
+        ByteStream\ReadableStream $stdIn = new ByteStream\ReadableBuffer(),
     ): self {
-        $logger = new Logger('TestKernel');
-        $logger->pushHandler(new NullHandler());
+        $components = [
+            ...(new Finder()),
+            DependencyProvider::create([
+                EventLoop\Driver::class => $loop ?? EventLoop::getDriver(),
+            ]),
+        ];
 
-        return (new self(cancellation: $cancellation))
-            ->withDependency(EventLoop\Driver::class, $loop ?? EventLoop::getDriver())
-            ->withDependency(Logger::class, $logger)
-            ->withDependency('async.stderr', $stdErr)
-            ->withDependency('async.stdout', $stdOut);
+        return new self($components, $cancellation, $stdOut, $stdErr, $stdIn);
     }
+
+    public function trap(int ...$signals): void {}
 
     public function withDependency(string $name, mixed $value): self
     {
@@ -53,6 +72,7 @@ final class TestKernel extends Kernel
                     DependencyProvider::create([$name => $value]),
                 ],
             ),
+            $this->cancellation,
         );
     }
 }

@@ -16,7 +16,7 @@ use Amp\Parallel\Ipc\IpcHub;
 
 use function Amp\async;
 
-final class ContextFactory implements ContextFactoryInterface
+class ContextFactory implements ContextFactoryInterface
 {
     private readonly ContextFactoryInterface $contextFactory;
 

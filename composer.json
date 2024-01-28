@@ -3,10 +3,12 @@
   "description": "Building blocks for async applications.",
   "license": "MIT",
   "require": {
-    "php": ">=8.1",
+    "php": ">=8.3",
     "ext-pcntl": "*",
     "ext-posix": "*",
     "amphp/amp": "^3",
+    "amphp/cache": "^2",
+    "amphp/cluster": "^2@dev",
     "amphp/log": "^2",
     "amphp/parallel": "^2",
     "amphp/serialization": "^1",
@@ -17,18 +19,17 @@
     "php-di/php-di": "^7.0.6",
     "revolt/event-loop": "^1",
     "roave/better-reflection": "^6.20",
-    "symfony/clock": "^6 || ^7"
+    "symfony/clock": "^7"
   },
   "require-dev": {
-    "amphp/cache": "^2",
-    "amphp/cluster": "^2@dev",
     "amphp/http": "^2",
     "amphp/http-server": "^3",
+    "amphp/websocket-server": "^4",
     "amphp/redis": "^2",
     "bnf/phpstan-psr-container": "^1",
     "jetbrains/phpstorm-stubs": "@dev",
     "nayleen/codestandard": "dev-latest",
-    "nayleen/development-dependencies": "^3.3",
+    "nayleen/development-dependencies": "^3.4@dev",
     "phpunit/phpunit": "^9.6",
     "roave/security-advisories": "dev-latest"
   },
@@ -58,7 +59,8 @@
   "config": {
     "allow-plugins": {
       "ergebnis/composer-normalize": true,
-      "phpstan/extension-installer": true
+      "phpstan/extension-installer": true,
+      "symfony/runtime": true
     },
     "lock": false,
     "preferred-install": {
@@ -68,7 +70,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "0.9.x-dev"
+      "dev-main": "0.10.x-dev"
     }
   }
 }

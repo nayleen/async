@@ -10,10 +10,7 @@ use Nayleen\Async\Component;
 use Nayleen\Async\Component\HasDependencies;
 use Nayleen\Async\Kernel;
 
-/**
- * @psalm-internal Nayleen\Async
- */
-final class TestComponent extends Component implements HasDependencies
+final readonly class TestComponent extends Component implements HasDependencies
 {
     public static function dependencies(): iterable
     {

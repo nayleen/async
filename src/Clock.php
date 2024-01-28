@@ -15,17 +15,17 @@ use Symfony\Component\Clock\MonotonicClock;
 /**
  * @phpstan-consistent-constructor
  */
-class Clock implements ClockInterface
+readonly class Clock implements ClockInterface
 {
     use ForbidCloning;
     use ForbidSerialization;
 
-    private readonly ClockInterface $clock;
+    private ClockInterface $clock;
 
-    private readonly DateTimeZone $timezone;
+    private DateTimeZone $timezone;
 
     public function __construct(
-        private readonly EventLoop\Driver $loop,
+        private EventLoop\Driver $loop,
         ?ClockInterface $clock = null,
         DateTimeZone|string|null $timezone = null,
     ) {

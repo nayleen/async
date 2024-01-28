@@ -4,19 +4,11 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-/**
- * @internal
- */
-abstract class Timer
+abstract readonly class Timer
 {
-    private string $callbackId;
+    private string $callbackId; // @phpstan-ignore-line
 
-    protected Kernel $kernel;
-
-    public function __destruct()
-    {
-        $this->stop();
-    }
+    protected Kernel $kernel; // @phpstan-ignore-line
 
     abstract protected function execute(): void;
 
@@ -40,10 +32,11 @@ abstract class Timer
 
     public function start(Kernel $kernel): void
     {
-        $this->kernel = $kernel;
-        $this->callbackId = $this->kernel->loop()->unreference(
+        $this->kernel = $kernel; // @phpstan-ignore-line
+        $this->callbackId = $this->kernel->loop()->unreference( // @phpstan-ignore-line
             $this->kernel->loop()->defer($this->run(...)),
         );
+        $this->kernel->cancellation->subscribe($this->stop(...));
     }
 
     public function stop(): void

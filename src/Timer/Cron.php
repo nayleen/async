@@ -7,9 +7,9 @@ namespace Nayleen\Async\Timer;
 use Cron\CronExpression;
 use Nayleen\Async\Timer;
 
-abstract class Cron extends Timer
+abstract readonly class Cron extends Timer
 {
-    private readonly CronExpression $cronExpression;
+    private CronExpression $cronExpression;
 
     public function __construct(string $expression)
     {

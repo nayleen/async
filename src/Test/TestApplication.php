@@ -7,9 +7,6 @@ namespace Nayleen\Async\Test;
 use Nayleen\Async\Application;
 use Nayleen\Async\Kernel;
 
-/**
- * @psalm-internal Nayleen\Async
- */
 final class TestApplication extends Application
 {
     protected function execute(Kernel $kernel): int

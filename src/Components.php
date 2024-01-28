@@ -8,7 +8,6 @@ use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
 use ArrayIterator;
 use DI;
-use DI\Definition\Source\SourceCache;
 use IteratorAggregate;
 use Nayleen\Async\Component\HasDependencies;
 use Traversable;
@@ -21,7 +20,7 @@ class Components implements IteratorAggregate
     /**
      * @var Component[]
      */
-    private array $components = [];
+    private array $components;
 
     /**
      * @param iterable<class-string<Component>|Component> $components
@@ -79,10 +78,6 @@ class Components implements IteratorAggregate
         $cacheDir = $tmpContainer->get('async.dir.cache');
         assert(is_string($cacheDir) && file_exists($cacheDir) && is_dir($cacheDir));
 
-        if (SourceCache::isSupported()) {
-            $containerBuilder->enableDefinitionCache();
-        }
-
         return $containerBuilder->enableCompilation($cacheDir);
     }
 
@@ -93,10 +88,8 @@ class Components implements IteratorAggregate
         }
     }
 
-    public function compile(): DI\Container
+    public function compile(DI\ContainerBuilder $containerBuilder = new DI\ContainerBuilder()): DI\Container
     {
-        $containerBuilder = new DI\ContainerBuilder();
-
         foreach ($this->components as $component) {
             $component->register($containerBuilder);
         }
@@ -118,13 +111,6 @@ class Components implements IteratorAggregate
     public function has(Component|string $component): bool
     {
         return isset($this->components[(string) $component]);
-    }
-
-    public function reload(Kernel $kernel): void
-    {
-        foreach ($this->components as $component) {
-            $component->reload($kernel);
-        }
     }
 
     public function shutdown(Kernel $kernel): void

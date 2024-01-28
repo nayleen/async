@@ -18,8 +18,8 @@ final class ComponentsIntegrationTest extends AsyncTestCase
      */
     public function dumps_container_in_production(): void
     {
-        Environment::set('ASYNC_DEBUG', false);
-        Environment::set('ASYNC_ENV', 'prod');
+        $_ENV['ASYNC_DEBUG'] = $_SERVER['ASYNC_DEBUG'] = false;
+        $_ENV['ASYNC_ENV'] = $_SERVER['ASYNC_ENV'] = 'prod';
 
         $components = TestKernel::create()->components;
         $components->compile();

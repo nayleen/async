@@ -8,14 +8,22 @@ use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
 use DI;
 use Nayleen\Async\Component\Configuration\FileLoader;
+use Nayleen\Async\Component\Recommender;
 use Stringable;
 
-abstract class Component implements Stringable
+abstract readonly class Component implements Stringable
 {
     use ForbidCloning;
     use ForbidSerialization;
 
     public function __construct() {}
+
+    private function recommend(Kernel $kernel, Recommender ...$recommenders): void
+    {
+        foreach ($recommenders as $recommender) {
+            $recommender->recommend($kernel);
+        }
+    }
 
     /**
      * @param non-empty-string ...$filenames
@@ -25,7 +33,23 @@ abstract class Component implements Stringable
         FileLoader::load($containerBuilder, ...$filenames);
     }
 
-    public function boot(Kernel $kernel): void {}
+    /**
+     * @return iterable<Recommender>
+     */
+    protected function recommenders(Kernel $kernel): iterable
+    {
+        return [];
+    }
+
+    public function boot(Kernel $kernel): void
+    {
+        $wantsRecommendations = $kernel->container()->get('async.run_recommendations');
+        assert(is_bool($wantsRecommendations));
+
+        if ($wantsRecommendations) {
+            $this->recommend($kernel, ...$this->recommenders($kernel));
+        }
+    }
 
     /**
      * @return non-empty-string
@@ -36,8 +60,6 @@ abstract class Component implements Stringable
     }
 
     abstract public function register(DI\ContainerBuilder $containerBuilder): void;
-
-    public function reload(Kernel $kernel): void {}
 
     public function shutdown(Kernel $kernel): void {}
 

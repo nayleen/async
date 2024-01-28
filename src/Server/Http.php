@@ -2,15 +2,15 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Worker\Server;
+namespace Nayleen\Async\Server;
 
-use Amp\Cancellation;
 use Amp\Http\Server\DefaultErrorHandler;
 use Amp\Http\Server\ErrorHandler;
 use Amp\Http\Server\HttpServer;
 use Amp\Http\Server\RequestHandler;
+use Nayleen\Async\Kernel;
+use Nayleen\Async\Task\Worker;
 use Nayleen\Async\Timers;
-use Nayleen\Async\Worker;
 
 class Http extends Worker
 {
@@ -23,14 +23,14 @@ class Http extends Worker
         parent::__construct($timers);
     }
 
-    protected function execute(Cancellation $cancellation): void
+    protected function execute(Kernel $kernel): null
     {
-        $this->server->start($this->requestHandler, $this->errorHandler);
-    }
+        try {
+            $this->server->start($this->requestHandler, $this->errorHandler);
 
-    public function stop(): void
-    {
-        parent::stop();
-        $this->server->stop();
+            return parent::execute($kernel);
+        } finally {
+            $this->server->stop();
+        }
     }
 }

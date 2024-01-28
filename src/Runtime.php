@@ -5,11 +5,10 @@ declare(strict_types = 1);
 namespace Nayleen\Async;
 
 use Amp\Cancellation;
-use Amp\NullCancellation;
 use Amp\Sync\Channel;
 
 /**
- * @internal
+ * @psalm-internal Nayleen\Async
  *
  * @template-covariant TResult
  * @template TReceive
@@ -30,18 +29,18 @@ abstract class Runtime
     /**
      * @param Channel<TReceive, TSend>|null $channel
      */
-    protected function initialize(?Channel $channel, Cancellation $cancellation): Kernel
+    protected function initialize(?Channel $channel, ?Cancellation $cancellation): Kernel
     {
         return $this->kernel ??= new Kernel(channel: $channel, cancellation: $cancellation);
     }
 
     /**
      * @param Channel<TReceive, TSend>|null $channel
-     * @return TResult
+     * @return TResult|null
      */
     final public function run(
         ?Channel $channel = null,
-        Cancellation $cancellation = new NullCancellation(),
+        ?Cancellation $cancellation = null,
     ): mixed {
         return $this->initialize($channel, $cancellation)->run($this->execute(...));
     }

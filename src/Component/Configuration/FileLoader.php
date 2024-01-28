@@ -9,9 +9,9 @@ use InvalidArgumentException;
 use Safe;
 
 /**
- * @internal
+ * @psalm-internal Nayleen\Async
  */
-abstract class FileLoader
+final class FileLoader
 {
     /**
      * @param non-empty-string ...$filenames
@@ -23,16 +23,13 @@ abstract class FileLoader
                 $definitions = (static function () use ($file): array {
                     assert(
                         file_exists($file) && is_file($file),
-                        new InvalidArgumentException(
-                            sprintf(
-                                '%s config file "%s" does not exist!',
-                                static::class,
-                                $file,
-                            ),
-                        ),
+                        new InvalidArgumentException(sprintf('Config file "%s" does not exist!', $file)),
                     );
 
-                    return (array) require $file;
+                    $config = require $file;
+                    assert(is_array($config));
+
+                    return $config;
                 })();
 
                 $containerBuilder->addDefinitions($definitions);

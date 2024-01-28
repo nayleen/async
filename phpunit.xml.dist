@@ -27,6 +27,10 @@
         <include>
             <directory suffix=".php">./src</directory>
         </include>
+
+        <exclude>
+            <file>./src/Task/Internal/cluster-runner.php</file>
+        </exclude>
     </coverage>
 
     <php>

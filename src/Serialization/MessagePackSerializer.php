@@ -8,7 +8,7 @@ use Amp\Serialization\SerializationException;
 use Amp\Serialization\Serializer;
 use Throwable;
 
-final class MessagePackSerializer implements Serializer
+class MessagePackSerializer implements Serializer
 {
     public function __construct()
     {

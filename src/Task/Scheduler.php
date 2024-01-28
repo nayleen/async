@@ -11,10 +11,11 @@ use Amp\ForbidSerialization;
 use Amp\Future;
 use Amp\NullCancellation;
 use Amp\Parallel\Worker\Execution;
-use Amp\Parallel\Worker\Task;
+use Amp\Parallel\Worker\Task as AmpTask;
 use Amp\Parallel\Worker\Worker;
 use Amp\Parallel\Worker\WorkerPool;
 use Amp\TimeoutCancellation;
+use Closure;
 use Nayleen\Async\Kernel;
 use SplObjectStorage;
 use Throwable;
@@ -22,7 +23,7 @@ use Throwable;
 use function Amp\delay;
 
 /**
- * @internal Nayleen\Async
+ * @psalm-internal Nayleen\Async
  */
 class Scheduler
 {
@@ -30,7 +31,7 @@ class Scheduler
     use ForbidSerialization;
 
     /**
-     * @var SplObjectStorage<Task, Execution>
+     * @var SplObjectStorage<AmpTask, Execution>
      */
     private SplObjectStorage $executions;
 
@@ -46,7 +47,7 @@ class Scheduler
         $this->executions = new SplObjectStorage();
     }
 
-    private function cancel(Task $task): void
+    private function cancel(AmpTask $task): void
     {
         if (!$this->executions->offsetExists($task)) {
             return;
@@ -67,36 +68,27 @@ class Scheduler
         assert($timeout === null || $timeout >= 0);
 
         return new CompositeCancellation(
-            $this->kernel->cancellation(),
+            $this->kernel->cancellation,
             isset($timeout) ? new TimeoutCancellation($timeout) : new NullCancellation(),
         );
     }
 
-    private function retry(Throwable $throwable, Task $task, Cancellation $cancellation): mixed
+    private function retry(AmpTask $task, Cancellation $cancellation, int $attempts = 1): mixed
     {
-        $this->kernel->handle($throwable);
-
-        $attempts = 1;
-
-        retry:
         try {
-            delay($this->retryDelay, false, $cancellation);
+            delay($this->retryDelay * $attempts, false, $cancellation);
 
             return $this->spawn($task, $cancellation)->await($cancellation);
-        } catch (Throwable $throwable) {
-            $this->kernel->handle($throwable);
-
+        } catch (Throwable) {
             if ($attempts++ <= $this->retryCount) {
-                goto retry;
+                return $this->retry($task, $cancellation, $attempts);
             }
         }
-
-        $this->cancel($task);
 
         return null;
     }
 
-    private function spawn(Task $task, Cancellation $cancellation): Execution
+    private function spawn(AmpTask $task, Cancellation $cancellation): Execution
     {
         $this->cancel($task);
 
@@ -126,7 +118,7 @@ class Scheduler
     /**
      * @api
      */
-    public function run(Task $task, ?float $awaitTimeout = null, ?float $submitTimeout = null): mixed
+    public function run(AmpTask|Closure|string $task, ?float $awaitTimeout = null, ?float $submitTimeout = null): mixed
     {
         return $this->submit($task, timeout: $submitTimeout)->await($this->cancellation($awaitTimeout));
     }
@@ -139,12 +131,20 @@ class Scheduler
     /**
      * @api
      */
-    public function submit(Task $task, ?float $timeout = null): Future
+    public function submit(AmpTask|Closure|string $task, ?float $timeout = null): Future
     {
+        assert($task !== '');
+
+        $task = match (true) {
+            $task instanceof Closure => new AnonymousTask($task),
+            is_string($task) => AnonymousTask::fromScript($task),
+            default => $task,
+        };
+
         $cancellation = $this->cancellation($timeout);
 
         $future = $this->spawn($task, $cancellation)->getFuture();
 
-        return $future->catch(fn (Throwable $throwable) => $this->retry($throwable, $task, $cancellation));
+        return $future->catch(fn () => $this->retry($task, $cancellation));
     }
 }

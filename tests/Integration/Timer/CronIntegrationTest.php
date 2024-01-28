@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Timer;
 
+use Amp\CancelledException;
 use Amp\PHPUnit\AsyncTestCase;
 use Monolog\Logger;
 use Nayleen\Async\Clock;
-use Nayleen\Async\Exception\StopException;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Test\TestKernel;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -39,22 +39,21 @@ final class CronIntegrationTest extends AsyncTestCase
 
     private function createCron(Kernel $kernel): Cron
     {
-        $cron = new class($this->logger) extends Cron {
-            private int $invocations = 0;
-
-            public function __construct(private readonly Logger $logger)
+        $cron = new readonly class($this->logger) extends Cron {
+            public function __construct(private Logger $logger)
             {
                 parent::__construct('* * * * *');
             }
 
             protected function execute(): void
             {
-                if ($this->invocations === 1) {
-                    throw new StopException();
+                static $invocations = 0;
+
+                if ($invocations++ === 1) {
+                    throw new CancelledException();
                 }
 
                 $this->logger->alert('Executing cron');
-                $this->invocations++;
             }
         };
 
@@ -68,25 +67,22 @@ final class CronIntegrationTest extends AsyncTestCase
      */
     public function delays_execution_according_to_schedule(): void
     {
-        try {
-            $expectedDelay = 60;
+        $expectedDelay = 60;
 
-            $this->loop->expects(self::once())->method('delay')->with(
-                $expectedDelay,
-                self::callback(function () {
-                    $this->clock->modify('+60 seconds');
+        $this->loop->expects(self::once())->method('delay')->with(
+            $expectedDelay,
+            self::callback(function () {
+                $this->clock->modify('+60 seconds');
 
-                    return true;
-                }),
-            );
-            $this->logger->expects(self::once())->method('alert')->with('Executing cron');
+                return true;
+            }),
+        );
+        $this->logger->expects(self::once())->method('alert')->with('Executing cron');
 
-            $kernel = TestKernel::create($this->loop)
-                ->withDependency(Clock::class, new Clock($this->loop, $this->clock))
-                ->withDependency(Logger::class, $this->logger);
+        $kernel = TestKernel::create($this->loop)
+            ->withDependency(Clock::class, new Clock($this->loop, $this->clock))
+            ->withDependency(Logger::class, $this->logger);
 
-            $this->createCron($kernel)->run();
-        } catch (StopException) {
-        }
+        $this->createCron($kernel)->run();
     }
 }
