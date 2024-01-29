@@ -11,16 +11,13 @@ use Nayleen\Async\Test\TestKernel;
 /**
  * @internal
  */
-final class ApplicationFunctionalTest extends AsyncTestCase
+final class ApplicationTest extends AsyncTestCase
 {
     /**
      * @test
      */
     public function executes_in_kernel_context(): void
     {
-        $app = new TestApplication();
-        $app->kernel = TestKernel::create();
-
-        self::assertSame(420, $app->run());
+        self::assertSame(420, (new TestApplication())->execute(TestKernel::create()));
     }
 }

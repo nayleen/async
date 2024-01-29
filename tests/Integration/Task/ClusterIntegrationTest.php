@@ -21,8 +21,7 @@ final class ClusterIntegrationTest extends AsyncTestCase
         $kernel = TestKernel::create();
 
         $cluster = new Cluster(new NoopWorker(), 1);
-        $cluster->kernel = $kernel;
-        $cluster->run();
+        $cluster->execute($kernel);
 
         self::assertTrue($kernel->log->hasInfoThatContains('Started cluster worker with ID 1'));
         self::assertTrue($kernel->log->hasInfoThatContains('Worker 1 terminated cleanly'));

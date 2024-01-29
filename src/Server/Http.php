@@ -12,18 +12,18 @@ use Nayleen\Async\Kernel;
 use Nayleen\Async\Task\Worker;
 use Nayleen\Async\Timers;
 
-class Http extends Worker
+readonly class Http extends Worker
 {
     public function __construct(
-        private readonly HttpServer $server,
-        private readonly RequestHandler $requestHandler,
-        private readonly ErrorHandler $errorHandler = new DefaultErrorHandler(),
+        private HttpServer $server,
+        private RequestHandler $requestHandler,
+        private ErrorHandler $errorHandler = new DefaultErrorHandler(),
         Timers $timers = new Timers(),
     ) {
         parent::__construct($timers);
     }
 
-    protected function execute(Kernel $kernel): null
+    public function execute(Kernel $kernel): null
     {
         try {
             $this->server->start($this->requestHandler, $this->errorHandler);

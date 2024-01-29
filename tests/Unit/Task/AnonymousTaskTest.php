@@ -20,9 +20,7 @@ final class AnonymousTaskTest extends AsyncTestCase
         $task = unserialize(serialize(new AnonymousTask(static fn () => 69)));
         assert($task instanceof AnonymousTask);
 
-        $task->kernel = TestKernel::create();
-
-        self::assertSame(69, $task->run());
+        self::assertSame(69, $task->execute(TestKernel::create()));
     }
 
     /**
@@ -31,8 +29,7 @@ final class AnonymousTaskTest extends AsyncTestCase
     public function executes_in_kernel_context(): void
     {
         $task = new AnonymousTask(static fn () => 69);
-        $task->kernel = TestKernel::create();
 
-        self::assertSame(69, $task->run());
+        self::assertSame(69, $task->execute(TestKernel::create()));
     }
 }

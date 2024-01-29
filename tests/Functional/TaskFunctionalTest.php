@@ -21,9 +21,7 @@ final class TaskFunctionalTest extends AsyncTestCase
         $task = unserialize(serialize(new TestTask()));
         assert($task instanceof TestTask);
 
-        $task->kernel = TestKernel::create();
-
-        self::assertSame(69, $task->run());
+        self::assertSame(69, $task->execute(TestKernel::create()));
     }
 
     /**
@@ -32,8 +30,7 @@ final class TaskFunctionalTest extends AsyncTestCase
     public function executes_in_kernel_context(): void
     {
         $task = new TestTask();
-        $task->kernel = TestKernel::create();
 
-        self::assertSame(69, $task->run());
+        self::assertSame(69, $task->execute(TestKernel::create()));
     }
 }

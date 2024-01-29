@@ -7,9 +7,9 @@ namespace Nayleen\Async\Test;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Task;
 
-final class TestTask extends Task
+final readonly class TestTask extends Task
 {
-    protected function execute(Kernel $kernel): int
+    public function execute(Kernel $kernel): int
     {
         return 69;
     }

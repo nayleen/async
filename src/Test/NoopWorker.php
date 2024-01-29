@@ -7,7 +7,7 @@ namespace Nayleen\Async\Test;
 use Nayleen\Async\Task\Worker;
 use Nayleen\Async\Timers;
 
-final class NoopWorker extends Worker
+final readonly class NoopWorker extends Worker
 {
     public function __construct()
     {

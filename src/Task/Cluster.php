@@ -11,12 +11,12 @@ use Nayleen\Async\Task;
 use Nayleen\Async\Timers;
 use RuntimeException;
 
-class Cluster extends Worker
+readonly class Cluster extends Worker
 {
     /**
      * @var positive-int
      */
-    private readonly int $count;
+    private int $count;
 
     /**
      * @var non-empty-string
@@ -54,7 +54,7 @@ class Cluster extends Worker
         return $watcher;
     }
 
-    protected function execute(Kernel $kernel): null
+    public function execute(Kernel $kernel): null
     {
         $watcher = $this->watcher($kernel);
 

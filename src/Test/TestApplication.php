@@ -7,9 +7,9 @@ namespace Nayleen\Async\Test;
 use Nayleen\Async\Application;
 use Nayleen\Async\Kernel;
 
-final class TestApplication extends Application
+final readonly class TestApplication extends Application
 {
-    protected function execute(Kernel $kernel): int
+    public function execute(Kernel $kernel): int
     {
         return 420;
     }

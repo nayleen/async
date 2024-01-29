@@ -9,7 +9,7 @@ use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
 use Amp\Sync\Channel;
 
-abstract class Application extends Runtime
+abstract readonly class Application extends Runtime
 {
     use ForbidCloning;
     use ForbidSerialization;

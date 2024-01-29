@@ -7,6 +7,7 @@ namespace Nayleen\Async;
 use Amp\Future;
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Task\Scheduler;
+use Nayleen\Async\Test\NoopWorker;
 
 /**
  * @internal
@@ -30,7 +31,7 @@ final class TasksTest extends AsyncTestCase
      */
     public function schedules_registered_tasks(): void
     {
-        $task = $this->createStub(Task::class);
+        $task = new NoopWorker();
         $tasks = new Tasks($task);
 
         $scheduler = $this->createMock(Scheduler::class);

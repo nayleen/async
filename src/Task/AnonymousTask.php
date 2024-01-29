@@ -12,13 +12,11 @@ use ReflectionFunction;
 use ReflectionNamedType;
 
 /**
- * @psalm-internal Nayleen\Async
- *
  * @template-covariant TResult
  */
-class AnonymousTask extends Task
+readonly class AnonymousTask extends Task
 {
-    private readonly SerializableClosure $code;
+    private SerializableClosure $code;
 
     /**
      * @param Closure(Kernel): TResult $closure
@@ -74,7 +72,7 @@ class AnonymousTask extends Task
     /**
      * @return TResult
      */
-    protected function execute(Kernel $kernel): mixed
+    public function execute(Kernel $kernel): mixed
     {
         return ($this->code)($kernel);
     }
