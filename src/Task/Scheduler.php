@@ -9,6 +9,7 @@ use Amp\CompositeCancellation;
 use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
 use Amp\Future;
+use Amp\NullCancellation;
 use Amp\Parallel\Worker\Execution;
 use Amp\Parallel\Worker\Task as AmpTask;
 use Amp\Parallel\Worker\Worker;
@@ -16,6 +17,7 @@ use Amp\Parallel\Worker\WorkerPool;
 use Amp\TimeoutCancellation;
 use Closure;
 use Nayleen\Async\Kernel;
+use Nayleen\Async\Task;
 use SplObjectStorage;
 use Throwable;
 
@@ -73,22 +75,22 @@ class Scheduler
         return new CompositeCancellation($this->kernel->cancellation, new TimeoutCancellation($timeout));
     }
 
-    private function retry(AmpTask $task, Cancellation $cancellation, int $attempts = 1): mixed
+    private function retry(AmpTask $task, int $attempts = 1): mixed
     {
         try {
-            delay($this->retryDelay * $attempts, false, $cancellation);
+            delay($this->retryDelay * $attempts, false, $this->kernel->cancellation);
 
-            return $this->spawn($task, $cancellation)->await($cancellation);
+            return $this->spawn($task)->await($this->kernel->cancellation);
         } catch (Throwable) {
             if ($attempts++ <= $this->retryCount) {
-                return $this->retry($task, $cancellation, $attempts);
+                return $this->retry($task, $attempts);
             }
         }
 
         return null;
     }
 
-    private function spawn(AmpTask $task, Cancellation $cancellation): Execution
+    private function spawn(AmpTask $task, Cancellation $cancellation = new NullCancellation()): Execution
     {
         $this->cancel($task);
 
@@ -118,9 +120,9 @@ class Scheduler
     /**
      * @api
      */
-    public function run(AmpTask|Closure|string $task, ?float $awaitTimeout = null, ?float $submitTimeout = null): mixed
+    public function run(AmpTask|Closure|string $task, ?float $timeout = null): mixed
     {
-        return $this->submit($task, timeout: $submitTimeout)->await($this->cancellation($awaitTimeout));
+        return $this->submit($task)->await($this->cancellation($timeout));
     }
 
     public function shutdown(): void
@@ -131,20 +133,11 @@ class Scheduler
     /**
      * @api
      */
-    public function submit(AmpTask|Closure|string $task, ?float $timeout = null): Future
+    public function submit(AmpTask|Closure|string $task): Future
     {
-        assert($task !== '');
+        $task = Task::create($task);
+        $future = $this->spawn($task)->getFuture();
 
-        $task = match (true) {
-            $task instanceof Closure => new AnonymousTask($task),
-            is_string($task) => AnonymousTask::fromScript($task),
-            default => $task,
-        };
-
-        $cancellation = $this->cancellation($timeout);
-
-        $future = $this->spawn($task, $cancellation)->getFuture();
-
-        return $future->catch(fn () => $this->retry($task, $cancellation));
+        return $future->catch(fn () => $this->retry($task));
     }
 }

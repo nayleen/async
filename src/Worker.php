@@ -2,15 +2,19 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Task;
+namespace Nayleen\Async;
 
-use Nayleen\Async\Kernel;
-use Nayleen\Async\Task;
-use Nayleen\Async\Timers;
+use Amp\Parallel\Worker\Task as TaskInterface;
+use Closure;
 
-abstract readonly class Worker extends Task
+readonly class Worker extends Runtime implements TaskInterface
 {
-    public function __construct(public Timers $timers = new Timers()) {}
+    public function __construct(
+        Closure $closure,
+        public Timers $timers = new Timers(),
+    ) {
+        parent::__construct($closure);
+    }
 
     /**
      * @return iterable<int>
@@ -24,6 +28,8 @@ abstract readonly class Worker extends Task
     {
         try {
             $this->timers->start($kernel);
+            parent::execute($kernel);
+
             $kernel->trap(...$this->signals());
 
             return null;

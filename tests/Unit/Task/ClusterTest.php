@@ -6,6 +6,7 @@ namespace Nayleen\Async\Task;
 
 use Amp\PHPUnit\AsyncTestCase;
 use InvalidArgumentException;
+use Nayleen\Async\Cluster;
 use Nayleen\Async\Test\NoopWorker;
 
 /**

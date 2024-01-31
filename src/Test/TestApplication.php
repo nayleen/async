@@ -9,8 +9,11 @@ use Nayleen\Async\Kernel;
 
 final readonly class TestApplication extends Application
 {
-    public function execute(Kernel $kernel): int
+    protected ?Kernel $kernel;
+
+    public function __construct(?Kernel $kernel = null)
     {
-        return 420;
+        $this->kernel = $kernel;
+        parent::__construct(static fn (): int => 420);
     }
 }

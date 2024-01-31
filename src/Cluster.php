@@ -2,14 +2,10 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Task;
+namespace Nayleen\Async;
 
 use Amp\Cluster as AmpCluster;
 use InvalidArgumentException;
-use Nayleen\Async\Kernel;
-use Nayleen\Async\Task;
-use Nayleen\Async\Timers;
-use RuntimeException;
 
 readonly class Cluster extends Worker
 {
@@ -18,23 +14,20 @@ readonly class Cluster extends Worker
      */
     private int $count;
 
+    private Worker $worker;
+
     /**
      * @var non-empty-string
      */
-    private const string RUNNER_SCRIPT = __DIR__ . '/Internal/cluster-runner.php';
+    private const string RUNNER_SCRIPT = __DIR__ . '/Task/Internal/cluster-runner.php';
 
     /**
      * @param positive-int|null $count
      */
-    public function __construct(private readonly Task $task, ?int $count = null)
+    public function __construct(Worker $worker, ?int $count = null)
     {
         assert(
-            class_exists(AmpCluster\Cluster::class),
-            new RuntimeException('Running workers in a cluster requires amphp/cluster:^2 to be installed'),
-        );
-
-        assert(
-            !($task instanceof self),
+            !($worker instanceof static),
             new InvalidArgumentException(),
         );
 
@@ -43,11 +36,28 @@ readonly class Cluster extends Worker
 
         $this->count = $count;
 
-        parent::__construct(new Timers());
+        [$this->worker, $timers] = $this->adapt($worker);
+
+        parent::__construct(static fn () => null, $timers);
+    }
+
+    /**
+     * Splits a worker from its timers, which will run only on the main cluster process/thread
+     * instead of once per worker.
+     *
+     * @return array{0: Worker, 1: Timers}
+     */
+    private function adapt(Worker $worker): array
+    {
+        $timers = $worker->timers;
+
+        return [new Worker($worker->code->getClosure(), new Timers()), $timers];
     }
 
     private function watcher(Kernel $kernel): AmpCluster\ClusterWatcher
     {
+        assert(file_exists(self::RUNNER_SCRIPT));
+
         $watcher = $kernel->container()->make(AmpCluster\ClusterWatcher::class, ['script' => self::RUNNER_SCRIPT]);
         assert($watcher instanceof AmpCluster\ClusterWatcher);
 
@@ -60,7 +70,7 @@ readonly class Cluster extends Worker
 
         try {
             $watcher->start($this->count);
-            $watcher->broadcast($this->task);
+            $watcher->broadcast($this->worker);
 
             return parent::execute($kernel);
         } finally {

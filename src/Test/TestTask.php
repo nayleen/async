@@ -7,10 +7,16 @@ namespace Nayleen\Async\Test;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Task;
 
+/**
+ * @template-extends Task<mixed, mixed, int>
+ */
 final readonly class TestTask extends Task
 {
-    public function execute(Kernel $kernel): int
+    protected ?Kernel $kernel;
+
+    public function __construct(?Kernel $kernel = null)
     {
-        return 69;
+        $this->kernel = $kernel;
+        parent::__construct(static fn (): int => 69);
     }
 }

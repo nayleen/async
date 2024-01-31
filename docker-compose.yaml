@@ -14,6 +14,9 @@ services:
     networks:
       - async
     restart: "no"
+    tmpfs:
+      - /home/docker/.opcache
+      - /tmp
     volumes:
       - ./:/usr/src/app
 

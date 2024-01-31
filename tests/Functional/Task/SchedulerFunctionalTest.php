@@ -5,10 +5,12 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Task;
 
 use Amp\ByteStream\WritableBuffer;
+use Amp\CancelledException;
 use Amp\PHPUnit\AsyncTestCase;
 use Amp\Sync\LocalMutex;
 use Amp\Sync\SharedMemoryParcel;
 use Nayleen\Async\Kernel;
+use Nayleen\Async\Task;
 use Nayleen\Async\Test\TestKernel;
 use Nayleen\Async\Test\TestTask;
 use RuntimeException;
@@ -23,6 +25,15 @@ final class SchedulerFunctionalTest extends AsyncTestCase
     private function createScheduler(TestKernel $kernel): Scheduler
     {
         return new Scheduler($kernel, 0, 0);
+    }
+
+    /**
+     * @test
+     */
+    public function can_run_amp_task(): void
+    {
+        $scheduler = $this->createScheduler(TestKernel::create());
+        self::assertSame(42, $scheduler->run(new AmpTask()));
     }
 
     /**
@@ -55,12 +66,23 @@ final class SchedulerFunctionalTest extends AsyncTestCase
     /**
      * @test
      */
+    public function can_timeout_long_running_task(): void
+    {
+        $this->expectException(CancelledException::class);
+
+        $scheduler = $this->createScheduler(TestKernel::create());
+        self::assertNull($scheduler->run(static fn () => delay(1), 0.0));
+    }
+
+    /**
+     * @test
+     */
     public function pipes_stderr_from_child(): void
     {
         $stdErr = new WritableBuffer();
 
         $scheduler = $this->createScheduler(TestKernel::create(stdErr: $stdErr));
-        $task = new AnonymousTask(static fn (Kernel $kernel) => $kernel->io()->debug('Child says uhoh!'));
+        $task = new Task(static fn (Kernel $kernel) => $kernel->io()->debug('Child says uhoh!'));
 
         $scheduler->submit($task)->finally(fn () => $stdErr->close());
 
@@ -75,7 +97,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
         $delay = 0.001;
         $scheduler = $this->createScheduler(TestKernel::create());
 
-        $task = new AnonymousTask(static function () use ($delay) {
+        $task = new Task(static function () use ($delay) {
             $result = 0;
             while ($result < 400) {
                 delay($delay);
@@ -100,7 +122,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
         $kernel = TestKernel::create();
         $scheduler = $this->createScheduler($kernel);
 
-        $task = new AnonymousTask(static fn () => throw new RuntimeException());
+        $task = new Task(static fn () => throw new RuntimeException());
 
         $result = $scheduler->submit($task)->await();
         self::assertNull($result);
@@ -119,7 +141,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
         $kernel = TestKernel::create();
         $scheduler = new Scheduler($kernel, $expectedRetries - 1, 0);
 
-        $task = new AnonymousTask(function () use ($key, $expectedRetries) {
+        $task = new Task(function () use ($key, $expectedRetries) {
             $shm = SharedMemoryParcel::use(new LocalMutex(), $key);
             $value = $shm->synchronized(fn ($value) => $value + 1);
 

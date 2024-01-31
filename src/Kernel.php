@@ -51,13 +51,18 @@ readonly class Kernel
                 DependencyProvider::create([
                     self::class => $this,
                     Cancellation::class => $this->cancellation,
-                    Channel::class => $channel,
+                    Channel::class => static fn (): ?Channel => $channel,
                 ]),
                 ...$components,
             ],
         );
         $this->scheduler = new Scheduler($this);
         $this->signals = new Signals($this);
+    }
+
+    public function channel(): Channel
+    {
+        return $this->container()->get(Channel::class);
     }
 
     public function clock(): Clock

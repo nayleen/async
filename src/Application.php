@@ -4,23 +4,26 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Amp\Cancellation;
 use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
-use Amp\Sync\Channel;
+use Closure;
 
 abstract readonly class Application extends Runtime
 {
     use ForbidCloning;
     use ForbidSerialization;
 
-    public function __construct(public Tasks $tasks = new Tasks()) {}
+    public function __construct(
+        Closure $closure,
+        public Tasks $tasks = new Tasks(),
+    ) {
+        parent::__construct($closure);
+    }
 
-    protected function initialize(?Channel $channel, ?Cancellation $cancellation): Kernel
+    public function execute(Kernel $kernel): mixed
     {
-        $kernel = parent::initialize($channel, $cancellation);
         $this->tasks->submit($kernel->scheduler);
 
-        return $kernel;
+        return parent::execute($kernel);
     }
 }

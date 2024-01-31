@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Task;
 
 use Amp\PHPUnit\AsyncTestCase;
+use Nayleen\Async\Cluster;
 use Nayleen\Async\Test\NoopWorker;
 use Nayleen\Async\Test\TestKernel;
 
