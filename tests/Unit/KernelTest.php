@@ -4,11 +4,21 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
+use Amp\ByteStream\WritableStream;
+use Amp\DeferredCancellation;
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Test\TestKernel;
+use Revolt\EventLoop\Driver;
+use Symfony\Component\Clock\ClockInterface;
+
+use function Amp\async;
 
 /**
  * @internal
+ * @small
+ *
+ * @covers \Nayleen\Async\Kernel
+ * @covers \Nayleen\Async\Test\TestKernel
  */
 final class KernelTest extends AsyncTestCase
 {
@@ -37,16 +47,52 @@ final class KernelTest extends AsyncTestCase
     /**
      * @test
      */
-    public function run_returns_value_from_callback(): void
+    public function can_retrieve_clock(): void
     {
-        $started = false;
-        $return = TestKernel::create()->run(static function () use (&$started): int {
-            $started = true;
+        $clock = $this->createMock(ClockInterface::class);
+        $clock->expects(self::once())->method('now');
 
-            return 420;
+        $kernel = TestKernel::create();
+        $kernel = $kernel->withDependency(Clock::class, new Clock($this->createStub(Driver::class), $clock));
+        $kernel->clock()->now();
+    }
+
+    /**
+     * @test
+     */
+    public function can_retrieve_default_channel(): void
+    {
+        $stdOut = $this->createMock(WritableStream::class);
+        $stdOut->expects(self::once())->method('write');
+
+        $kernel = TestKernel::create(stdOut: $stdOut);
+        $kernel->channel()->send('Test');
+    }
+
+    /**
+     * @test
+     */
+    public function run_returns_null_when_event_loop_is_cancelled(): void
+    {
+        $cancellation = new DeferredCancellation();
+        $kernel = TestKernel::create(cancellation: $cancellation->getCancellation());
+
+        $return = $kernel->run(static function (Kernel $kernel) use ($cancellation): mixed {
+            $cancellation->cancel();
+
+            return async(fn () => 420)->await($kernel->cancellation);
         });
 
+        self::assertNull($return);
+    }
+
+    /**
+     * @test
+     */
+    public function run_returns_value_from_callback(): void
+    {
+        $return = TestKernel::create()->run(static fn (): int => 420);
+
         self::assertSame(420, $return);
-        self::assertTrue($started);
     }
 }

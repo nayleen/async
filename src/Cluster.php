@@ -4,8 +4,11 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Amp\Cluster as AmpCluster;
+use Amp\Cluster\ClusterWatcher;
 use InvalidArgumentException;
+use Override;
+
+use function Amp\Cluster\countCpuCores;
 
 readonly class Cluster extends Worker
 {
@@ -19,7 +22,7 @@ readonly class Cluster extends Worker
     /**
      * @var non-empty-string
      */
-    private const string RUNNER_SCRIPT = __DIR__ . '/Task/Internal/cluster-runner.php';
+    private const string RUNNER_SCRIPT = __DIR__ . '/Worker/Internal/cluster-runner.php';
 
     /**
      * @param positive-int|null $count
@@ -31,7 +34,7 @@ readonly class Cluster extends Worker
             new InvalidArgumentException(),
         );
 
-        $count ??= AmpCluster\countCpuCores();
+        $count ??= countCpuCores();
         assert($count > 0);
 
         $this->count = $count;
@@ -54,16 +57,17 @@ readonly class Cluster extends Worker
         return [new Worker($worker->code->getClosure(), new Timers()), $timers];
     }
 
-    private function watcher(Kernel $kernel): AmpCluster\ClusterWatcher
+    private function watcher(Kernel $kernel): ClusterWatcher
     {
         assert(file_exists(self::RUNNER_SCRIPT));
 
-        $watcher = $kernel->container()->make(AmpCluster\ClusterWatcher::class, ['script' => self::RUNNER_SCRIPT]);
-        assert($watcher instanceof AmpCluster\ClusterWatcher);
+        $watcher = $kernel->container()->make(ClusterWatcher::class, ['script' => self::RUNNER_SCRIPT]);
+        assert($watcher instanceof ClusterWatcher);
 
         return $watcher;
     }
 
+    #[Override]
     public function execute(Kernel $kernel): null
     {
         $watcher = $this->watcher($kernel);

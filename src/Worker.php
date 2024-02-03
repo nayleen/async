@@ -6,13 +6,12 @@ namespace Nayleen\Async;
 
 use Amp\Parallel\Worker\Task as TaskInterface;
 use Closure;
+use Override;
 
 readonly class Worker extends Runtime implements TaskInterface
 {
-    public function __construct(
-        Closure $closure,
-        public Timers $timers = new Timers(),
-    ) {
+    public function __construct(Closure $closure, public Timers $timers = new Timers())
+    {
         parent::__construct($closure);
     }
 
@@ -24,6 +23,7 @@ readonly class Worker extends Runtime implements TaskInterface
         return [SIGINT, SIGQUIT, SIGTERM];
     }
 
+    #[Override]
     public function execute(Kernel $kernel): null
     {
         try {

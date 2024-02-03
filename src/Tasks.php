@@ -29,10 +29,6 @@ readonly class Tasks
 
     public function submit(Scheduler $scheduler): void
     {
-        if (count($this->tasks) === 0) {
-            return;
-        }
-
         foreach ($this->tasks as $task) {
             $scheduler->submit($task);
         }

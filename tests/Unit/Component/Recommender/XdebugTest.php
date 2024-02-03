@@ -10,7 +10,10 @@ use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal
+ * @small
  * @backupGlobals enabled
+ *
+ * @covers \Nayleen\Async\Component\Recommender\Xdebug
  */
 final class XdebugTest extends AsyncTestCase
 {
@@ -29,7 +32,7 @@ final class XdebugTest extends AsyncTestCase
         $kernel = TestKernel::create();
         $this->recommend($kernel);
 
-        self::assertTrue($kernel->log->hasNoticeThatContains('The "xdebug" extension is enabled, which has a major impact on performance'));
+        self::assertTrue($kernel->log->hasNoticeThatContains('The "xdebug" extension is active, which has a major impact on performance'));
     }
 
     /**
@@ -42,6 +45,6 @@ final class XdebugTest extends AsyncTestCase
         $kernel = TestKernel::create();
         $this->recommend($kernel);
 
-        self::assertTrue($kernel->log->hasNoticeThatContains('The "xdebug" extension is enabled, which has a major impact on performance'));
+        self::assertTrue($kernel->log->hasNoticeThatContains('The "xdebug" extension is active, which has a major impact on performance'));
     }
 }

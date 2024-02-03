@@ -10,6 +10,9 @@ use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal
+ * @small
+ *
+ * @covers \Nayleen\Async\Task\Scheduler
  */
 final class SchedulerTest extends AsyncTestCase
 {

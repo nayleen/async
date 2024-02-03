@@ -11,6 +11,9 @@ use Revolt\EventLoop;
 
 /**
  * @internal
+ * @medium
+ *
+ * @covers \Nayleen\Async\Timers
  */
 final class TimersIntegrationTest extends AsyncTestCase
 {
@@ -31,7 +34,7 @@ final class TimersIntegrationTest extends AsyncTestCase
 
     private function createTimer(): Timer
     {
-        $timer = new readonly class() extends Timer {
+        return new readonly class() extends Timer {
             protected function execute(): void {}
 
             protected function interval(): float|int
@@ -39,8 +42,6 @@ final class TimersIntegrationTest extends AsyncTestCase
                 return 0;
             }
         };
-
-        return $timer;
     }
 
     private function createTimers(): Timers
@@ -76,7 +77,7 @@ final class TimersIntegrationTest extends AsyncTestCase
      */
     public function stop_proxies_to_loop_driver(): void
     {
-        $this->loop->expects(self::atLeast(1))->method('cancel');
+        $this->loop->expects(self::once())->method('cancel');
 
         $this->createTimers()->stop();
     }

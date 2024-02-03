@@ -12,6 +12,9 @@ use Symfony\Component\Clock\ClockInterface;
 
 /**
  * @internal
+ * @small
+ *
+ * @covers \Nayleen\Async\Clock
  */
 final class ClockTest extends AsyncTestCase
 {

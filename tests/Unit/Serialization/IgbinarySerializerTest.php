@@ -10,6 +10,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
+ * @small
+ *
+ * @covers \Nayleen\Async\Serialization\IgbinarySerializer
  */
 final class IgbinarySerializerTest extends TestCase
 {
@@ -18,13 +21,11 @@ final class IgbinarySerializerTest extends TestCase
      */
     public static function provideSerializableData(): iterable
     {
-        return [
-            ['test'],
-            [1],
-            [3.14],
-            [['test', 1, 3.14]],
-            [[str_repeat('a', 1024), str_repeat('b', 1024), str_repeat('c', 1024)]],
-        ];
+        yield ['test'];
+        yield [1];
+        yield [3.14];
+        yield [['test', 1, 3.14]];
+        yield [[str_repeat('a', 1024), str_repeat('b', 1024), str_repeat('c', 1024)]];
     }
 
     /**

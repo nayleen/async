@@ -36,7 +36,6 @@
   "suggest": {
     "ext-igbinary": "To use igbinary serializer",
     "ext-msgpack": "To use msgpack serializer",
-    "amphp/cluster": "To run workers in a cluster",
     "amphp/http-server": "To run http server workers",
     "amphp/redis": "To use Redis as worker cache",
     "amphp/websocket-server": "For websocket request handler support",

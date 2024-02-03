@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Amp\Parallel\Worker\Task as AmpTask;
+use Amp\Parallel\Worker\Task as TaskInterface;
 use Closure;
 use Nayleen\Async\Task\Scheduler;
 
@@ -17,12 +17,12 @@ use Nayleen\Async\Task\Scheduler;
  * @template TResult of mixed
  * @extends Runtime<TReceive, TSend, TResult>
  */
-readonly class Task extends Runtime implements AmpTask
+readonly class Task extends Runtime implements TaskInterface
 {
     /**
      * @return Task<mixed, mixed, mixed>
      */
-    final public static function create(AmpTask|Closure|string $task): self
+    final public static function create(Closure|string|TaskInterface $task): self
     {
         assert($task !== '');
 
@@ -62,7 +62,7 @@ readonly class Task extends Runtime implements AmpTask
     /**
      * @return Task<mixed, mixed, mixed>
      */
-    final public static function fromTask(AmpTask $task): self
+    final public static function fromTask(TaskInterface $task): self
     {
         return new self(static fn (Kernel $kernel): mixed => $task->run($kernel->channel(), $kernel->cancellation));
     }

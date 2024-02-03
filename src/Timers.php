@@ -16,11 +16,6 @@ readonly class Timers
         $this->timers = $timers;
     }
 
-    public function __destruct()
-    {
-        $this->stop();
-    }
-
     public function disable(): void
     {
         foreach ($this->timers as $timer) {

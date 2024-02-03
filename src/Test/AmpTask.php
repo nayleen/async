@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Task;
+namespace Nayleen\Async\Test;
 
 use Amp\Cancellation;
 use Amp\Parallel\Worker\Task;

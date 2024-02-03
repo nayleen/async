@@ -29,7 +29,8 @@
         </include>
 
         <exclude>
-            <file>./src/Task/Internal/cluster-runner.php</file>
+            <file>./src/Test/nice-script.php</file>
+            <file>./src/Worker/Internal/cluster-runner.php</file>
         </exclude>
     </coverage>
 
@@ -37,5 +38,6 @@
         <env name="ASYNC_DEBUG" value="true" />
         <env name="ASYNC_DIR" value="/usr/src/app" />
         <env name="ASYNC_ENV" value="test" />
+        <ini name="zend.assertions" value="1" />
     </php>
 </phpunit>

@@ -11,7 +11,7 @@ use Amp\ForbidSerialization;
 use Amp\Future;
 use Amp\NullCancellation;
 use Amp\Parallel\Worker\Execution;
-use Amp\Parallel\Worker\Task as AmpTask;
+use Amp\Parallel\Worker\Task as TaskInterface;
 use Amp\Parallel\Worker\Worker;
 use Amp\Parallel\Worker\WorkerPool;
 use Amp\TimeoutCancellation;
@@ -32,7 +32,7 @@ class Scheduler
     use ForbidSerialization;
 
     /**
-     * @var SplObjectStorage<AmpTask, Execution>
+     * @var SplObjectStorage<TaskInterface, Execution>
      */
     private SplObjectStorage $executions;
 
@@ -48,7 +48,7 @@ class Scheduler
         $this->executions = new SplObjectStorage();
     }
 
-    private function cancel(AmpTask $task): void
+    private function cancel(TaskInterface $task): void
     {
         if (!$this->executions->offsetExists($task)) {
             return;
@@ -56,7 +56,10 @@ class Scheduler
 
         $execution = $this->executions->offsetGet($task);
 
-        if ($execution->getFuture()->isComplete() || $execution->getChannel()->isClosed()) {
+        if (
+            $execution->getFuture()->isComplete()
+            || $execution->getChannel()->isClosed()
+        ) {
             return;
         }
 
@@ -75,7 +78,7 @@ class Scheduler
         return new CompositeCancellation($this->kernel->cancellation, new TimeoutCancellation($timeout));
     }
 
-    private function retry(AmpTask $task, int $attempts = 1): mixed
+    private function retry(TaskInterface $task, int $attempts = 1): mixed
     {
         try {
             delay($this->retryDelay * $attempts, false, $this->kernel->cancellation);
@@ -90,7 +93,7 @@ class Scheduler
         return null;
     }
 
-    private function spawn(AmpTask $task, Cancellation $cancellation = new NullCancellation()): Execution
+    private function spawn(TaskInterface $task, Cancellation $cancellation = new NullCancellation()): Execution
     {
         $this->cancel($task);
 
@@ -120,7 +123,7 @@ class Scheduler
     /**
      * @api
      */
-    public function run(AmpTask|Closure|string $task, ?float $timeout = null): mixed
+    public function run(Closure|string|TaskInterface $task, ?float $timeout = null): mixed
     {
         return $this->submit($task)->await($this->cancellation($timeout));
     }
@@ -133,7 +136,7 @@ class Scheduler
     /**
      * @api
      */
-    public function submit(AmpTask|Closure|string $task): Future
+    public function submit(Closure|string|TaskInterface $task): Future
     {
         $task = Task::create($task);
         $future = $this->spawn($task)->getFuture();

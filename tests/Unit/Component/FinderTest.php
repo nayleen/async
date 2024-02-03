@@ -13,6 +13,9 @@ use Nayleen\Finder\Expectation;
 
 /**
  * @internal
+ * @small
+ *
+ * @covers \Nayleen\Async\Component\Finder
  */
 final class FinderTest extends AsyncTestCase
 {

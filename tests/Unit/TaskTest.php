@@ -4,35 +4,53 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
+use Amp\Parallel\Worker\Task as TaskInterface;
 use Amp\PHPUnit\AsyncTestCase;
 use AssertionError;
+use Closure;
+use Nayleen\Async\Test\AmpTask;
 use Nayleen\Async\Test\TestKernel;
 use Nayleen\Async\Test\TestTask;
 
 /**
  * @internal
+ * @small
+ *
+ * @covers \Nayleen\Async\Runtime
+ * @covers \Nayleen\Async\Task
+ * @covers \Nayleen\Async\Test\AmpTask
+ * @covers \Nayleen\Async\Test\TestTask
  */
 final class TaskTest extends AsyncTestCase
 {
+    /**
+     * @return iterable<string, array{0: Closure|string|TaskInterface, 1: int}>
+     */
+    public static function provideTask(): iterable
+    {
+        yield 'closure' => [static fn () => 1337, 1337];
+        yield 'instance' => [new TestTask(), 69];
+        yield 'script' => [dirname(__DIR__, 2) . '/src/Test/nice-script.php', 69];
+        yield 'task interface' => [new AmpTask(), 42];
+    }
+
     /**
      * @test
      */
     public function can_be_serialized(): void
     {
         $task = unserialize(serialize(new Task(static fn () => 69)));
-        assert($task instanceof Task);
 
-        self::assertSame(69, $task->execute(TestKernel::create()));
+        self::assertInstanceOf(Task::class, $task);
     }
 
     /**
      * @test
+     * @dataProvider provideTask
      */
-    public function executes_in_kernel_context(): void
+    public function executes_in_kernel_context(Closure|string|TaskInterface $task, int $expectedReturn): void
     {
-        $task = new TestTask();
-
-        self::assertSame(69, $task->execute(TestKernel::create()));
+        self::assertSame($expectedReturn, Task::create($task)->execute(TestKernel::create()));
     }
 
     /**
@@ -42,7 +60,7 @@ final class TaskTest extends AsyncTestCase
     {
         $this->expectException(AssertionError::class);
 
-        new Task(static fn ($a): mixed => null);
+        new Task(static fn ($a) => null);
     }
 
     /**

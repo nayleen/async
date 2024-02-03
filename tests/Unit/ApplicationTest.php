@@ -10,6 +10,10 @@ use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal
+ * @small
+ *
+ * @covers \Nayleen\Async\Application
+ * @covers \Nayleen\Async\Test\TestApplication
  */
 final class ApplicationTest extends AsyncTestCase
 {

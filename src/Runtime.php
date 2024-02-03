@@ -27,11 +27,6 @@ abstract readonly class Runtime
     protected SerializableClosure $code;
 
     /**
-     * @psalm-internal Nayleen\Async
-     */
-    protected ?Kernel $kernel; // @phpstan-ignore-line
-
-    /**
      * @param Closure(Kernel): TResult $closure
      */
     public function __construct(Closure $closure)
@@ -83,6 +78,6 @@ abstract readonly class Runtime
         ?Channel $channel = null,
         ?Cancellation $cancellation = null,
     ): mixed {
-        return ($this->kernel ?? new Kernel(channel: $channel, cancellation: $cancellation))->run($this->execute(...));
+        return (new Kernel(channel: $channel, cancellation: $cancellation))->run($this->execute(...));
     }
 }

@@ -10,7 +10,10 @@ use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal
+ * @small
  * @backupGlobals enabled
+ *
+ * @covers \Nayleen\Async\Component\Recommender\Assertions
  */
 final class AssertionsTest extends AsyncTestCase
 {

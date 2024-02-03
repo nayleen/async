@@ -11,6 +11,7 @@ use Amp\Sync\LocalMutex;
 use Amp\Sync\SharedMemoryParcel;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Task;
+use Nayleen\Async\Test\AmpTask;
 use Nayleen\Async\Test\TestKernel;
 use Nayleen\Async\Test\TestTask;
 use RuntimeException;
@@ -19,6 +20,13 @@ use function Amp\delay;
 
 /**
  * @internal
+ * @large
+ *
+ * @covers \Nayleen\Async\Runtime
+ * @covers \Nayleen\Async\Task\ContextFactory
+ * @covers \Nayleen\Async\Task\Scheduler
+ * @covers \Nayleen\Async\Test\AmpTask
+ * @covers \Nayleen\Async\Test\TestTask
  */
 final class SchedulerFunctionalTest extends AsyncTestCase
 {
@@ -51,7 +59,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
     public function can_run_script(): void
     {
         $scheduler = $this->createScheduler(TestKernel::create());
-        self::assertSame(69, $scheduler->run(__DIR__ . '/nice-script.php'));
+        self::assertSame(69, $scheduler->run(dirname(__DIR__, 3) . '/src/Test/nice-script.php'));
     }
 
     /**
@@ -143,7 +151,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
 
         $task = new Task(function () use ($key, $expectedRetries) {
             $shm = SharedMemoryParcel::use(new LocalMutex(), $key);
-            $value = $shm->synchronized(fn ($value) => $value + 1);
+            $value = $shm->synchronized(static fn ($value) => $value + 1);
 
             if ($value < $expectedRetries) {
                 throw new RuntimeException();

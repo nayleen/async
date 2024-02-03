@@ -11,6 +11,10 @@ use Nayleen\Async\Test\NoopWorker;
 
 /**
  * @internal
+ * @small
+ *
+ * @covers \Nayleen\Async\Tasks
+ * @covers \Nayleen\Async\Test\NoopWorker
  */
 final class TasksTest extends AsyncTestCase
 {

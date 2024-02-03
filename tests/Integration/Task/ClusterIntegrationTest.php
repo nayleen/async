@@ -11,6 +11,12 @@ use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal
+ * @medium
+ *
+ * @covers \Nayleen\Async\Cluster
+ * @covers \Nayleen\Async\Runtime
+ * @covers \Nayleen\Async\Worker
+ * @covers \Nayleen\Async\Test\NoopWorker
  */
 final class ClusterIntegrationTest extends AsyncTestCase
 {

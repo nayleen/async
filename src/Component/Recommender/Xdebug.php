@@ -35,7 +35,7 @@ final readonly class Xdebug implements Recommender
     public function recommend(Kernel $kernel): void
     {
         if ($this->xdebugEnabled()) {
-            $kernel->io()->notice('The "xdebug" extension is enabled, which has a major impact on performance');
+            $kernel->io()->notice('The "xdebug" extension is active, which has a major impact on performance');
         }
     }
 }

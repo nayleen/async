@@ -12,6 +12,10 @@ use Nayleen\Async\Component\DependencyProvider;
 
 /**
  * @internal
+ * @medium
+ *
+ * @covers \Nayleen\Async\Bootstrapper
+ * @covers \Nayleen\Async\Kernel
  */
 final class KernelIntegrationTest extends AsyncTestCase
 {
@@ -21,18 +25,16 @@ final class KernelIntegrationTest extends AsyncTestCase
     public function can_trap_signals(): void
     {
         $logger = new Logger('test');
-        $logger->pushHandler($handler = new TestHandler());
+        $logger->pushHandler($log = new TestHandler());
 
         $cancellation = new DeferredCancellation();
+        $components = [
+            DependencyProvider::create([
+                Logger::class => $logger,
+            ]),
+        ];
 
-        $kernel = new Kernel(
-            [
-                DependencyProvider::create([
-                    Logger::class => $logger,
-                ]),
-            ],
-            cancellation: $cancellation->getCancellation(),
-        );
+        $kernel = new Kernel($components, cancellation: $cancellation->getCancellation());
         $return = $kernel->run(function (Kernel $kernel) use ($cancellation): int {
             $kernel->loop()->defer(fn () => $cancellation->cancel());
             $kernel->trap(SIGINT);
@@ -41,6 +43,6 @@ final class KernelIntegrationTest extends AsyncTestCase
         });
 
         self::assertNull($return);
-        self::assertTrue($handler->hasInfoThatContains('Awaiting shutdown via signals'));
+        self::assertTrue($log->hasInfoThatContains('Awaiting shutdown via signals'));
     }
 }

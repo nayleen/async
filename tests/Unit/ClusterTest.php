@@ -2,15 +2,20 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Task;
+namespace Nayleen\Async;
 
 use Amp\PHPUnit\AsyncTestCase;
 use InvalidArgumentException;
-use Nayleen\Async\Cluster;
 use Nayleen\Async\Test\NoopWorker;
 
 /**
  * @internal
+ * @small
+ *
+ * @covers \Nayleen\Async\Cluster
+ * @covers \Nayleen\Async\Runtime
+ * @covers \Nayleen\Async\Worker
+ * @covers \Nayleen\Async\Test\NoopWorker
  */
 final class ClusterTest extends AsyncTestCase
 {

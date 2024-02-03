@@ -7,6 +7,9 @@ namespace Nayleen\Async;
 use Amp\Cluster\ClusterWatcher;
 use Amp\Cluster\ServerSocketPipeProvider;
 use Amp\Parallel\Context\ContextFactory as ContextFactoryInterface;
+use Amp\Parallel\Context\ProcessContextFactory;
+use Amp\Parallel\Context\ThreadContext;
+use Amp\Parallel\Context\ThreadContextFactory;
 use Amp\Parallel\Ipc\IpcHub;
 use Amp\Parallel\Ipc\LocalIpcHub;
 use Amp\Parallel\Worker\ContextWorkerFactory;
@@ -30,6 +33,7 @@ return [
     'async.worker.context_id' => static fn () => defined('\AMP_CONTEXT_ID') ? \AMP_CONTEXT_ID : Safe\getmypid(),
     'async.worker.log_threshold' => DI\factory(static fn (bool $debug): int|Level|string => $debug ? LogLevel::DEBUG : LogLevel::WARNING)
         ->parameter('debug', DI\get('async.debug')),
+
     'async.worker.pool_size' => WorkerPool::DEFAULT_WORKER_LIMIT,
 
     // worker services
@@ -48,10 +52,18 @@ return [
     }),
 
     ContextFactoryInterface::class => static function (DI\Container $container): ContextFactoryInterface {
+        $ipcHub = $container->get(IpcHub::class);
+
+        if (ThreadContext::isSupported()) {
+            $contextFactory = new ThreadContextFactory(ipcHub: $ipcHub);
+        } else {
+            $contextFactory = new ProcessContextFactory(ipcHub: $ipcHub);
+        }
+
         return new ContextFactory(
             $container->get('async.stdout'),
             $container->get('async.stderr'),
-            $container->get(IpcHub::class),
+            $contextFactory,
         );
     },
 

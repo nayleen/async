@@ -42,6 +42,8 @@ abstract class TestCase extends AsyncTestCase
 
     final protected function container(): Container
     {
-        return (new TestKernel([$this->component()]))->components->compile();
+        static $container = null;
+
+        return $container ??= (new TestKernel([$this->component()]))->components->compile();
     }
 }
