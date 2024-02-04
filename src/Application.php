@@ -7,7 +7,6 @@ namespace Nayleen\Async;
 use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
 use Closure;
-use Override;
 
 abstract readonly class Application extends Runtime
 {
@@ -19,7 +18,6 @@ abstract readonly class Application extends Runtime
         parent::__construct($closure);
     }
 
-    #[Override]
     public function execute(Kernel $kernel): mixed
     {
         $this->tasks->submit($kernel->scheduler);

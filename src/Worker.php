@@ -6,7 +6,6 @@ namespace Nayleen\Async;
 
 use Amp\Parallel\Worker\Task as TaskInterface;
 use Closure;
-use Override;
 
 readonly class Worker extends Runtime implements TaskInterface
 {
@@ -23,7 +22,6 @@ readonly class Worker extends Runtime implements TaskInterface
         return [SIGINT, SIGQUIT, SIGTERM];
     }
 
-    #[Override]
     public function execute(Kernel $kernel): null
     {
         try {

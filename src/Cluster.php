@@ -6,7 +6,6 @@ namespace Nayleen\Async;
 
 use Amp\Cluster\ClusterWatcher;
 use InvalidArgumentException;
-use Override;
 
 use function Amp\Cluster\countCpuCores;
 
@@ -67,7 +66,6 @@ readonly class Cluster extends Worker
         return $watcher;
     }
 
-    #[Override]
     public function execute(Kernel $kernel): null
     {
         $watcher = $this->watcher($kernel);
