@@ -58,8 +58,7 @@
   "config": {
     "allow-plugins": {
       "ergebnis/composer-normalize": true,
-      "phpstan/extension-installer": true,
-      "symfony/runtime": true
+      "phpstan/extension-installer": true
     },
     "lock": false,
     "preferred-install": {
