@@ -1,0 +1,11 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types = 1);
+
+namespace Nayleen\Async;
+
+require $_composer_autoload_path ?? dirname(__DIR__) . '/vendor/autoload.php';
+
+$exitCode = (new Console())->run();
+exit($exitCode);

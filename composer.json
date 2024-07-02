@@ -19,13 +19,14 @@
     "php-di/php-di": "^7.0.6",
     "revolt/event-loop": "^1",
     "roave/better-reflection": "^6.20",
-    "symfony/clock": "^7"
+    "symfony/clock": "^7",
+    "symfony/console": "^7"
   },
   "require-dev": {
     "amphp/http": "^2",
     "amphp/http-server": "^3",
-    "amphp/websocket-server": "^4",
     "amphp/redis": "^2",
+    "amphp/websocket-server": "^4",
     "bnf/phpstan-psr-container": "^1",
     "jetbrains/phpstorm-stubs": "@dev",
     "nayleen/codestandard": "dev-latest",
@@ -55,12 +56,14 @@
       ]
     }
   },
+  "bin": [
+    "bin/async-console"
+  ],
   "config": {
     "allow-plugins": {
       "ergebnis/composer-normalize": true,
       "phpstan/extension-installer": true
     },
-    "lock": false,
     "preferred-install": {
       "*": "dist"
     },
@@ -68,7 +71,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "0.10.x-dev"
+      "dev-main": "0.11.x-dev"
     }
   }
 }
