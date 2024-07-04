@@ -9,8 +9,6 @@ use Amp\ByteStream\WritableBuffer;
 use Amp\ByteStream\WritableResourceStream;
 use Amp\PHPUnit\AsyncTestCase;
 
-use function Safe\fopen;
-
 /**
  * @internal
  */
@@ -21,10 +19,12 @@ final class StreamOutputFunctionalTest extends AsyncTestCase
      */
     public function evaluates_color_support_when_writing_to_stream(): void
     {
-        $stream = new WritableResourceStream(fopen('php://temp', 'r+'));
+        $resource = STDOUT;
+
+        $stream = new WritableResourceStream($resource);
         $output = new StreamOutput($stream);
 
-        self::assertTrue($output->isDecorated());
+        self::assertSame(posix_isatty($resource), $output->isDecorated());
     }
 
     /**
