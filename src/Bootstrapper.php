@@ -32,7 +32,7 @@ readonly class Bootstrapper extends Component
 
     public function boot(Kernel $kernel): void
     {
-        assert($kernel->io()->info('Booting Kernel'));
+        assert($kernel->io()->debug('Booting Kernel'));
 
         $this->setupLoop($kernel);
 
@@ -49,7 +49,7 @@ readonly class Bootstrapper extends Component
 
     public function shutdown(Kernel $kernel): void
     {
-        assert($kernel->io()->info('Shutting down Kernel'));
+        assert($kernel->io()->debug('Shutting down Kernel'));
 
         $kernel->scheduler->shutdown();
     }

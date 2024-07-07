@@ -92,8 +92,10 @@ final class SchedulerFunctionalTest extends AsyncTestCase
         $scheduler = $this->createScheduler(TestKernel::create(stdErr: $stdErr));
         $task = new Task(static fn (Kernel $kernel) => $kernel->io()->debug('Child says uhoh!'));
 
-        $scheduler->submit($task)->finally(fn () => $stdErr->close());
+        $scheduler->run($task);
+        delay(0.001);
 
+        $stdErr->close();
         self::assertStringContainsString('Child says uhoh!', $stdErr->buffer());
     }
 
@@ -132,7 +134,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
 
         $task = new Task(static fn () => throw new RuntimeException());
 
-        $result = $scheduler->submit($task)->await();
+        $result = $scheduler->run($task);
         self::assertNull($result);
     }
 

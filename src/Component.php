@@ -43,7 +43,9 @@ abstract readonly class Component implements Stringable
 
     public function boot(Kernel $kernel): void
     {
-        $wantsRecommendations = $kernel->container()->get('async.run_recommendations');
+        static $wantsRecommendations;
+
+        $wantsRecommendations ??= $kernel->container()->get('async.run_recommendations');
         assert(is_bool($wantsRecommendations));
 
         if ($wantsRecommendations) {

@@ -65,8 +65,15 @@ class Components implements IteratorAggregate
 
     public function boot(Kernel $kernel): void
     {
+        $wantsRecommendations = $kernel->container()->get('async.run_recommendations');
+        assert(is_bool($wantsRecommendations));
+
         foreach ($this->components as $component) {
             $component->boot($kernel);
+        }
+
+        if ($wantsRecommendations) {
+            $kernel->io()->notice('To disable recommendations set ASYNC_RECOMMENDATIONS to a falsy value like 0');
         }
     }
 

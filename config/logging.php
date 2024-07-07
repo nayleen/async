@@ -46,5 +46,6 @@ return [
 
         return $logger;
     },
+
     LoggerInterface::class => DI\get(Logger::class),
 ];

@@ -19,7 +19,7 @@ readonly class Console extends Application
         private ?OutputInterface $output = null,
     ) {
         assert($this->defaultCommand !== '');
-        parent::__construct($this->runConsole(...), new Tasks());
+        parent::__construct($this->runConsole(...));
     }
 
     protected function runConsole(Kernel $kernel): int
