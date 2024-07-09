@@ -31,7 +31,7 @@
     "jetbrains/phpstorm-stubs": "@dev",
     "nayleen/codestandard": "dev-latest",
     "nayleen/development-dependencies": "^3.4.2",
-    "phpunit/phpunit": "^9.6",
+    "phpunit/phpunit": "^11.2",
     "roave/security-advisories": "dev-latest"
   },
   "suggest": {
