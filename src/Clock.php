@@ -45,6 +45,10 @@ readonly class Clock implements ClockInterface
 
     public function sleep(float|int $seconds): void
     {
+        if ($seconds <= 0) {
+            return;
+        }
+
         $suspension = $this->loop->getSuspension();
         $callbackId = $this->loop->unreference($this->loop->delay($seconds, $suspension->resume(...)));
 
