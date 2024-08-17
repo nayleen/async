@@ -28,4 +28,4 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - run: docker compose pull --quiet
-      - run: make ci
+      - run: task ci
