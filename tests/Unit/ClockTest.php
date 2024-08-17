@@ -78,7 +78,7 @@ final class ClockTest extends AsyncTestCase
      */
     public function sleep_noops_on_lte_zero_seconds(): void
     {
-        $loop = $this->createStub(EventLoop\Driver::class);
+        $loop = $this->createMock(EventLoop\Driver::class);
         $loop->expects(self::never())->method('getSuspension');
 
         $clock = new Clock($loop);
