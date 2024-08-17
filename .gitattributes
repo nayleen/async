@@ -8,6 +8,6 @@ tests/ export-ignore
 .gitignore export-ignore
 .php-cs-fixer.php export-ignore
 compose.yaml export-ignore
-Makefile export-ignore
 phpstan.neon.dist export-ignore
 phpunit.xml.dist export-ignore
+Taskfile.dist.yaml export-ignore

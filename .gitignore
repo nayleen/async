@@ -1,8 +1,9 @@
 .idea/
+.task/
 coverage/
 vendor/
 compose.override.yaml
 composer.lock
-Makefile.local
 phpstan.neon
 phpunit.xml
+Taskfile.yaml

@@ -24,5 +24,8 @@ jobs:
       DEPENDENCY_VERSIONS: ${{ matrix.dependencies }}
     steps:
       - uses: actions/checkout@v4
+      - uses: arduino/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - run: docker compose pull --quiet
       - run: make ci
