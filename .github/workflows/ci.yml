@@ -24,5 +24,5 @@ jobs:
       DEPENDENCY_VERSIONS: ${{ matrix.dependencies }}
     steps:
       - uses: actions/checkout@v4
-      - run: docker-compose pull --quiet
+      - run: docker compose pull --quiet
       - run: make ci
