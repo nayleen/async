@@ -73,5 +73,8 @@
     "branch-alias": {
       "dev-main": "0.11.x-dev"
     }
+  },
+  "scripts": {
+    "post-update-cmd": "@composer normalize"
   }
 }
