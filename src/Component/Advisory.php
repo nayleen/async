@@ -6,7 +6,7 @@ namespace Nayleen\Async\Component;
 
 use Nayleen\Async\Kernel;
 
-interface Recommender
+interface Advisory
 {
-    public function recommend(Kernel $kernel): void;
+    public function advise(Kernel $kernel): void;
 }

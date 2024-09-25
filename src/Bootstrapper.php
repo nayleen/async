@@ -8,7 +8,7 @@ use Amp\Dns;
 use Amp\Parallel;
 use Amp\Socket;
 use DI\ContainerBuilder;
-use Nayleen\Async\Component\Recommender;
+use Nayleen\Async\Component\Advisory;
 
 readonly class Bootstrapper extends Component
 {
@@ -22,12 +22,12 @@ readonly class Bootstrapper extends Component
     }
 
     /**
-     * @return iterable<Recommender>
+     * @return iterable<Advisory>
      */
-    protected function recommenders(Kernel $kernel): iterable
+    protected function advisories(Kernel $kernel): iterable
     {
-        yield new Recommender\Assertions();
-        yield new Recommender\Xdebug();
+        yield new Advisory\Assertions();
+        yield new Advisory\Xdebug();
     }
 
     public function boot(Kernel $kernel): void

@@ -2,16 +2,16 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Component\Recommender;
+namespace Nayleen\Async\Component\Advisory;
 
-use Nayleen\Async\Component\Recommender;
+use Nayleen\Async\Component\Advisory;
 use Nayleen\Async\Kernel;
 use Safe;
 
 /**
  * @psalm-internal Nayleen\Async
  */
-final readonly class Xdebug implements Recommender
+final readonly class Xdebug implements Advisory
 {
     /**
      * @var string[]
@@ -32,7 +32,7 @@ final readonly class Xdebug implements Recommender
         return !in_array(Safe\ini_get('xdebug.mode'), self::XDEBUG_DISABLED_MODES, true);
     }
 
-    public function recommend(Kernel $kernel): void
+    public function advise(Kernel $kernel): void
     {
         if ($this->xdebugEnabled()) {
             $kernel->io()->notice('The "xdebug" extension is active, which has a major impact on performance');

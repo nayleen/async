@@ -15,6 +15,7 @@ tasks:
     deps: [install]
     cmd: docker compose run --rm php php vendor/bin/php-cs-fixer fix --dry-run --diff --verbose 2>/dev/null
     sources:
+      - config/**/*.php
       - src/**/*.php
       - tests/**/*.php
 
@@ -26,14 +27,12 @@ tasks:
     cmd: docker compose run --rm -eXDEBUG_MODE=coverage php php vendor/bin/phpunit --coverage-html=coverage/ 2>/dev/null
     generates:
       - coverage/**/*
-    sources:
-      - src/**/*.php
-      - tests/**/*.php
 
   fix-style:
     deps: [install]
     cmd: docker compose run --rm php php vendor/bin/php-cs-fixer fix 2>/dev/null
     sources:
+      - config/**/*.php
       - src/**/*.php
       - tests/**/*.php
 
@@ -53,18 +52,12 @@ tasks:
   static:
     deps: [install]
     cmd: docker compose run --rm php php vendor/bin/phpstan 2>/dev/null
-    sources:
-      - src/**/*.php
-      - tests/**/*.php
 
   test:
     deps: [install]
     cmds:
       - docker compose run --rm php php vendor/bin/phpunit 2>/dev/null
       - task: clean
-    sources:
-      - src/**/*.php
-      - tests/**/*.php
 
   update:
     deps: [validate]

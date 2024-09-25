@@ -27,8 +27,9 @@ namespace PHPSTORM_META
             'async.logger.level' => \int|\string|\Monolog\Level::class,
             'async.logger.name' => \string,
             // config/redis.php
+            'async.redis_available' => \bool,
             'async.redis_dsn' => \string,
-            'async.redis_support' => \bool,
+            'async.redis_enabled' => \bool,
             // config/worker.php
             'async.worker' => \bool,
             'async.worker.bootstrap_path' => \null|\string,

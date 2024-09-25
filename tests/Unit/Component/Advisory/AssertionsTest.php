@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Component\Recommender;
+namespace Nayleen\Async\Component\Advisory;
 
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Kernel;
@@ -13,13 +13,13 @@ use Nayleen\Async\Test\TestKernel;
  * @small
  * @backupGlobals enabled
  *
- * @covers \Nayleen\Async\Component\Recommender\Assertions
+ * @covers \Nayleen\Async\Component\Advisory\Assertions
  */
 final class AssertionsTest extends AsyncTestCase
 {
-    private function recommend(Kernel $kernel): void
+    private function advise(Kernel $kernel): void
     {
-        (new Assertions())->recommend($kernel);
+        (new Assertions())->advise($kernel);
     }
 
     /**
@@ -28,7 +28,7 @@ final class AssertionsTest extends AsyncTestCase
     public function logs_performance_implications_of_assertions(): void
     {
         $kernel = TestKernel::create();
-        $this->recommend($kernel);
+        $this->advise($kernel);
 
         self::assertTrue($kernel->log->hasNoticeThatContains('Running Nayleen\Async\Kernel with assertions enabled is not recommended'));
     }

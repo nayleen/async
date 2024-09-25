@@ -45,6 +45,9 @@ readonly class Kernel
         ?Cancellation $cancellation = null,
     ) {
         $this->cancellation = $cancellation ?? new NullCancellation();
+        $this->scheduler = new Scheduler($this);
+        $this->signals = new Signals($this);
+
         $this->components = new Components(
             [
                 Bootstrapper::class,
@@ -52,12 +55,12 @@ readonly class Kernel
                     self::class => $this,
                     Cancellation::class => $this->cancellation,
                     Channel::class => static fn (): ?Channel => $channel,
+                    Scheduler::class => $this->scheduler,
+                    Signals::class => $this->signals,
                 ]),
                 ...$components,
             ],
         );
-        $this->scheduler = new Scheduler($this);
-        $this->signals = new Signals($this);
     }
 
     public function channel(): Channel

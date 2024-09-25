@@ -2,16 +2,16 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Component\Recommender;
+namespace Nayleen\Async\Component\Advisory;
 
-use Nayleen\Async\Component\Recommender;
+use Nayleen\Async\Component\Advisory;
 use Nayleen\Async\Kernel;
 use Safe;
 
 /**
  * @psalm-internal Nayleen\Async
  */
-final readonly class Assertions implements Recommender
+final readonly class Assertions implements Advisory
 {
     public function __construct() {}
 
@@ -20,7 +20,7 @@ final readonly class Assertions implements Recommender
         return Safe\ini_get('zend.assertions') === '1';
     }
 
-    public function recommend(Kernel $kernel): void
+    public function advise(Kernel $kernel): void
     {
         if ($this->assertionsEnabled()) {
             $kernel->io()->notice('Running Nayleen\Async\Kernel with assertions enabled is not recommended');

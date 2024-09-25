@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async\Component\Recommender;
+namespace Nayleen\Async\Component\Advisory;
 
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Kernel;
@@ -13,13 +13,13 @@ use Nayleen\Async\Test\TestKernel;
  * @small
  * @backupGlobals enabled
  *
- * @covers \Nayleen\Async\Component\Recommender\Xdebug
+ * @covers \Nayleen\Async\Component\Advisory\Xdebug
  */
 final class XdebugTest extends AsyncTestCase
 {
-    private function recommend(Kernel $kernel): void
+    private function advise(Kernel $kernel): void
     {
-        (new Xdebug())->recommend($kernel);
+        (new Xdebug())->advise($kernel);
     }
 
     /**
@@ -30,7 +30,7 @@ final class XdebugTest extends AsyncTestCase
         $_ENV['XDEBUG_MODE'] = $_SERVER['XDEBUG_MODE'] = 'debug';
 
         $kernel = TestKernel::create();
-        $this->recommend($kernel);
+        $this->advise($kernel);
 
         self::assertTrue($kernel->log->hasNoticeThatContains('The "xdebug" extension is active, which has a major impact on performance'));
     }
@@ -43,7 +43,7 @@ final class XdebugTest extends AsyncTestCase
         $_ENV['XDEBUG_MODE'] = $_SERVER['XDEBUG_MODE'] = null;
 
         $kernel = TestKernel::create();
-        $this->recommend($kernel);
+        $this->advise($kernel);
 
         self::assertTrue($kernel->log->hasNoticeThatContains('The "xdebug" extension is active, which has a major impact on performance'));
     }

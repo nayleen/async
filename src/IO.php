@@ -51,8 +51,7 @@ readonly class IO
      */
     public function __call(string $method, array $arguments): true
     {
-        /** @phpstan-ignore-next-line */
-        $this->logger->log($method, ...$arguments);
+        $this->logger->log($method, ...$arguments); // @phpstan-ignore-line
 
         return true;
     }

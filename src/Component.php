@@ -7,8 +7,8 @@ namespace Nayleen\Async;
 use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
 use DI;
+use Nayleen\Async\Component\Advisory;
 use Nayleen\Async\Component\Configuration\FileLoader;
-use Nayleen\Async\Component\Recommender;
 use Stringable;
 
 abstract readonly class Component implements Stringable
@@ -18,11 +18,19 @@ abstract readonly class Component implements Stringable
 
     public function __construct() {}
 
-    private function recommend(Kernel $kernel, Recommender ...$recommenders): void
+    private function advise(Kernel $kernel, Advisory ...$advisories): void
     {
-        foreach ($recommenders as $recommender) {
-            $recommender->recommend($kernel);
+        foreach ($advisories as $advisory) {
+            $advisory->advise($kernel);
         }
+    }
+
+    /**
+     * @return iterable<Advisory>
+     */
+    protected function advisories(Kernel $kernel): iterable
+    {
+        return [];
     }
 
     /**
@@ -33,14 +41,6 @@ abstract readonly class Component implements Stringable
         FileLoader::load($containerBuilder, ...$filenames);
     }
 
-    /**
-     * @return iterable<Recommender>
-     */
-    protected function recommenders(Kernel $kernel): iterable
-    {
-        return [];
-    }
-
     public function boot(Kernel $kernel): void
     {
         static $wantsRecommendations;
@@ -49,7 +49,7 @@ abstract readonly class Component implements Stringable
         assert(is_bool($wantsRecommendations));
 
         if ($wantsRecommendations) {
-            $this->recommend($kernel, ...$this->recommenders($kernel));
+            $this->advise($kernel, ...$this->advisories($kernel));
         }
     }
 

@@ -10,21 +10,23 @@ use RuntimeException;
 
 return [
     // redis config
-    'async.redis_dsn' => DI\factory(static function (?string $dsn, bool $redisSupported): string {
-        if (!$redisSupported) {
-            throw new RuntimeException();
+    'async.redis_available' => DI\factory(static fn (): bool => class_exists(Redis\RedisClient::class)),
+
+    'async.redis_dsn' => DI\factory(static function (bool $redisEnabled, ?string $dsn): string {
+        if (!$redisEnabled) {
+            throw new RuntimeException('Redis support is not installed or you have not configured the ASYNC_REDIS_DSN environment variable.');
         }
 
-        if ($dsn === null) {
-            throw new RuntimeException();
-        }
+        assert($dsn !== null);
 
         return $dsn;
     })
-        ->parameter('dsn', DI\env('ASYNC_REDIS_DSN', null))
-        ->parameter('redisSupported', DI\get('async.redis_support')),
+        ->parameter('redisEnabled', DI\get('async.redis_enabled'))
+        ->parameter('dsn', DI\env('ASYNC_REDIS_DSN', null)),
 
-    'async.redis_support' => DI\factory(static fn (): bool => class_exists(Redis\RedisClient::class)),
+    'async.redis_enabled' => DI\factory(static fn (bool $redisAvailable, ?string $dsn): bool => $redisAvailable && $dsn !== null)
+        ->parameter('redisAvailable', DI\get('async.redis_available'))
+        ->parameter('dsn', DI\env('ASYNC_REDIS_DSN', null)),
 
     // redis services
     Redis\RedisClient::class => DI\factory(static fn (string $dsn): Redis\RedisClient => Redis\createRedisClient($dsn))
