@@ -25,6 +25,14 @@ use function Amp\Dns\createDefaultResolver;
 
 return [
     // app config
+    'async.advisories' => DI\factory(static function (string $runAdvisories, bool $isWorker): bool {
+        $runAdvisories = (bool) filter_var($runAdvisories, FILTER_VALIDATE_BOOL);
+
+        return $runAdvisories && !$isWorker;
+    })
+        ->parameter('runAdvisories', DI\env('ASYNC_ADVISORIES', '1'))
+        ->parameter('isWorker', DI\get('async.worker')),
+
     'async.app_name' => DI\env('ASYNC_APP_NAME', 'Kernel'),
     'async.app_version' => DI\env('ASYNC_APP_VERSION', 'UNKNOWN'),
     'async.debug' => DI\factory(static function (string $env, string $debug): bool {
@@ -37,14 +45,6 @@ return [
 
     'async.env' => DI\factory(static fn (string $env): string => strtolower($env))
         ->parameter('env', DI\env('ASYNC_ENV', 'prod')),
-
-    'async.run_recommendations' => DI\factory(static function (string $wantsRecommendations, bool $isWorker): bool {
-        $wantsRecommendations = (bool) filter_var($wantsRecommendations, FILTER_VALIDATE_BOOL);
-
-        return $wantsRecommendations && !$isWorker;
-    })
-        ->parameter('wantsRecommendations', DI\env('ASYNC_RECOMMENDATIONS', '1'))
-        ->parameter('isWorker', DI\get('async.worker')),
 
     // directories
     'async.dir.base' => DI\env('ASYNC_DIR'),

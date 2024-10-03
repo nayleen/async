@@ -15,7 +15,7 @@ namespace PHPSTORM_META
             'async.dir.tmp' => \string,
             'async.env' => \string,
             'async.exception_handler' => \Closure::class,
-            'async.run_recommendations' => \bool,
+            'async.advisories' => \bool,
             'async.stderr' => \Amp\ByteStream\WritableResourceStream::class,
             'async.stdin' => \Amp\ByteStream\ReadableResourceStream::class,
             'async.stdout' => \Amp\ByteStream\WritableResourceStream::class,

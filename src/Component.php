@@ -18,21 +18,6 @@ abstract readonly class Component implements Stringable
 
     public function __construct() {}
 
-    private function advise(Kernel $kernel, Advisory ...$advisories): void
-    {
-        foreach ($advisories as $advisory) {
-            $advisory->advise($kernel);
-        }
-    }
-
-    /**
-     * @return iterable<Advisory>
-     */
-    protected function advisories(Kernel $kernel): iterable
-    {
-        return [];
-    }
-
     /**
      * @param non-empty-string ...$filenames
      */
@@ -41,17 +26,15 @@ abstract readonly class Component implements Stringable
         FileLoader::load($containerBuilder, ...$filenames);
     }
 
-    public function boot(Kernel $kernel): void
+    /**
+     * @return iterable<Advisory>
+     */
+    public function advisories(): iterable
     {
-        static $wantsRecommendations;
-
-        $wantsRecommendations ??= $kernel->container()->get('async.run_recommendations');
-        assert(is_bool($wantsRecommendations));
-
-        if ($wantsRecommendations) {
-            $this->advise($kernel, ...$this->advisories($kernel));
-        }
+        return [];
     }
+
+    public function boot(Kernel $kernel): void {}
 
     /**
      * @return non-empty-string
