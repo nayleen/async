@@ -70,7 +70,7 @@ class Components implements IteratorAggregate
 
         foreach ($this->components as $component) {
             if ($runAdvisories) {
-                foreach ($component->advisories() as $advisory) {
+                foreach ($component->advisories($kernel) as $advisory) {
                     $advisory->advise($kernel);
                 }
             }

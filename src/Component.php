@@ -29,7 +29,7 @@ abstract readonly class Component implements Stringable
     /**
      * @return iterable<Advisory>
      */
-    public function advisories(): iterable
+    public function advisories(Kernel $kernel): iterable
     {
         return [];
     }

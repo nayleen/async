@@ -24,7 +24,7 @@ readonly class Bootstrapper extends Component
     /**
      * @return iterable<Advisory>
      */
-    public function advisories(): iterable
+    public function advisories(Kernel $kernel): iterable
     {
         yield new Advisory\Assertions();
         yield new Advisory\Xdebug();
