@@ -12,12 +12,14 @@ use Amp\Future;
 use Amp\NullCancellation;
 use Amp\Parallel\Worker\Execution;
 use Amp\Parallel\Worker\Task as TaskInterface;
-use Amp\Parallel\Worker\Worker;
+use Amp\Parallel\Worker\Worker as AmpWorker;
 use Amp\Parallel\Worker\WorkerPool;
 use Amp\TimeoutCancellation;
 use Closure;
+use InvalidArgumentException;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Task;
+use Nayleen\Async\Worker;
 use SplObjectStorage;
 use Throwable;
 
@@ -105,7 +107,7 @@ class Scheduler
         return $execution;
     }
 
-    private function worker(): Worker
+    private function worker(): AmpWorker
     {
         return $this->workers()->getWorker();
     }
@@ -125,6 +127,10 @@ class Scheduler
      */
     public function run(Closure|string|TaskInterface $task, ?float $timeout = null): mixed
     {
+        if ($task instanceof Worker) {
+            throw new InvalidArgumentException('Running a Worker to completion is not supported.');
+        }
+
         return $this->submit($task)->await($this->cancellation($timeout));
     }
 
