@@ -52,7 +52,7 @@ return [
     'async.dir.tmp' => DI\env('ASYNC_TMP_DIR', sys_get_temp_dir()),
 
     // app services
-    'async.exception_handler' => static function (ErrorHandler $errorHandler): Closure {
+    'async.exceptions.handler' => static function (ErrorHandler $errorHandler): Closure {
         $errorHandler->registerExceptionHandler();
         $exceptionHandler = set_exception_handler(null);
         assert(is_callable($exceptionHandler));
@@ -104,7 +104,7 @@ return [
 
         return $driver;
     })
-        ->parameter('errorHandler', DI\get('async.exception_handler')),
+        ->parameter('errorHandler', DI\get('async.exceptions.handler')),
 
     IO::class => DI\factory(static function (
         ByteStream\ReadableStream $input,

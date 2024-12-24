@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
 
 return [
     // cache parameters
-    'async.cache.redis' => DI\get('async.redis_enabled'),
+    'async.cache.redis' => DI\get('async.redis.enabled'),
 
     // cache services
     AtomicCache::class => DI\autowire(),

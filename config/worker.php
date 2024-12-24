@@ -8,8 +8,6 @@ use Amp\Cluster\ClusterWatcher;
 use Amp\Cluster\ServerSocketPipeProvider;
 use Amp\Parallel\Context\ContextFactory as ContextFactoryInterface;
 use Amp\Parallel\Context\ProcessContextFactory;
-use Amp\Parallel\Context\ThreadContext;
-use Amp\Parallel\Context\ThreadContextFactory;
 use Amp\Parallel\Ipc\IpcHub;
 use Amp\Parallel\Ipc\LocalIpcHub;
 use Amp\Parallel\Worker\ContextWorkerFactory;
@@ -52,18 +50,10 @@ return [
     }),
 
     ContextFactoryInterface::class => static function (DI\Container $container): ContextFactoryInterface {
-        $ipcHub = $container->get(IpcHub::class);
-
-        if (ThreadContext::isSupported()) {
-            $contextFactory = new ThreadContextFactory(ipcHub: $ipcHub);
-        } else {
-            $contextFactory = new ProcessContextFactory(ipcHub: $ipcHub);
-        }
-
         return new ContextFactory(
             $container->get('async.stdout'),
             $container->get('async.stderr'),
-            $contextFactory,
+            new ProcessContextFactory(ipcHub: $container->get(IpcHub::class)),
         );
     },
 

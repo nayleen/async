@@ -14,7 +14,7 @@ namespace PHPSTORM_META
             'async.dir.cache' => \string,
             'async.dir.tmp' => \string,
             'async.env' => \string,
-            'async.exception_handler' => \Closure::class,
+            'async.exceptions.handler' => \Closure::class,
             'async.advisories' => \bool,
             'async.stderr' => \Amp\ByteStream\WritableResourceStream::class,
             'async.stdin' => \Amp\ByteStream\ReadableResourceStream::class,
@@ -27,9 +27,9 @@ namespace PHPSTORM_META
             'async.logger.level' => \int|\string|\Monolog\Level::class,
             'async.logger.name' => \string,
             // config/redis.php
-            'async.redis_available' => \bool,
-            'async.redis_dsn' => \string,
-            'async.redis_enabled' => \bool,
+            'async.redis.available' => \bool,
+            'async.redis.dsn' => \string,
+            'async.redis.enabled' => \bool,
             // config/worker.php
             'async.worker' => \bool,
             'async.worker.bootstrap_path' => \null|\string,

@@ -28,6 +28,7 @@
     "amphp/redis": "^2",
     "amphp/websocket-server": "^4",
     "bnf/phpstan-psr-container": "^1",
+    "google/protobuf": "^4.29",
     "jetbrains/phpstorm-stubs": "@dev",
     "nayleen/codestandard": "dev-latest",
     "nayleen/development-dependencies": "^3.4.2",

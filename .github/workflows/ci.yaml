@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:
+  XDEBUG_MODE: off
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,12 +19,19 @@ jobs:
       matrix:
         php:
           - 8.3
+          - 8.4
         dependencies:
           - stable
           - lowest
+        loop_driver:
+          - StreamSelectDriver
+          - EvDriver
+          - EventDriver
+          - UvDriver
     env:
-      PHP_VERSION: ${{ matrix.php }}
       DEPENDENCY_VERSIONS: ${{ matrix.dependencies }}
+      PHP_VERSION: ${{ matrix.php }}
+      REVOLT_DRIVER: "Revolt\\EventLoop\\Driver\\${{ matrix.loop_driver }}"
     steps:
       - uses: actions/checkout@v4
       - uses: arduino/setup-task@v2

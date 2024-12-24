@@ -13,12 +13,17 @@ use Safe;
  */
 final readonly class Xdebug implements Advisory
 {
+    private string $iniSetting;
+
     /**
      * @var string[]
      */
     private const array XDEBUG_DISABLED_MODES = ['', 'off'];
 
-    public function __construct() {}
+    public function __construct(?string $iniSetting = null)
+    {
+        $this->iniSetting = $iniSetting ?? Safe\ini_get('xdebug.mode');
+    }
 
     private function xdebugEnabled(): bool
     {
@@ -29,7 +34,7 @@ final readonly class Xdebug implements Advisory
             return !in_array($envSetting, self::XDEBUG_DISABLED_MODES, true);
         }
 
-        return !in_array(Safe\ini_get('xdebug.mode'), self::XDEBUG_DISABLED_MODES, true);
+        return !in_array($this->iniSetting, self::XDEBUG_DISABLED_MODES, true);
     }
 
     public function advise(Kernel $kernel): void

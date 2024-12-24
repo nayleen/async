@@ -71,7 +71,7 @@ final class BootstrapperTest extends ComponentTestCase
      */
     public function registers_error_handler(): void
     {
-        $this->assertContainerHasParameter('async.exception_handler', Closure::class);
+        $this->assertContainerHasParameter('async.exceptions.handler', Closure::class);
         $this->assertContainerHasService(ErrorHandler::class);
     }
 
