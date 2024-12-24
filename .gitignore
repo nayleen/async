@@ -2,6 +2,7 @@
 .task/
 coverage/
 vendor/
+.DS_Store
 compose.override.yaml
 composer.lock
 phpstan.neon

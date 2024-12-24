@@ -6,6 +6,7 @@ services:
       redis:
         condition: service_started
     environment:
+      PHP_CS_FIXER_IGNORE_ENV: ${PHP_CS_FIXER_IGNORE_ENV:-0}
       PHP_INI_TEMPLATE_FILE: development
       REVOLT_DRIVER: ${REVOLT_DRIVER:-Revolt\EventLoop\Driver\StreamSelectDriver}
       XDEBUG_MODE: ${XDEBUG_MODE:-off}

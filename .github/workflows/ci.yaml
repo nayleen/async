@@ -30,6 +30,7 @@ jobs:
           - UvDriver
     env:
       DEPENDENCY_VERSIONS: ${{ matrix.dependencies }}
+      PHP_CS_FIXER_IGNORE_ENV: ${{ matrix.php == '8.4' }}
       PHP_VERSION: ${{ matrix.php }}
       REVOLT_DRIVER: "Revolt\\EventLoop\\Driver\\${{ matrix.loop_driver }}"
     steps:
