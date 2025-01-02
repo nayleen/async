@@ -36,7 +36,6 @@
 
     <php>
         <env name="ASYNC_DEBUG" value="true" />
-        <env name="ASYNC_DIR" value="/usr/src/app" />
         <env name="ASYNC_ENV" value="test" />
         <ini name="zend.assertions" value="1" />
     </php>

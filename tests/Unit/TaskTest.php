@@ -5,11 +5,10 @@ declare(strict_types = 1);
 namespace Nayleen\Async;
 
 use Amp\Parallel\Worker\Task as TaskInterface;
-use Amp\PHPUnit\AsyncTestCase;
 use AssertionError;
 use Closure;
 use Nayleen\Async\Test\AmpTask;
-use Nayleen\Async\Test\TestKernel;
+use Nayleen\Async\Test\RuntimeTestCase;
 use Nayleen\Async\Test\TestTask;
 
 /**
@@ -21,7 +20,7 @@ use Nayleen\Async\Test\TestTask;
  * @covers \Nayleen\Async\Test\AmpTask
  * @covers \Nayleen\Async\Test\TestTask
  */
-final class TaskTest extends AsyncTestCase
+final class TaskTest extends RuntimeTestCase
 {
     /**
      * @return iterable<string, array{0: Closure|string|TaskInterface, 1: int}>
@@ -50,7 +49,7 @@ final class TaskTest extends AsyncTestCase
      */
     public function executes_in_kernel_context(Closure|string|TaskInterface $task, int $expectedReturn): void
     {
-        self::assertSame($expectedReturn, Task::create($task)->execute(TestKernel::create()));
+        self::assertSame($expectedReturn, $this->execute(Task::create($task)));
     }
 
     /**

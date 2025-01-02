@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async;
+namespace Nayleen\Async\Component;
 
 use Amp\ByteStream\ReadableStream;
 use Amp\ByteStream\WritableStream;
@@ -14,14 +14,16 @@ use Amp\Socket\ServerSocketFactory;
 use Amp\Socket\SocketConnector;
 use Closure;
 use Monolog\ErrorHandler;
+use Nayleen\Async\Component;
 use Nayleen\Async\Component\TestCase as ComponentTestCase;
+use Nayleen\Async\IO;
 use Revolt\EventLoop;
 
 /**
  * @internal
  * @small
  *
- * @covers \Nayleen\Async\Bootstrapper
+ * @covers \Nayleen\Async\Component\Bootstrapper
  * @covers \Nayleen\Async\Component
  * @covers \Nayleen\Async\Component\Configuration\FileLoader
  * @covers \Nayleen\Async\Component\TestCase
@@ -54,16 +56,6 @@ final class BootstrapperTest extends ComponentTestCase
         $this->assertContainerHasService('async.stdin', ReadableStream::class);
         $this->assertContainerHasService('async.stdout', WritableStream::class);
         $this->assertContainerHasService(IO::class);
-    }
-
-    /**
-     * @test
-     */
-    public function registers_directory_parameters(): void
-    {
-        $this->assertContainerHasParameter('async.dir.base', 'string');
-        $this->assertContainerHasParameter('async.dir.cache', 'string');
-        $this->assertContainerHasParameter('async.dir.tmp', 'string');
     }
 
     /**

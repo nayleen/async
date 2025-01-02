@@ -6,7 +6,6 @@ namespace Nayleen\Async\Component;
 
 use Amp\PHPUnit\AsyncTestCase;
 use Generator;
-use Nayleen\Async\Bootstrapper;
 use Nayleen\Async\Component;
 use Nayleen\Finder\Engine;
 use Nayleen\Finder\Expectation;

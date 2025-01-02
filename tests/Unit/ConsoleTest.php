@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Amp\PHPUnit\AsyncTestCase;
+use Nayleen\Async\Test\RuntimeTestCase;
 use Nayleen\Async\Test\TestKernel;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @internal
  */
-final class ConsoleTest extends AsyncTestCase
+final class ConsoleTest extends RuntimeTestCase
 {
     /**
      * @test
@@ -26,9 +26,9 @@ final class ConsoleTest extends AsyncTestCase
         $kernel = TestKernel::create()->withDependency(Application::class, $consoleApplication);
 
         $console = new Console(
-            input: $this->createStub(InputInterface::class),
-            output: $this->createStub(OutputInterface::class),
+            input: self::createStub(InputInterface::class),
+            output: self::createStub(OutputInterface::class),
         );
-        $console->execute($kernel);
+        $this->execute($console, $kernel);
     }
 }

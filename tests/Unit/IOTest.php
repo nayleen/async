@@ -41,7 +41,7 @@ final class IOTest extends AsyncTestCase
         $input = $this->createMock(ReadableStream::class);
         $input->expects(self::once())->method('read')->willReturn('test');
 
-        $io = new IO($input, $this->createStub(WritableStream::class), $this->createStub(Logger::class));
+        $io = new IO($input, self::createStub(WritableStream::class), self::createStub(Logger::class));
         self::assertSame('test', $io->read());
     }
 
@@ -53,7 +53,7 @@ final class IOTest extends AsyncTestCase
         $output = $this->createMock(WritableStream::class);
         $output->expects(self::once())->method('write')->with('test');
 
-        $io = new IO($this->createStub(ReadableStream::class), $output, $this->createStub(Logger::class));
+        $io = new IO(self::createStub(ReadableStream::class), $output, self::createStub(Logger::class));
         $io->write('test');
     }
 
@@ -66,7 +66,7 @@ final class IOTest extends AsyncTestCase
         $logger = $this->createMock(Logger::class);
         $logger->expects(self::once())->method('log')->with($level, 'Message');
 
-        $io = new IO($this->createStub(ReadableStream::class), $this->createStub(WritableStream::class), $logger);
+        $io = new IO(self::createStub(ReadableStream::class), self::createStub(WritableStream::class), $logger);
         $io->{$level}('Message'); // @phpstan-ignore-line
     }
 }

@@ -22,7 +22,7 @@ final class StreamOutputTest extends AsyncTestCase
     {
         try {
             putenv('NO_COLOR=1');
-            $output = new StreamOutput($this->createStub(WritableStream::class));
+            $output = new StreamOutput(self::createStub(WritableStream::class));
         } finally {
             putenv('NO_COLOR');
         }
@@ -37,7 +37,7 @@ final class StreamOutputTest extends AsyncTestCase
     {
         try {
             $_SERVER['NO_COLOR'] = 1;
-            $output = new StreamOutput($this->createStub(WritableStream::class));
+            $output = new StreamOutput(self::createStub(WritableStream::class));
         } finally {
             unset($_SERVER['NO_COLOR']);
         }

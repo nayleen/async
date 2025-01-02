@@ -4,15 +4,14 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Amp\PHPUnit\AsyncTestCase;
-use Nayleen\Async\Test\TestKernel;
+use Nayleen\Async\Test\RuntimeTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * @internal
  */
-final class ConsoleFunctionalTest extends AsyncTestCase
+final class ConsoleFunctionalTest extends RuntimeTestCase
 {
     /**
      * @test
@@ -25,7 +24,7 @@ final class ConsoleFunctionalTest extends AsyncTestCase
             output: $output = new BufferedOutput(),
         );
 
-        self::assertSame(0, $console->execute(TestKernel::create()));
+        self::assertSame(0, $this->execute($console));
         self::assertStringContainsString('Available commands:', $output->fetch());
     }
 }

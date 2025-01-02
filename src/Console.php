@@ -8,7 +8,7 @@ use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-readonly class Console extends Application
+readonly class Console extends Runtime
 {
     /**
      * @param non-empty-string|null $defaultCommand

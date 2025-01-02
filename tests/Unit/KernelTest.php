@@ -7,6 +7,7 @@ namespace Nayleen\Async;
 use Amp\ByteStream\WritableStream;
 use Amp\DeferredCancellation;
 use Amp\PHPUnit\AsyncTestCase;
+use Nayleen\Async\Component\Bootstrapper;
 use Nayleen\Async\Test\TestKernel;
 use Revolt\EventLoop\Driver;
 use Symfony\Component\Clock\ClockInterface;
@@ -53,7 +54,7 @@ final class KernelTest extends AsyncTestCase
         $clock->expects(self::once())->method('now');
 
         $kernel = TestKernel::create();
-        $kernel = $kernel->withDependency(Clock::class, new Clock($this->createStub(Driver::class), $clock));
+        $kernel = $kernel->withDependency(Clock::class, new Clock(self::createStub(Driver::class), $clock));
         $kernel->clock()->now();
     }
 

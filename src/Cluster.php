@@ -6,6 +6,7 @@ namespace Nayleen\Async;
 
 use Amp\Cluster\ClusterWatcher;
 use InvalidArgumentException;
+use Override;
 
 use function Amp\Cluster\countCpuCores;
 
@@ -37,23 +38,9 @@ readonly class Cluster extends Worker
         assert($count > 0);
 
         $this->count = $count;
+        $this->worker = $worker;
 
-        [$this->worker, $timers] = $this->adapt($worker);
-
-        parent::__construct(static fn () => null, $timers);
-    }
-
-    /**
-     * Splits a worker from its timers, which will run only on the main cluster process/thread
-     * instead of once per worker.
-     *
-     * @return array{0: Worker, 1: Timers}
-     */
-    private function adapt(Worker $worker): array
-    {
-        $timers = $worker->timers;
-
-        return [new Worker($worker->code->getClosure(), new Timers()), $timers];
+        parent::__construct(static fn () => null);
     }
 
     private function watcher(Kernel $kernel): ClusterWatcher
@@ -66,7 +53,8 @@ readonly class Cluster extends Worker
         return $watcher;
     }
 
-    public function execute(Kernel $kernel): null
+    #[Override]
+    protected function execute(Kernel $kernel): null
     {
         $watcher = $this->watcher($kernel);
 

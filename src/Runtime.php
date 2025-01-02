@@ -12,9 +12,9 @@ use ReflectionFunction;
 use ReflectionNamedType;
 
 /**
- * A runtime is the basic building block for code intended for use in
- * a separate process/thread, be it a one-off {@see Task}, a long-running {@see Worker},
- * a {@see Cluster} of workers, or your main {@see Application}.
+ * A runtime is the basic building block for code intended for use in a process,
+ * be it a one-off {@see Task}, a long-running {@see Worker}, a {@see Cluster} of workers,
+ * or your main application.
  *
  * @psalm-internal Nayleen\Async
  *
@@ -56,16 +56,9 @@ abstract readonly class Runtime
     }
 
     /**
-     * This is marked as internal for good reason. It's supposed to only be called
-     * by either the {main} Fiber through {@see run()} as the entry point of an {@see Application},
-     * or as the primary executable when running in a separate process/thread.
-     *
-     * For testing purposes it's way more convenient to leave it open, unfortunately.
-     *
-     * @psalm-internal Nayleen\Async
      * @return TResult
      */
-    public function execute(Kernel $kernel): mixed
+    protected function execute(Kernel $kernel): mixed
     {
         return ($this->code)($kernel);
     }

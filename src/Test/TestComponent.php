@@ -5,8 +5,8 @@ declare(strict_types = 1);
 namespace Nayleen\Async\Test;
 
 use DI;
-use Nayleen\Async\Bootstrapper;
 use Nayleen\Async\Component;
+use Nayleen\Async\Component\Bootstrapper;
 use Nayleen\Async\Component\HasDependencies;
 use Nayleen\Async\Kernel;
 

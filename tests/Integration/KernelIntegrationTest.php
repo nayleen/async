@@ -14,7 +14,7 @@ use Nayleen\Async\Component\DependencyProvider;
  * @internal
  * @medium
  *
- * @covers \Nayleen\Async\Bootstrapper
+ * @covers \Nayleen\Async\Component\Bootstrapper
  * @covers \Nayleen\Async\Kernel
  */
 final class KernelIntegrationTest extends AsyncTestCase
@@ -37,7 +37,7 @@ final class KernelIntegrationTest extends AsyncTestCase
         $kernel = new Kernel($components, cancellation: $cancellation->getCancellation());
         $return = $kernel->run(function (Kernel $kernel) use ($cancellation): int {
             $kernel->loop()->defer(fn () => $cancellation->cancel());
-            $kernel->trap(SIGINT);
+            $kernel->trap();
 
             return 69;
         });

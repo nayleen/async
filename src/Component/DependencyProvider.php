@@ -7,6 +7,7 @@ namespace Nayleen\Async\Component;
 use DI\ContainerBuilder;
 use DI\Definition\Source\DefinitionSource;
 use Nayleen\Async\Component;
+use Override;
 
 readonly class DependencyProvider extends Component
 {
@@ -44,6 +45,7 @@ readonly class DependencyProvider extends Component
         return $this->name;
     }
 
+    #[Override]
     public function register(ContainerBuilder $containerBuilder): void
     {
         $containerBuilder->addDefinitions(...$this->definitions);

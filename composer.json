@@ -24,7 +24,7 @@
   },
   "require-dev": {
     "amphp/http": "^2.1.2",
-    "amphp/http-server": "^3.4.1",
+    "amphp/http-server": "^3.4.2",
     "amphp/redis": "^2.0.1",
     "amphp/websocket-server": "^4.0.0",
     "bnf/phpstan-psr-container": "^1.1.0",
@@ -71,7 +71,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "0.12.x-dev"
+      "dev-main": "0.13.x-dev"
     }
   },
   "scripts": {

@@ -35,44 +35,36 @@ return [
     'async.worker.pool_size' => WorkerPool::DEFAULT_WORKER_LIMIT,
 
     // worker services
-    ClusterWatcher::class => DI\factory(static function (
+    ClusterWatcher::class => DI\factory(static fn (
         string $script,
         ?Logger $logger,
         DI\Container $container,
-    ): ClusterWatcher {
-        return new ClusterWatcher(
-            $script,
-            $logger ?? $container->get(Logger::class),
-            $container->get(IpcHub::class),
-            $container->get(ContextFactoryInterface::class),
-            $container->get(ServerSocketPipeProvider::class),
-        );
-    }),
+    ): ClusterWatcher => new ClusterWatcher(
+        $script,
+        $logger ?? $container->get(Logger::class),
+        $container->get(IpcHub::class),
+        $container->get(ContextFactoryInterface::class),
+        $container->get(ServerSocketPipeProvider::class),
+    )),
 
-    ContextFactoryInterface::class => static function (DI\Container $container): ContextFactoryInterface {
-        return new ContextFactory(
-            $container->get('async.stdout'),
-            $container->get('async.stderr'),
-            new ProcessContextFactory(ipcHub: $container->get(IpcHub::class)),
-        );
-    },
+    ContextFactoryInterface::class => static fn (DI\Container $container): ContextFactoryInterface => new ContextFactory(
+        $container->get('async.stdout'),
+        $container->get('async.stderr'),
+        new ProcessContextFactory(ipcHub: $container->get(IpcHub::class)),
+    ),
 
     IpcHub::class => DI\get(LocalIpcHub::class),
     LocalIpcHub::class => DI\autowire(LocalIpcHub::class),
 
     ServerSocketPipeProvider::class => static fn (): ServerSocketPipeProvider => new ServerSocketPipeProvider(),
 
-    WorkerFactory::class => static function (DI\Container $container): WorkerFactory {
-        return new ContextWorkerFactory(
-            $container->get('async.worker.bootstrap_path'),
-            $container->get(ContextFactoryInterface::class),
-        );
-    },
+    WorkerFactory::class => static fn (DI\Container $container): WorkerFactory => new ContextWorkerFactory(
+        $container->get('async.worker.bootstrap_path'),
+        $container->get(ContextFactoryInterface::class),
+    ),
 
-    WorkerPool::class => static function (DI\Container $container): WorkerPool {
-        return new ContextWorkerPool(
-            $container->get('async.worker.pool_size'),
-            $container->get(WorkerFactory::class),
-        );
-    },
+    WorkerPool::class => static fn (DI\Container $container): WorkerPool => new ContextWorkerPool(
+        $container->get('async.worker.pool_size'),
+        $container->get(WorkerFactory::class),
+    ),
 ];

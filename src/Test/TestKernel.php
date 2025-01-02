@@ -73,7 +73,7 @@ final readonly class TestKernel extends Kernel
         return $finder ??= new Finder(new MemoizedEngine(defaultEngine()));
     }
 
-    public function trap(int ...$signals): void {}
+    public function trap(Cancellation $cancellation = new NullCancellation()): void {}
 
     public function withDependency(string $name, mixed $value): self
     {

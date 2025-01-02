@@ -6,11 +6,14 @@ namespace Nayleen\Async;
 
 use Amp\Cancellation;
 use Amp\CancelledException;
+use Amp\Cluster\Cluster;
+use Amp\CompositeCancellation;
 use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
 use Amp\NullCancellation;
 use Amp\Sync\Channel;
 use DI;
+use Nayleen\Async\Component\Bootstrapper;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\Finder;
 use Nayleen\Async\Task\Scheduler;
@@ -24,8 +27,6 @@ readonly class Kernel
     use ForbidSerialization;
 
     private DI\Container $container; // @phpstan-ignore-line
-
-    private Signals $signals;
 
     public Cancellation $cancellation;
 
@@ -46,7 +47,6 @@ readonly class Kernel
     ) {
         $this->cancellation = $cancellation ?? new NullCancellation();
         $this->scheduler = new Scheduler($this);
-        $this->signals = new Signals($this);
 
         $this->components = new Components(
             [
@@ -56,7 +56,6 @@ readonly class Kernel
                     Cancellation::class => $this->cancellation,
                     Channel::class => static fn (): ?Channel => $channel,
                     Scheduler::class => $this->scheduler,
-                    Signals::class => $this->signals,
                 ]),
                 ...$components,
             ],
@@ -111,9 +110,14 @@ readonly class Kernel
         }
     }
 
-    public function trap(int ...$signals): void
+    public function trap(Cancellation $cancellation = new NullCancellation()): void
     {
-        assert(count($signals) > 0);
-        $this->signals->trap(...array_unique(array_values($signals)));
+        assert($this->io()->info('Awaiting shutdown via signals', ['trapped' => Cluster::getSignalList()]));
+
+        try {
+            Cluster::awaitTermination(new CompositeCancellation($this->cancellation, $cancellation));
+        } finally {
+            assert($this->io()->notice('Received shutdown request'));
+        }
     }
 }

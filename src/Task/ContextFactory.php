@@ -25,8 +25,14 @@ readonly class ContextFactory implements ContextFactoryInterface
         $context = $this->contextFactory->start($script, $cancellation);
 
         if ($context instanceof ProcessContext) {
-            async(ByteStream\pipe(...), $context->getStdout(), $this->stdOut, $cancellation)->ignore();
-            async(ByteStream\pipe(...), $context->getStderr(), $this->stdErr, $cancellation)->ignore();
+            $stdout = $context->getStdout();
+            $stdout->unreference();
+
+            $stderr = $context->getStderr();
+            $stderr->unreference();
+
+            async(ByteStream\pipe(...), $stdout, $this->stdOut, $cancellation)->ignore();
+            async(ByteStream\pipe(...), $stderr, $this->stdErr, $cancellation)->ignore();
         }
 
         return $context;

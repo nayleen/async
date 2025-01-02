@@ -23,12 +23,12 @@ final class ClockTest extends AsyncTestCase
      */
     public function can_overwrite_timezone(): void
     {
-        $timezone = $this->createStub(DateTimeZone::class);
+        $timezone = self::createStub(DateTimeZone::class);
 
         $wrappedClock = $this->createMock(ClockInterface::class);
         $wrappedClock->expects(self::once())->method('withTimeZone')->with($timezone);
 
-        $clock = new Clock($this->createStub(EventLoop\Driver::class), $wrappedClock);
+        $clock = new Clock(self::createStub(EventLoop\Driver::class), $wrappedClock);
         $clock = $clock->withTimeZone($timezone);
 
         self::assertSame($timezone, $clock->timezone());
@@ -39,12 +39,12 @@ final class ClockTest extends AsyncTestCase
      */
     public function returns_current_time_from_wrapped_clock(): void
     {
-        $now = $this->createStub(DateTimeImmutable::class);
+        $now = self::createStub(DateTimeImmutable::class);
 
         $wrappedClock = $this->createMock(ClockInterface::class);
         $wrappedClock->expects(self::once())->method('now')->willReturn($now);
 
-        $clock = new Clock($this->createStub(EventLoop\Driver::class), $wrappedClock);
+        $clock = new Clock(self::createStub(EventLoop\Driver::class), $wrappedClock);
 
         self::assertSame($now, $clock->now());
     }
@@ -90,7 +90,7 @@ final class ClockTest extends AsyncTestCase
      */
     public function uses_system_timezone_by_default(): void
     {
-        $clock = new Clock($this->createStub(EventLoop\Driver::class));
+        $clock = new Clock(self::createStub(EventLoop\Driver::class));
 
         self::assertSame(date_default_timezone_get(), $clock->timezone()->getName());
     }

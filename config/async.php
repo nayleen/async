@@ -46,11 +46,6 @@ return [
     'async.env' => DI\factory(static fn (string $env): string => strtolower($env))
         ->parameter('env', DI\env('ASYNC_ENV', 'prod')),
 
-    // directories
-    'async.dir.base' => DI\env('ASYNC_DIR'),
-    'async.dir.cache' => DI\env('ASYNC_CACHE_DIR', sys_get_temp_dir()),
-    'async.dir.tmp' => DI\env('ASYNC_TMP_DIR', sys_get_temp_dir()),
-
     // app services
     'async.exceptions.handler' => static function (ErrorHandler $errorHandler): Closure {
         $errorHandler->registerExceptionHandler();
@@ -106,13 +101,11 @@ return [
     })
         ->parameter('errorHandler', DI\get('async.exceptions.handler')),
 
-    IO::class => DI\factory(static function (
+    IO::class => DI\factory(static fn (
         ByteStream\ReadableStream $input,
         ByteStream\WritableStream $output,
         Logger $logger,
-    ): IO {
-        return new IO($input, $output, $logger);
-    })
+    ): IO => new IO($input, $output, $logger))
         ->parameter('input', DI\get('async.stdin'))
         ->parameter('output', DI\get('async.stdout')),
 
