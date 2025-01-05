@@ -40,11 +40,11 @@ final class BootstrapperTest extends ComponentTestCase
      */
     public function registers_core_parameters(): void
     {
-        $this->assertContainerHasParameter('async.app_name', 'string');
-        $this->assertContainerHasParameter('async.app_version', 'string');
+        $this->assertContainerHasParameter('async.advisories', 'bool');
+        $this->assertContainerHasParameter('async.app.name', 'string');
+        $this->assertContainerHasParameter('async.app.version', 'string');
         $this->assertContainerHasParameter('async.debug', 'bool');
         $this->assertContainerHasParameter('async.env', 'string');
-        $this->assertContainerHasParameter('async.advisories', 'bool');
     }
 
     /**

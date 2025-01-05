@@ -64,6 +64,8 @@ abstract readonly class Runtime
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * @param Channel<TReceive, TSend>|null $channel
      * @return TResult|null
      */

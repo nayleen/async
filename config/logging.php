@@ -19,7 +19,7 @@ return [
     'async.logger.format' => "[%datetime%] [%channel%] [%level_name%]: %message% %context% %extra%\n",
     'async.logger.level' => DI\factory(static fn (bool $debug): int|Level|string => $debug ? LogLevel::DEBUG : LogLevel::INFO)
         ->parameter('debug', DI\get('async.debug')),
-    'async.logger.name' => static fn (DI\Container $container): string => $container->get('async.app_name'),
+    'async.logger.name' => static fn (DI\Container $container): string => $container->get('async.app.name'),
 
     // logger services
     LineFormatter::class => DI\factory(static fn (string $logFormat, string $dateFormat, bool $debug) => (new LineFormatter($logFormat, $dateFormat, true, true))->includeStacktraces($debug))
@@ -28,7 +28,7 @@ return [
         ->parameter('debug', DI\get('async.debug')),
 
     Logger::class => static function (DI\Container $container): Logger {
-        $logger = new Logger((string) $container->get('async.app_name'));
+        $logger = new Logger((string) $container->get('async.app.name'));
         $logger->useLoggingLoopDetection(false);
 
         $logHandler = new StreamHandler($container->get('async.stderr'), $container->get('async.logger.level'));

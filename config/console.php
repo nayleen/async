@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 return [
     // console services
     Application::class => DI\factory(static function (DI\Container $container): Application {
-        $name = sprintf('%s Console', (string) $container->get('async.app_name'));
+        $name = sprintf('%s Console', (string) $container->get('async.app.name'));
 
         $console = new Application($name);
         $console->setAutoExit(false);
@@ -36,5 +36,5 @@ return [
     InputInterface::class => static fn (): InputInterface => new ArgvInput(),
 
     OutputInterface::class => DI\factory(static fn (WritableStream $output): OutputInterface => new StreamOutput($output))
-        ->parameter('output', DI\get('async.stderr')),
+        ->parameter('output', DI\get('async.stdout')),
 ];

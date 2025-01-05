@@ -33,8 +33,9 @@ return [
         ->parameter('runAdvisories', DI\env('ASYNC_ADVISORIES', '1'))
         ->parameter('isWorker', DI\get('async.worker')),
 
-    'async.app_name' => DI\env('ASYNC_APP_NAME', 'Kernel'),
-    'async.app_version' => DI\env('ASYNC_APP_VERSION', 'UNKNOWN'),
+    'async.app.name' => DI\env('ASYNC_APP_NAME', 'Kernel'),
+    'async.app.version' => DI\env('ASYNC_APP_VERSION', 'UNKNOWN'),
+
     'async.debug' => DI\factory(static function (string $env, string $debug): bool {
         $debug = (bool) filter_var($debug, FILTER_VALIDATE_BOOL);
 

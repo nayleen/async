@@ -7,12 +7,12 @@ namespace PHPSTORM_META
         map([
             '' => '@',
             // config/async.php
-            'async.app_name' => \string,
-            'async.app_version' => \string,
+            'async.advisories' => \bool,
+            'async.app.name' => \string,
+            'async.app.version' => \string,
             'async.debug' => \bool,
             'async.env' => \string,
             'async.exceptions.handler' => \Closure::class,
-            'async.advisories' => \bool,
             'async.stderr' => \Amp\ByteStream\WritableResourceStream::class,
             'async.stdin' => \Amp\ByteStream\ReadableResourceStream::class,
             'async.stdout' => \Amp\ByteStream\WritableResourceStream::class,
