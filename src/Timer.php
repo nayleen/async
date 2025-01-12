@@ -44,8 +44,13 @@ abstract readonly class Timer
         $this->kernel->loop()->cancel($this->callbackId);
     }
 
+    /**
+     * @param float|positive-int $duration
+     */
     public function suspend(float|int $duration): void
     {
+        assert($duration > 0);
+
         $this->disable();
         $this->kernel->loop()->unreference(
             $this->kernel->loop()->delay((float) $duration, $this->enable(...)),

@@ -24,7 +24,7 @@ use Throwable;
 use function Amp\Dns\createDefaultResolver;
 
 return [
-    // app config
+    // app parameters
     'async.advisories' => DI\factory(static function (string $runAdvisories, bool $isWorker): bool {
         $runAdvisories = (bool) filter_var($runAdvisories, FILTER_VALIDATE_BOOL);
 

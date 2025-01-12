@@ -4,16 +4,23 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-readonly class Timers
+class Timers
 {
     /**
      * @var Timer[]
      */
-    private array $timers;
+    private array $timers = [];
 
     public function __construct(Timer ...$timers)
     {
-        $this->timers = $timers;
+        $this->add(...$timers);
+    }
+
+    public function add(Timer ...$timers): void
+    {
+        assert(count($timers) > 0);
+
+        array_push($this->timers, ...$timers);
     }
 
     public function disable(): void
@@ -44,8 +51,13 @@ readonly class Timers
         }
     }
 
+    /**
+     * @param float|positive-int $duration
+     */
     public function suspend(float|int $duration): void
     {
+        assert($duration > 0);
+
         foreach ($this->timers as $timer) {
             $timer->suspend($duration);
         }

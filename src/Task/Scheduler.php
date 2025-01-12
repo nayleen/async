@@ -16,10 +16,8 @@ use Amp\Parallel\Worker\Worker as AmpWorker;
 use Amp\Parallel\Worker\WorkerPool;
 use Amp\TimeoutCancellation;
 use Closure;
-use InvalidArgumentException;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Task;
-use Nayleen\Async\Worker;
 use SplObjectStorage;
 use Throwable;
 
@@ -42,11 +40,18 @@ class Scheduler
 
     public const int|float RETRY_DELAY_DEFAULT = 2.0; // seconds
 
+    /**
+     * @param non-negative-int $retryCount
+     * @param float|positive-int $retryDelay
+     */
     public function __construct(
         private readonly Kernel $kernel,
         private readonly int $retryCount = self::RETRY_COUNT_DEFAULT,
         private readonly float|int $retryDelay = self::RETRY_DELAY_DEFAULT,
     ) {
+        assert($retryCount >= 0);
+        assert($retryDelay >= 0);
+
         $this->executions = new SplObjectStorage();
     }
 
@@ -127,10 +132,6 @@ class Scheduler
      */
     public function run(Closure|string|TaskInterface $task, ?float $timeout = null): mixed
     {
-        if ($task instanceof Worker) {
-            throw new InvalidArgumentException('Running a Worker to completion is not supported.');
-        }
-
         return $this->submit($task)->await($this->cancellation($timeout));
     }
 

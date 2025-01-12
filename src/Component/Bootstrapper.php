@@ -14,22 +14,6 @@ use Override;
 
 readonly class Bootstrapper extends Component
 {
-    private function setupLoop(Kernel $kernel): void
-    {
-        assert($kernel->io()->debug('Booting Kernel'));
-
-        Dns\dnsResolver($kernel->container()->get(Dns\DnsResolver::class));
-        Parallel\Context\contextFactory($kernel->container()->get(Parallel\Context\ContextFactory::class));
-        Parallel\Worker\workerFactory($kernel->container()->get(Parallel\Worker\WorkerFactory::class));
-        Parallel\Worker\workerPool($kernel->container()->get(Parallel\Worker\WorkerPool::class));
-        Socket\socketConnector($kernel->container()->get(Socket\SocketConnector::class));
-    }
-
-    private function setupMessageBus(Kernel $kernel): void
-    {
-        assert($kernel->io()->debug('Starting Message Bus'));
-    }
-
     /**
      * @return iterable<Advisory>
      */
@@ -39,12 +23,16 @@ readonly class Bootstrapper extends Component
         yield new Advisory\Xdebug();
     }
 
+    #[Override]
     public function boot(Kernel $kernel): void
     {
-        $this->setupLoop($kernel);
-        $this->setupMessageBus($kernel);
+        assert($kernel->io()->debug('Booting Kernel'));
 
-        parent::boot($kernel);
+        Dns\dnsResolver($kernel->container()->get(Dns\DnsResolver::class));
+        Parallel\Context\contextFactory($kernel->container()->get(Parallel\Context\ContextFactory::class));
+        Parallel\Worker\workerFactory($kernel->container()->get(Parallel\Worker\WorkerFactory::class));
+        Parallel\Worker\workerPool($kernel->container()->get(Parallel\Worker\WorkerPool::class));
+        Socket\socketConnector($kernel->container()->get(Socket\SocketConnector::class));
     }
 
     #[Override]
@@ -56,6 +44,7 @@ readonly class Bootstrapper extends Component
         $this->load($containerBuilder, $configPath . '/*.php');
     }
 
+    #[Override]
     public function shutdown(Kernel $kernel): void
     {
         assert($kernel->io()->debug('Shutting down Kernel'));

@@ -19,36 +19,33 @@ use Nayleen\Async\Task\Scheduler;
  */
 readonly class Task extends Runtime implements TaskInterface
 {
-    /**
-     * @return Task<mixed, mixed, mixed>
-     */
-    final public static function create(Closure|string|TaskInterface $task): self
+    final public static function create(Closure|string|TaskInterface $task): static
     {
         assert($task !== '');
 
-        $adapted = match (true) {
+        $task = match (true) {
             $task instanceof Closure => new self($task),
             is_string($task) => self::fromScript($task),
-            !($task instanceof Runtime) => self::fromTask($task),
+            !($task instanceof static) => self::fromTask($task),
             default => $task,
         };
-        assert($adapted instanceof self);
+        assert($task instanceof static);
 
-        return $adapted;
+        return $task;
     }
 
     /**
-     * @param non-empty-string $script path to a script returning a closure compatible with {@see Task::__construct}
+     * @param non-empty-string $filePath path to a script returning a closure compatible with {@see Task::__construct}
      * @return Task<mixed, mixed, mixed>
      */
-    final public static function fromScript(string $script): self
+    final public static function fromScript(string $filePath): self
     {
-        assert((static function () use ($script): bool {
-            if (!file_exists($script)) {
+        assert((static function () use ($filePath): bool {
+            if (!file_exists($filePath)) {
                 return false;
             }
 
-            $return = require $script;
+            $return = require $filePath;
             if (!($return instanceof Closure)) {
                 return false;
             }
@@ -56,7 +53,7 @@ readonly class Task extends Runtime implements TaskInterface
             return true;
         })());
 
-        return new self((require $script)(...));
+        return new self((require $filePath)(...));
     }
 
     /**

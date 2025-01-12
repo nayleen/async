@@ -41,7 +41,7 @@ readonly class Kernel
      * @param iterable<class-string<Component>|Component> $components
      */
     public function __construct(
-        iterable $components = new Finder(),
+        iterable $components = new Finder(), // @phpstan-ignore-line - Traversable IS iterable
         ?Channel $channel = null,
         ?Cancellation $cancellation = null,
     ) {

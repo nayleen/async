@@ -6,8 +6,6 @@ namespace Nayleen\Async\Task;
 
 use Amp\Parallel\Worker\WorkerPool;
 use Amp\PHPUnit\AsyncTestCase;
-use InvalidArgumentException;
-use Nayleen\Async\Test\NoopWorker;
 use Nayleen\Async\Test\TestKernel;
 
 /**
@@ -49,18 +47,5 @@ final class SchedulerTest extends AsyncTestCase
 
         $scheduler = $this->createScheduler($kernel);
         $scheduler->shutdown();
-    }
-
-    /**
-     * @test
-     */
-    public function refuses_to_run_workers(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $kernel = TestKernel::create();
-
-        $scheduler = $this->createScheduler($kernel);
-        $scheduler->run(new NoopWorker());
     }
 }

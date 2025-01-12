@@ -4,11 +4,10 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Amp\Parallel\Worker\Task as TaskInterface;
 use Closure;
 use Override;
 
-readonly class Worker extends Runtime implements TaskInterface
+readonly class Worker extends Runtime
 {
     public function __construct(Closure $closure)
     {
