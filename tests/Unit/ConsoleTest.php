@@ -12,6 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @internal
+ * @small
  */
 final class ConsoleTest extends RuntimeTestCase
 {

@@ -13,6 +13,7 @@ use Symfony\Component\Console\Exception\CommandNotFoundException;
 
 /**
  * @internal
+ * @small
  */
 final class LoaderTest extends AsyncTestCase
 {

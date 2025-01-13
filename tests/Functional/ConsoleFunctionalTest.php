@@ -10,6 +10,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * @internal
+ * @large
  */
 final class ConsoleFunctionalTest extends RuntimeTestCase
 {

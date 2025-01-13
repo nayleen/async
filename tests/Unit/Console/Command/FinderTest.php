@@ -12,6 +12,7 @@ use Symfony\Component\Console\Command\Command;
 
 /**
  * @internal
+ * @small
  */
 final class FinderTest extends AsyncTestCase
 {
