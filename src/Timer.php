@@ -10,9 +10,21 @@ abstract readonly class Timer
 
     protected Kernel $kernel; // @phpstan-ignore-line
 
+    private function suspendTime(): float
+    {
+        $jitter = round((mt_rand() / mt_getrandmax() * $this->jitter()), 2);
+
+        return $this->interval() + $jitter;
+    }
+
     abstract protected function execute(): void;
 
     abstract protected function interval(): float|int;
+
+    protected function jitter(): float|int
+    {
+        return 0;
+    }
 
     public function disable(): void
     {
@@ -27,7 +39,7 @@ abstract readonly class Timer
     public function run(): void
     {
         $this->execute();
-        $this->suspend($this->interval());
+        $this->suspend($this->suspendTime());
     }
 
     public function start(Kernel $kernel): void

@@ -6,6 +6,7 @@ namespace Nayleen\Async\Timer;
 
 use Cron\CronExpression;
 use Nayleen\Async\Timer;
+use Override;
 
 abstract readonly class Cron extends Timer
 {
@@ -24,5 +25,11 @@ abstract readonly class Cron extends Timer
         );
 
         return (float) $next->format('U.v') - (float) $now->format('U.v');
+    }
+
+    #[Override]
+    final protected function jitter(): float
+    {
+        return 0.0;
     }
 }
