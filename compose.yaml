@@ -17,6 +17,7 @@ services:
     tmpfs:
       - /tmp
     volumes:
+      - ${COMPOSER_HOME:-$HOME/.composer}:/app/var/composer:delegated
       - ./:/app/src
 
   redis:

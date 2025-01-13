@@ -38,7 +38,7 @@ tasks:
 
   install:
     deps: [validate]
-    cmd: docker compose run --rm php composer update --no-cache --prefer-{{ .DEPENDENCY_VERSIONS | default "stable" }} --prefer-stable 2>/dev/null
+    cmd: docker compose run --rm php composer update --prefer-{{ .DEPENDENCY_VERSIONS | default "stable" }} --prefer-stable 2>/dev/null
     generates:
       - composer.lock
       - vendor/**/*
@@ -61,7 +61,7 @@ tasks:
 
   update:
     deps: [validate]
-    cmd: docker compose run --rm php composer update --no-cache --prefer-stable 2>/dev/null
+    cmd: docker compose run --rm php composer update --prefer-stable 2>/dev/null
 
   validate:
     cmd: docker compose run --rm php composer validate 2>/dev/null
