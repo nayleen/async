@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async\Test;
 
+use Nayleen\Async\Kernel;
 use Nayleen\Async\Task;
 
 /**
@@ -11,8 +12,8 @@ use Nayleen\Async\Task;
  */
 final readonly class TestTask extends Task
 {
-    public function __construct()
+    public function __construct(?Kernel $kernel = null)
     {
-        parent::__construct(static fn (): int => 69);
+        parent::__construct(static fn (): int => 69, $kernel);
     }
 }

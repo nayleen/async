@@ -17,9 +17,10 @@ readonly class Console extends Runtime
         private ?string $defaultCommand = null,
         private ?InputInterface $input = null,
         private ?OutputInterface $output = null,
+        ?Kernel $kernel = null,
     ) {
         assert($this->defaultCommand !== '');
-        parent::__construct($this->runConsole(...));
+        parent::__construct($this->runConsole(...), $kernel);
     }
 
     protected function runConsole(Kernel $kernel): int

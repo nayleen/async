@@ -9,9 +9,9 @@ use Override;
 
 readonly class Worker extends Runtime
 {
-    public function __construct(Closure $closure)
+    public function __construct(Closure $closure, ?Kernel $kernel = null)
     {
-        parent::__construct($closure);
+        parent::__construct($closure, $kernel);
     }
 
     #[Override]

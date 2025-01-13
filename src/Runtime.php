@@ -29,7 +29,7 @@ abstract readonly class Runtime
     /**
      * @param Closure(Kernel): TResult $closure
      */
-    public function __construct(Closure $closure)
+    public function __construct(Closure $closure, private ?Kernel $kernel = null)
     {
         assert((static function () use ($closure): bool {
             $reflection = new ReflectionFunction($closure);
@@ -64,8 +64,6 @@ abstract readonly class Runtime
     }
 
     /**
-     * @codeCoverageIgnore
-     *
      * @param Channel<TReceive, TSend>|null $channel
      * @return TResult|null
      */
@@ -73,6 +71,8 @@ abstract readonly class Runtime
         ?Channel $channel = null,
         ?Cancellation $cancellation = null,
     ): mixed {
-        return (new Kernel(channel: $channel, cancellation: $cancellation))->run($this->execute(...));
+        $kernel = $this->kernel ?? new Kernel(channel: $channel, cancellation: $cancellation);
+
+        return $kernel->run($this->execute(...));
     }
 }

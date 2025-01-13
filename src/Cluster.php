@@ -27,7 +27,7 @@ readonly class Cluster extends Worker
     /**
      * @param positive-int|null $count
      */
-    public function __construct(Worker $worker, ?int $count = null)
+    public function __construct(Worker $worker, ?int $count = null, ?Kernel $kernel = null)
     {
         assert(
             !($worker instanceof static),
@@ -40,7 +40,7 @@ readonly class Cluster extends Worker
         $this->count = $count;
         $this->worker = $worker;
 
-        parent::__construct(static fn () => null);
+        parent::__construct(static fn () => null, $kernel);
     }
 
     private function watcher(Kernel $kernel): ClusterWatcher
