@@ -18,7 +18,7 @@ final class SchedulerTest extends AsyncTestCase
 {
     private function createScheduler(TestKernel $kernel): Scheduler
     {
-        return new Scheduler($kernel, 0, 0);
+        return new Scheduler($kernel);
     }
 
     /**
