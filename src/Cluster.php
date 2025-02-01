@@ -54,7 +54,7 @@ readonly class Cluster extends Worker
     }
 
     #[Override]
-    protected function execute(Kernel $kernel): null
+    protected function execute(Kernel $kernel): int
     {
         $watcher = $this->watcher($kernel);
 

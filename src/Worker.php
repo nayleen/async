@@ -6,21 +6,32 @@ namespace Nayleen\Async;
 
 use Closure;
 use Override;
+use Throwable;
 
 readonly class Worker extends Runtime
 {
+    /**
+     * @param Closure(Kernel): void $closure
+     */
     public function __construct(Closure $closure, ?Kernel $kernel = null)
     {
         parent::__construct($closure, $kernel);
     }
 
+    /**
+     * @return int<0, 255>
+     */
     #[Override]
-    protected function execute(Kernel $kernel): null
+    protected function execute(Kernel $kernel): int
     {
-        parent::execute($kernel);
+        try {
+            parent::execute($kernel);
 
-        $kernel->trap();
+            $kernel->trap();
+        } catch (Throwable) {
+            return 1;
+        }
 
-        return null;
+        return 0;
     }
 }
