@@ -10,4 +10,4 @@ use Nayleen\Async\Worker;
 $worker = Cluster::getChannel()->receive();
 assert($worker instanceof Worker);
 
-$worker->run();
+$worker->run(Cluster::getChannel());
