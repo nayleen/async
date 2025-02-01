@@ -46,7 +46,8 @@ final class TimersIntegrationTest extends AsyncTestCase
 
     private function createTimers(): Timers
     {
-        $timers = new Timers($this->createTimer());
+        $timers = new Timers();
+        $timers->add($this->createTimer());
         $timers->start($this->kernel);
 
         return $timers;

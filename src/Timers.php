@@ -4,23 +4,22 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
+use Amp\ForbidCloning;
+use Amp\ForbidSerialization;
+
 class Timers
 {
+    use ForbidCloning;
+    use ForbidSerialization;
+
     /**
      * @var Timer[]
      */
     private array $timers = [];
 
-    public function __construct(Timer ...$timers)
+    public function add(Timer $timer): void
     {
-        $this->add(...$timers);
-    }
-
-    public function add(Timer ...$timers): void
-    {
-        assert(count($timers) > 0);
-
-        array_push($this->timers, ...$timers);
+        $this->timers[] = $timer;
     }
 
     public function disable(): void
