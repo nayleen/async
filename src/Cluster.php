@@ -5,12 +5,12 @@ declare(strict_types = 1);
 namespace Nayleen\Async;
 
 use Amp\Cluster\ClusterWatcher;
-use InvalidArgumentException;
 use Override;
+use Throwable;
 
 use function Amp\Cluster\countCpuCores;
 
-readonly class Cluster extends Worker
+readonly class Cluster extends Runtime
 {
     /**
      * @var positive-int
@@ -29,11 +29,6 @@ readonly class Cluster extends Worker
      */
     public function __construct(Worker $worker, ?int $count = null, ?Kernel $kernel = null)
     {
-        assert(
-            !($worker instanceof static),
-            new InvalidArgumentException(),
-        );
-
         $count ??= countCpuCores();
         assert($count > 0);
 
@@ -53,6 +48,9 @@ readonly class Cluster extends Worker
         return $watcher;
     }
 
+    /**
+     * @return int<0, 255>
+     */
     #[Override]
     protected function execute(Kernel $kernel): int
     {
@@ -62,9 +60,13 @@ readonly class Cluster extends Worker
             $watcher->start($this->count);
             $watcher->broadcast($this->worker);
 
-            return parent::execute($kernel);
+            $kernel->trap();
+        } catch (Throwable) {
+            return 1;
         } finally {
             $watcher->stop($kernel->cancellation);
         }
+
+        return 0;
     }
 }
