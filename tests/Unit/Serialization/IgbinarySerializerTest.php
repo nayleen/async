@@ -11,8 +11,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  * @small
- *
- * @covers \Nayleen\Async\Serialization\IgbinarySerializer
  */
 final class IgbinarySerializerTest extends TestCase
 {

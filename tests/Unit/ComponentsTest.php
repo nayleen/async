@@ -12,10 +12,6 @@ use Nayleen\Async\Test\TestKernel;
 /**
  * @internal
  * @small
- *
- * @covers \Nayleen\Async\Component
- * @covers \Nayleen\Async\Components
- * @covers \Nayleen\Async\Test\TestComponent
  */
 final class ComponentsTest extends AsyncTestCase
 {

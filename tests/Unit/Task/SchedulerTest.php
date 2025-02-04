@@ -11,8 +11,6 @@ use Nayleen\Async\Test\TestKernel;
 /**
  * @internal
  * @small
- *
- * @covers \Nayleen\Async\Task\Scheduler
  */
 final class SchedulerTest extends AsyncTestCase
 {
@@ -29,7 +27,7 @@ final class SchedulerTest extends AsyncTestCase
         $workerPool = $this->createMock(WorkerPool::class);
         $workerPool->expects(self::once())->method('kill');
 
-        $kernel = TestKernel::create()->withDependency(WorkerPool::class, $workerPool);
+        $kernel = TestKernel::create([WorkerPool::class => $workerPool]);
 
         $scheduler = $this->createScheduler($kernel);
         $scheduler->kill();
@@ -43,7 +41,7 @@ final class SchedulerTest extends AsyncTestCase
         $workerPool = $this->createMock(WorkerPool::class);
         $workerPool->expects(self::once())->method('shutdown');
 
-        $kernel = TestKernel::create()->withDependency(WorkerPool::class, $workerPool);
+        $kernel = TestKernel::create([WorkerPool::class => $workerPool]);
 
         $scheduler = $this->createScheduler($kernel);
         $scheduler->shutdown();

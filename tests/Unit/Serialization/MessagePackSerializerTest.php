@@ -11,8 +11,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  * @small
- *
- * @covers \Nayleen\Async\Serialization\MessagePackSerializer
  */
 final class MessagePackSerializerTest extends TestCase
 {

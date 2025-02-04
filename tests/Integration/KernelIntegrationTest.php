@@ -13,9 +13,6 @@ use Nayleen\Async\Component\DependencyProvider;
 /**
  * @internal
  * @medium
- *
- * @covers \Nayleen\Async\Component\Bootstrapper
- * @covers \Nayleen\Async\Kernel
  */
 final class KernelIntegrationTest extends AsyncTestCase
 {

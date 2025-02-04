@@ -14,11 +14,6 @@ use Nayleen\Async\Test\TestTask;
 /**
  * @internal
  * @small
- *
- * @covers \Nayleen\Async\Runtime
- * @covers \Nayleen\Async\Task
- * @covers \Nayleen\Async\Test\AmpTask
- * @covers \Nayleen\Async\Test\TestTask
  */
 final class TaskTest extends RuntimeTestCase
 {

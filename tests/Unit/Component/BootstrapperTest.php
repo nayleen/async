@@ -22,11 +22,6 @@ use Revolt\EventLoop;
 /**
  * @internal
  * @small
- *
- * @covers \Nayleen\Async\Component\Bootstrapper
- * @covers \Nayleen\Async\Component
- * @covers \Nayleen\Async\Component\Configuration\FileLoader
- * @covers \Nayleen\Async\Component\TestCase
  */
 final class BootstrapperTest extends ComponentTestCase
 {

@@ -2,24 +2,35 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async;
+namespace Nayleen\Async\App;
 
 use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
+use Nayleen\Async\Kernel;
+use Nayleen\Async\Timer;
+use SplObjectStorage;
 
+/**
+ * @psalm-internal Nayleen\Async
+ */
 class Timers
 {
     use ForbidCloning;
     use ForbidSerialization;
 
     /**
-     * @var Timer[]
+     * @var SplObjectStorage<Timer>
      */
-    private array $timers = [];
+    public readonly SplObjectStorage $timers;
+
+    public function __construct()
+    {
+        $this->timers = new SplObjectStorage();
+    }
 
     public function add(Timer $timer): void
     {
-        $this->timers[] = $timer;
+        $this->timers->attach($timer);
     }
 
     public function disable(): void

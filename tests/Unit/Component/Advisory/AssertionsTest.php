@@ -12,8 +12,6 @@ use Nayleen\Async\Test\TestKernel;
  * @internal
  * @small
  * @backupGlobals enabled
- *
- * @covers \Nayleen\Async\Component\Advisory\Assertions
  */
 final class AssertionsTest extends AsyncTestCase
 {
@@ -27,7 +25,7 @@ final class AssertionsTest extends AsyncTestCase
      */
     public function logs_performance_implications_of_assertions(): void
     {
-        $kernel = TestKernel::create();
+        $kernel = new TestKernel();
         $this->advise($kernel);
 
         self::assertTrue($kernel->log->hasNoticeThatContains('Running Nayleen\Async\Kernel with assertions enabled is not recommended'));

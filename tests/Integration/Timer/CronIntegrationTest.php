@@ -14,9 +14,6 @@ use Symfony\Component\Clock\MockClock;
 /**
  * @internal
  * @medium
- *
- * @covers \Nayleen\Async\Timer
- * @covers \Nayleen\Async\Timer\Cron
  */
 final class CronIntegrationTest extends AsyncTestCase
 {
@@ -61,7 +58,10 @@ final class CronIntegrationTest extends AsyncTestCase
             }),
         );
 
-        $kernel = TestKernel::create($loop)->withDependency(Clock::class, new Clock($loop, $clock));
+        $kernel = TestKernel::create([
+            Clock::class => new Clock($loop, $clock),
+            EventLoop\Driver::class => $loop,
+        ]);
         $cron = $this->createCron();
 
         try {

@@ -16,8 +16,8 @@ use Amp\Parallel\Worker\WorkerFactory;
 use Amp\Parallel\Worker\WorkerPool;
 use DI;
 use Monolog\Level;
-use Monolog\Logger;
 use Nayleen\Async\Task\ContextFactory;
+use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Safe;
 
@@ -35,17 +35,13 @@ return [
     'async.worker.pool_size' => WorkerPool::DEFAULT_WORKER_LIMIT,
 
     // worker services
-    ClusterWatcher::class => DI\factory(static fn (
-        string $script,
-        ?Logger $logger,
-        DI\Container $container,
-    ): ClusterWatcher => new ClusterWatcher(
-        $script,
-        $logger ?? $container->get(Logger::class),
+    ClusterWatcher::class => static fn (DI\Container $container): ClusterWatcher => new ClusterWatcher(
+        dirname(__DIR__) . '/src/Worker/Internal/cluster-runner.php',
+        $container->get(LoggerInterface::class),
         $container->get(IpcHub::class),
         $container->get(ContextFactoryInterface::class),
         $container->get(ServerSocketPipeProvider::class),
-    )),
+    ),
 
     ContextFactoryInterface::class => static fn (DI\Container $container): ContextFactoryInterface => new ContextFactory(
         $container->get('async.stdout'),

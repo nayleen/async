@@ -29,7 +29,7 @@ class Loader implements CommandLoaderInterface
 
         $map = [];
         foreach ($this->finder as $commandClass) {
-            $command = $this->container->make($commandClass);
+            $command = $this->container->get($commandClass);
             assert($command instanceof Command);
 
             $map[$command->getName()] = $command;

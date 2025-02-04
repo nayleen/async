@@ -12,11 +12,7 @@ use ReflectionFunction;
 use ReflectionNamedType;
 
 /**
- * A runtime is the basic building block for code intended for use in a process,
- * be it a one-off {@see Task}, a long-running {@see Worker}, a {@see Cluster} of workers,
- * or your main application.
- *
- * @psalm-internal Nayleen\Async
+ * A runtime is the basic building block for code intended for use in a process.
  *
  * @template TReceive
  * @template TSend

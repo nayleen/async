@@ -5,24 +5,22 @@ declare(strict_types = 1);
 namespace Nayleen\Async;
 
 use Amp\Cluster\ClusterWatcher;
-use Override;
-use Throwable;
+use Amp\ForbidCloning;
+use Amp\ForbidSerialization;
 
 use function Amp\Cluster\countCpuCores;
 
 readonly class Cluster extends Runtime
 {
+    use ForbidCloning;
+    use ForbidSerialization;
+
     /**
      * @var positive-int
      */
     private int $count;
 
     private Worker $worker;
-
-    /**
-     * @var non-empty-string
-     */
-    private const string RUNNER_SCRIPT = __DIR__ . '/Worker/Internal/cluster-runner.php';
 
     /**
      * @param positive-int|null $count
@@ -35,37 +33,18 @@ readonly class Cluster extends Runtime
         $this->count = $count;
         $this->worker = $worker;
 
-        parent::__construct(static fn () => null, $kernel);
+        parent::__construct($this->start(...), $kernel);
     }
 
-    private function watcher(Kernel $kernel): ClusterWatcher
+    private function start(Kernel $kernel): int
     {
-        assert(file_exists(self::RUNNER_SCRIPT));
-
-        $watcher = $kernel->container()->make(ClusterWatcher::class, ['script' => self::RUNNER_SCRIPT]);
+        $watcher = $kernel->container()->make(ClusterWatcher::class);
         assert($watcher instanceof ClusterWatcher);
 
-        return $watcher;
-    }
+        $watcher->start($this->count);
+        $watcher->broadcast($this->worker);
 
-    /**
-     * @return int<0, 255>
-     */
-    #[Override]
-    protected function execute(Kernel $kernel): int
-    {
-        $watcher = $this->watcher($kernel);
-
-        try {
-            $watcher->start($this->count);
-            $watcher->broadcast($this->worker);
-
-            $kernel->trap();
-        } catch (Throwable) {
-            return 1;
-        } finally {
-            $watcher->stop($kernel->cancellation);
-        }
+        $kernel->trap();
 
         return 0;
     }

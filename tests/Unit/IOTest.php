@@ -14,8 +14,6 @@ use ReflectionClass;
 /**
  * @internal
  * @small
- *
- * @covers \Nayleen\Async\IO
  */
 final class IOTest extends AsyncTestCase
 {

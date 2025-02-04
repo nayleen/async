@@ -22,7 +22,13 @@ return [
     'async.logger.name' => static fn (DI\Container $container): string => $container->get('async.app.name'),
 
     // logger services
-    LineFormatter::class => DI\factory(static fn (string $logFormat, string $dateFormat, bool $debug) => (new LineFormatter($logFormat, $dateFormat, true, true))->includeStacktraces($debug))
+    LineFormatter::class => DI\factory(static fn (string $logFormat, string $dateFormat, bool $debug) => new LineFormatter(
+        $logFormat,
+        $dateFormat,
+        allowInlineLineBreaks: true,
+        ignoreEmptyContextAndExtra: true,
+        includeStacktraces: $debug,
+    ))
         ->parameter('logFormat', DI\get('async.logger.format'))
         ->parameter('dateFormat', DI\get('async.logger.date_format'))
         ->parameter('debug', DI\get('async.debug')),

@@ -2,18 +2,17 @@
 
 declare(strict_types = 1);
 
-namespace Nayleen\Async;
+namespace Nayleen\Async\App;
 
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Test\TestKernel;
+use Nayleen\Async\Timer;
 use PHPUnit\Framework\MockObject\MockObject;
 use Revolt\EventLoop;
 
 /**
  * @internal
  * @medium
- *
- * @covers \Nayleen\Async\Timers
  */
 final class TimersIntegrationTest extends AsyncTestCase
 {
@@ -29,25 +28,20 @@ final class TimersIntegrationTest extends AsyncTestCase
         $this->loop->method('defer')->willReturn('a');
         $this->loop->method('unreference')->willReturnArgument(0);
 
-        $this->kernel = TestKernel::create($this->loop);
+        $this->kernel = TestKernel::create([EventLoop\Driver::class => $this->loop]);
     }
 
-    private function createTimer(): Timer
+    private function createTimers(): Timers
     {
-        return new readonly class() extends Timer {
+        $timers = new Timers();
+        $timers->add(new readonly class() extends Timer {
             protected function execute(): void {}
 
             protected function interval(): float|int
             {
                 return 0;
             }
-        };
-    }
-
-    private function createTimers(): Timers
-    {
-        $timers = new Timers();
-        $timers->add($this->createTimer());
+        });
         $timers->start($this->kernel);
 
         return $timers;

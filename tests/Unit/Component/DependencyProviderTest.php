@@ -10,8 +10,6 @@ use DI;
 /**
  * @internal
  * @small
- *
- * @covers \Nayleen\Async\Component\DependencyProvider
  */
 final class DependencyProviderTest extends AsyncTestCase
 {

@@ -50,7 +50,7 @@ final readonly class TestKernel extends Kernel
     }
 
     public static function create(
-        ?EventLoop\Driver $loop = null,
+        array $dependencies,
         Cancellation $cancellation = new NullCancellation(),
         ByteStream\WritableStream $stdOut = new ByteStream\WritableBuffer(),
         ByteStream\WritableStream $stdErr = new ByteStream\WritableBuffer(),
@@ -58,9 +58,7 @@ final readonly class TestKernel extends Kernel
     ): self {
         $components = [
             ...self::finder(),
-            DependencyProvider::create([
-                EventLoop\Driver::class => $loop ?? EventLoop::getDriver(),
-            ]),
+            DependencyProvider::create($dependencies),
         ];
 
         return new self($components, $cancellation, $stdOut, $stdErr, $stdIn);
@@ -74,17 +72,4 @@ final readonly class TestKernel extends Kernel
     }
 
     public function trap(Cancellation $cancellation = new NullCancellation()): void {}
-
-    public function withDependency(string $name, mixed $value): self
-    {
-        return new self(
-            new Components(
-                [
-                    ...$this->components,
-                    DependencyProvider::create([$name => $value]),
-                ],
-            ),
-            $this->cancellation,
-        );
-    }
 }

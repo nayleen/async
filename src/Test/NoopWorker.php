@@ -11,6 +11,6 @@ final readonly class NoopWorker extends Worker
 {
     public function __construct(?Kernel $kernel = null)
     {
-        parent::__construct(static fn () => null, $kernel);
+        parent::__construct(static function (): void {}, $kernel);
     }
 }

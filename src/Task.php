@@ -15,7 +15,7 @@ use Nayleen\Async\Task\Scheduler;
  * @template TReceive
  * @template TSend
  * @template TResult of mixed
- * @extends Runtime<TReceive, TSend, TResult>
+ * @template-extends Runtime<TReceive, TSend, TResult>
  */
 readonly class Task extends Runtime implements TaskInterface
 {

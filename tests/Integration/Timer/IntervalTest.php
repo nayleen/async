@@ -12,9 +12,6 @@ use Revolt\EventLoop;
 /**
  * @internal
  * @medium
- *
- * @covers \Nayleen\Async\Timer
- * @covers \Nayleen\Async\Timer\Interval
  */
 final class IntervalTest extends AsyncTestCase
 {
@@ -48,7 +45,7 @@ final class IntervalTest extends AsyncTestCase
         $loop->expects(self::once())->method('defer')->willReturn('a');
         $loop->method('unreference')->willReturnArgument(0);
 
-        $kernel = TestKernel::create($loop);
+        $kernel = TestKernel::create([EventLoop\Driver::class => $loop]);
         $interval = $this->createInterval();
 
         $loop->expects(self::once())->method('delay')->with(60, self::callback(function () use ($interval) {

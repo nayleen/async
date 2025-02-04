@@ -20,6 +20,6 @@ abstract class RuntimeTestCase extends AsyncTestCase
     {
         $reflection = new ReflectionObject($runtime);
 
-        return $reflection->getMethod('execute')->invoke($runtime, $kernel ?? TestKernel::create());
+        return $reflection->getMethod('execute')->invoke($runtime, $kernel ?? new TestKernel());
     }
 }

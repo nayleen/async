@@ -24,7 +24,7 @@ final class ConsoleTest extends RuntimeTestCase
         $consoleApplication = $this->createMock(Application::class);
         $consoleApplication->expects(self::once())->method('run');
 
-        $kernel = TestKernel::create()->withDependency(Application::class, $consoleApplication);
+        $kernel = TestKernel::create([Application::class => $consoleApplication]);
 
         $console = new Console(
             input: self::createStub(InputInterface::class),

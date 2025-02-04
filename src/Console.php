@@ -4,12 +4,17 @@ declare(strict_types = 1);
 
 namespace Nayleen\Async;
 
-use Symfony\Component\Console\Application as ConsoleApplication;
+use Amp\ForbidCloning;
+use Amp\ForbidSerialization;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 readonly class Console extends Runtime
 {
+    use ForbidCloning;
+    use ForbidSerialization;
+
     /**
      * @param non-empty-string|null $defaultCommand
      */
@@ -25,12 +30,12 @@ readonly class Console extends Runtime
 
     protected function runConsole(Kernel $kernel): int
     {
-        $console = $kernel->container()->get(ConsoleApplication::class);
+        $console = $kernel->container()->get(Application::class);
         $console->setAutoExit(false);
 
         if (isset($this->defaultCommand)) {
             assert($this->defaultCommand !== '');
-            $console->setDefaultCommand($this->defaultCommand, true);
+            $console->setDefaultCommand($this->defaultCommand);
         }
 
         return $console->run(

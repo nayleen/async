@@ -18,18 +18,12 @@ use function Amp\delay;
 /**
  * @internal
  * @large
- *
- * @covers \Nayleen\Async\Runtime
- * @covers \Nayleen\Async\Task\ContextFactory
- * @covers \Nayleen\Async\Task\Scheduler
- * @covers \Nayleen\Async\Test\AmpTask
- * @covers \Nayleen\Async\Test\TestTask
  */
 final class SchedulerFunctionalTest extends AsyncTestCase
 {
-    private function createScheduler(TestKernel $kernel): Scheduler
+    private function createScheduler(?TestKernel $kernel = null): Scheduler
     {
-        return new Scheduler($kernel);
+        return new Scheduler($kernel ?? new TestKernel());
     }
 
     /**
@@ -37,7 +31,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
      */
     public function can_run_amp_task(): void
     {
-        $scheduler = $this->createScheduler(TestKernel::create());
+        $scheduler = $this->createScheduler();
         self::assertSame(42, $scheduler->run(new AmpTask()));
     }
 
@@ -46,7 +40,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
      */
     public function can_run_closure(): void
     {
-        $scheduler = $this->createScheduler(TestKernel::create());
+        $scheduler = $this->createScheduler();
         self::assertSame(69, $scheduler->run(static fn () => 69));
     }
 
@@ -55,7 +49,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
      */
     public function can_run_script(): void
     {
-        $scheduler = $this->createScheduler(TestKernel::create());
+        $scheduler = $this->createScheduler();
         self::assertSame(69, $scheduler->run(dirname(__DIR__, 3) . '/src/Test/nice-script.php'));
     }
 
@@ -64,7 +58,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
      */
     public function can_run_task(): void
     {
-        $scheduler = $this->createScheduler(TestKernel::create());
+        $scheduler = $this->createScheduler();
         self::assertSame(69, $scheduler->run(new TestTask()));
     }
 
@@ -75,7 +69,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
     {
         $this->expectException(CancelledException::class);
 
-        $scheduler = $this->createScheduler(TestKernel::create());
+        $scheduler = $this->createScheduler();
         self::assertNull($scheduler->run(static fn () => delay(1), 0.0));
     }
 
@@ -86,7 +80,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
     {
         $stdErr = new WritableBuffer();
 
-        $scheduler = $this->createScheduler(TestKernel::create(stdErr: $stdErr));
+        $scheduler = $this->createScheduler(new TestKernel(stdErr: $stdErr));
         $task = new Task(static fn (Kernel $kernel) => $kernel->io()->debug('Child says uhoh!'));
 
         $scheduler->run($task);
@@ -102,7 +96,7 @@ final class SchedulerFunctionalTest extends AsyncTestCase
     public function resubmitting_cancels_previous_execution(): void
     {
         $delay = 0.001;
-        $scheduler = $this->createScheduler(TestKernel::create());
+        $scheduler = $this->createScheduler();
 
         $task = new Task(static function () use ($delay) {
             $result = 0;

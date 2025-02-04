@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Nayleen\Async;
 
 use Nayleen\Async\Test\RuntimeTestCase;
-use RuntimeException;
+use Nayleen\Async\Test\TestKernel;
 
 /**
  * @internal
@@ -16,12 +16,15 @@ final class WorkerTest extends RuntimeTestCase
     /**
      * @test
      */
-    public function worker_returns_exitable_code(): void
+    public function runs_in_kernel_context(): void
     {
-        $worker = new Worker(fn () => null);
-        self::assertSame(0, $this->execute($worker));
+        $kernel = new TestKernel();
 
-        $worker = new Worker(fn () => throw new RuntimeException());
-        self::assertSame(1, $this->execute($worker));
+        $worker = new Worker(static function (Kernel $kernel): void {
+            $kernel->io()->info('Hi from your provided Kernel!');
+        }, $kernel);
+
+        $this->execute($worker, $kernel);
+        self::assertTrue($kernel->log->hasInfoThatContains('Hi from your provided Kernel!'));
     }
 }

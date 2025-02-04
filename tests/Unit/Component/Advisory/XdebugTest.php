@@ -12,8 +12,6 @@ use Nayleen\Async\Test\TestKernel;
  * @internal
  * @small
  * @backupGlobals enabled
- *
- * @covers \Nayleen\Async\Component\Advisory\Xdebug
  */
 final class XdebugTest extends AsyncTestCase
 {
@@ -29,7 +27,7 @@ final class XdebugTest extends AsyncTestCase
     {
         $_ENV['XDEBUG_MODE'] = $_SERVER['XDEBUG_MODE'] = 'debug';
 
-        $kernel = TestKernel::create();
+        $kernel = new TestKernel();
         $this->advise($kernel);
 
         self::assertTrue($kernel->log->hasNoticeThatContains('The "xdebug" extension is active, which has a major impact on performance'));
@@ -42,7 +40,7 @@ final class XdebugTest extends AsyncTestCase
     {
         $_ENV['XDEBUG_MODE'] = $_SERVER['XDEBUG_MODE'] = null;
 
-        $kernel = TestKernel::create();
+        $kernel = new TestKernel();
         $this->advise($kernel, 'debug');
 
         self::assertTrue($kernel->log->hasNoticeThatContains('The "xdebug" extension is active, which has a major impact on performance'));
