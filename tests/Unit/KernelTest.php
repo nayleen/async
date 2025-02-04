@@ -51,7 +51,7 @@ final class KernelTest extends AsyncTestCase
         $clock->expects(self::once())->method('now');
 
         $kernel = TestKernel::create([
-            Clock::class => new Clock(self::createStub(Driver::class), $clock)
+            Clock::class => new Clock(self::createStub(Driver::class), $clock),
         ]);
         $kernel->clock()->now();
     }

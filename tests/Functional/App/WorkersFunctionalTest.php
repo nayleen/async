@@ -7,6 +7,7 @@ namespace Nayleen\Async\App;
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Test\TestKernel;
 use Nayleen\Async\Worker;
+
 use function Amp\delay;
 
 /**
@@ -19,11 +20,11 @@ final class WorkersFunctionalTest extends AsyncTestCase
     {
         $workers = new Workers();
 
-        $workers->add(new Worker(static function () {
+        $workers->add(new Worker(static function (): void {
             delay(1);
         }));
 
-        $workers->add(new Worker(static function () {
+        $workers->add(new Worker(static function (): void {
             delay(1);
         }));
 

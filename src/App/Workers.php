@@ -7,7 +7,6 @@ namespace Nayleen\Async\App;
 use Amp\Cluster\ClusterWatcher;
 use Amp\ForbidCloning;
 use Amp\ForbidSerialization;
-use Amp\TimeoutCancellation;
 use Nayleen\Async\Kernel;
 use Nayleen\Async\Worker;
 use SplObjectStorage;

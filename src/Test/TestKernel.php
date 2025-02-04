@@ -12,11 +12,9 @@ use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\Finder;
-use Nayleen\Async\Components;
 use Nayleen\Async\Kernel;
 use Nayleen\Finder\Engine\MemoizedEngine;
 use Psr\Log\LoggerInterface;
-use Revolt\EventLoop;
 
 use function Nayleen\Finder\defaultEngine;
 
@@ -49,6 +47,9 @@ final readonly class TestKernel extends Kernel
         parent::__construct($components, null, $cancellation);
     }
 
+    /**
+     * @param array<class-string|string, object> $dependencies
+     */
     public static function create(
         array $dependencies,
         Cancellation $cancellation = new NullCancellation(),

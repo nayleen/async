@@ -17,7 +17,7 @@ final class AppTest extends RuntimeTestCase
     /**
      * @test
      */
-    public function addTimer_attaches_timer_to_collection(): void
+    public function add_timer_attaches_timer_to_collection(): void
     {
         $kernel = new TestKernel();
 
@@ -38,9 +38,9 @@ final class AppTest extends RuntimeTestCase
     /**
      * @test
      */
-    public function addTimer_can_retrieve_container_reference(): void
+    public function add_timer_can_retrieve_container_reference(): void
     {
-        $kernel = TestKernel::create(['custom_timer' => new readonly class extends Timer {
+        $kernel = TestKernel::create(['custom_timer' => new readonly class() extends Timer {
             protected function execute(): void {}
 
             protected function interval(): float|int
@@ -59,7 +59,7 @@ final class AppTest extends RuntimeTestCase
     /**
      * @test
      */
-    public function addWorker_attaches_worker_to_collection(): void
+    public function add_worker_attaches_worker_to_collection(): void
     {
         $kernel = new TestKernel();
 
@@ -73,7 +73,7 @@ final class AppTest extends RuntimeTestCase
     /**
      * @test
      */
-    public function addWorker_can_retrieve_container_reference(): void
+    public function add_worker_can_retrieve_container_reference(): void
     {
         $kernel = new TestKernel();
 

@@ -6,7 +6,6 @@ namespace Nayleen\Async;
 
 use Amp\PHPUnit\AsyncTestCase;
 use Nayleen\Async\Test\TestKernel;
-use Nayleen\Async\Timer;
 use PHPUnit\Framework\MockObject\MockObject;
 use Revolt\EventLoop;
 

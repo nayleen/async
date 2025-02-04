@@ -38,7 +38,7 @@ readonly class App extends Runtime
     }
 
     /**
-     * @param class-string<Timer>|Timer $timer
+     * @param class-string<Timer>|string|Timer $timer
      */
     public function addTimer(string|Timer $timer): static
     {
@@ -53,7 +53,7 @@ readonly class App extends Runtime
     }
 
     /**
-     * @param class-string<Worker>|Worker $worker
+     * @param class-string<Worker>|string|Worker $worker
      * @param positive-int $count
      */
     public function addWorker(string|Worker $worker, int $count = 1): static
