@@ -36,13 +36,15 @@ return [
     'async.app.name' => DI\env('ASYNC_APP_NAME', 'Kernel'),
     'async.app.version' => DI\env('ASYNC_APP_VERSION', 'UNKNOWN'),
 
-    'async.debug' => DI\factory(static function (string $env, string $debug): bool {
-        $debug = (bool) filter_var($debug, FILTER_VALIDATE_BOOL);
+    'async.debug' => DI\factory(static function (string $env, ?string $debug): bool {
+        if ($debug === null) {
+            return $env !== 'prod';
+        }
 
-        return $debug || $env !== 'prod';
+        return (bool) filter_var($debug, FILTER_VALIDATE_BOOL);
     })
         ->parameter('env', DI\get('async.env'))
-        ->parameter('debug', DI\env('ASYNC_DEBUG', '0')),
+        ->parameter('debug', DI\env('ASYNC_DEBUG', null)),
 
     'async.env' => DI\factory(static fn (string $env): string => strtolower($env))
         ->parameter('env', DI\env('ASYNC_ENV', 'prod')),
