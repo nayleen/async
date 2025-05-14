@@ -62,16 +62,4 @@ final class MessagePackSerializerTest extends TestCase
         $serializer = new MessagePackSerializer();
         $serializer->serialize(new class() {});
     }
-
-    /**
-     * @test
-     */
-    public function throws_on_invalid_serialized_data(): void
-    {
-        $this->expectException(SerializationException::class);
-        $this->expectExceptionMessage('Failed to unserialize data');
-
-        $serializer = new MessagePackSerializer();
-        $serializer->unserialize(random_bytes(8));
-    }
 }

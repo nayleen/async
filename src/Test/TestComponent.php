@@ -12,6 +12,16 @@ use Nayleen\Async\Kernel;
 
 final readonly class TestComponent extends Component implements HasDependencies
 {
+    private function __construct()
+    {
+        parent::__construct();
+    }
+
+    public static function create(): self
+    {
+        return new self();
+    }
+
     public static function dependencies(): iterable
     {
         yield Bootstrapper::class;

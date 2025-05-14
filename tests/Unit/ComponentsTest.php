@@ -20,7 +20,7 @@ final class ComponentsTest extends AsyncTestCase
      */
     public function adds_dependencies(): void
     {
-        $component = new TestComponent();
+        $component = TestComponent::create();
         $components = new Components([$component]);
 
         self::assertEquals([new Bootstrapper(), $component], iterator_to_array($components));
@@ -31,7 +31,7 @@ final class ComponentsTest extends AsyncTestCase
      */
     public function boot_runs_boot_on_components(): void
     {
-        $components = new Components([new TestComponent()]);
+        $components = new Components([TestComponent::create()]);
 
         $kernel = new TestKernel($components);
         $components->boot($kernel);
@@ -55,7 +55,7 @@ final class ComponentsTest extends AsyncTestCase
      */
     public function shutdown_runs_shutdown_on_components(): void
     {
-        $components = new Components([new TestComponent()]);
+        $components = new Components([TestComponent::create()]);
 
         $kernel = new TestKernel($components);
         $components->shutdown($kernel);

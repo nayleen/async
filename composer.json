@@ -15,7 +15,7 @@
     "dragonmantank/cron-expression": "^3.4.0",
     "laravel/serializable-closure": "^2.0.2",
     "monolog/monolog": "^2.10 || ^3.8.1",
-    "nayleen/finder": "^1.0",
+    "nayleen/finder": "^2.0@dev",
     "php-di/php-di": "^7.0.8",
     "revolt/event-loop": "^1.0.6",
     "roave/better-reflection": "^6.54.0",
@@ -70,7 +70,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "0.19.x-dev"
+      "dev-main": "0.20.x-dev"
     }
   },
   "scripts": {

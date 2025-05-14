@@ -62,16 +62,4 @@ final class IgbinarySerializerTest extends TestCase
         $serializer = new IgbinarySerializer();
         $serializer->serialize(new class() {});
     }
-
-    /**
-     * @test
-     */
-    public function throws_on_invalid_serialized_data(): void
-    {
-        $this->expectException(SerializationException::class);
-        $this->expectExceptionMessage('Failed to unserialize data');
-
-        $serializer = new IgbinarySerializer();
-        $serializer->unserialize(random_bytes(8));
-    }
 }

@@ -21,6 +21,11 @@ readonly class DependencyProvider extends Component
      */
     private string $name; // @phpstan-ignore-line
 
+    private function __construct()
+    {
+        parent::__construct();
+    }
+
     /**
      * @param DefinitionSource|mixed[]|string ...$definitions
      */
@@ -30,7 +35,7 @@ readonly class DependencyProvider extends Component
 
         $instance = new self();
         $instance->definitions = $definitions; // @phpstan-ignore-line
-        $instance->name = uniqid('dependencies.', true); // @phpstan-ignore-line
+        $instance->name = 'dependencies.' . spl_object_hash($instance); // @phpstan-ignore-line
 
         return $instance;
     }
@@ -40,7 +45,7 @@ readonly class DependencyProvider extends Component
      */
     public function name(): string
     {
-        assert($this->name !== '');
+        assert(isset($this->name));
 
         return $this->name;
     }
