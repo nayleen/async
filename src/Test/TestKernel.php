@@ -13,10 +13,7 @@ use Monolog\Logger;
 use Nayleen\Async\Component\DependencyProvider;
 use Nayleen\Async\Component\Finder;
 use Nayleen\Async\Kernel;
-use Nayleen\Finder\Engine\MemoizedEngine;
 use Psr\Log\LoggerInterface;
-
-use function Nayleen\Finder\defaultEngine;
 
 final readonly class TestKernel extends Kernel
 {
@@ -69,7 +66,7 @@ final readonly class TestKernel extends Kernel
     {
         static $finder = null;
 
-        return $finder ??= new Finder(new MemoizedEngine(defaultEngine()));
+        return $finder ??= new Finder();
     }
 
     public function trap(Cancellation $cancellation = new NullCancellation()): void {}
