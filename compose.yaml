@@ -1,0 +1,33 @@
+networks:
+  async:
+    driver: bridge
+
+services:
+  php:
+    image: ghcr.io/nayleen/php:${PHP_VERSION:-8.4}
+    container_name: async-php
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      PHP_INI_TEMPLATE_FILE: development
+      REDIS_DSN: "redis://redis:6379"
+      TZ: "Europe/Berlin"
+      XDEBUG_MODE: "${XDEBUG_MODE:-off}"
+    networks:
+      - async
+    volumes:
+      - $HOME/.composer:/app/var/composer
+      - ./:/app/src
+
+  redis:
+    image: valkey/valkey:9.0
+    container_name: async-redis
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      start_interval: 1s
+      start_period: 30s
+    hostname: redis
+    networks:
+      - async

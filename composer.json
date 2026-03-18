@@ -1,0 +1,63 @@
+{
+  "name": "nayleen/async",
+  "description": "Async framework for PHP",
+  "license": "MIT",
+  "type": "library",
+  "require": {
+    "php": ">=8.4",
+    "ext-pcntl": "*",
+    "amphp/amp": "^3.1.1",
+    "amphp/cache": "^2.0.1",
+    "amphp/log": "^2.0.0",
+    "amphp/pipeline": "^1.2.3",
+    "monolog/monolog": "^3.10.0",
+    "olvlvl/composer-attribute-collector": "^2.1.0",
+    "php-di/php-di": "^7.1.1",
+    "revolt/event-loop": "^1.0.8",
+    "revolt/event-loop-adapter-react": "^1.1.1",
+    "symfony/runtime": "^8.0.1",
+    "thecodingmachine/safe": "^3.3.0"
+  },
+  "require-dev": {
+    "amphp/redis": "^2.0.3",
+    "bnf/phpstan-psr-container": "^1.1",
+    "ergebnis/composer-normalize": "^2.48.2",
+    "friendsofphp/php-cs-fixer": "^3.93.0",
+    "nayleen/codestandard": "dev-latest",
+    "php-standard-library/phpstan-extension": "^2.0.2",
+    "phpstan/extension-installer": "^1.4.3",
+    "phpstan/phpstan": "^2.1.37",
+    "phpstan/phpstan-phpunit": "^2.0.12",
+    "phpunit/phpunit": "^12.5.7",
+    "roave/security-advisories": "dev-latest",
+    "thecodingmachine/phpstan-safe-rule": "^1.4.3"
+  },
+  "suggest": {
+    "ext-igbinary": "*",
+    "ext-msgpack": "*",
+    "amphp/redis": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Nayleen\\Async\\": "src/"
+    },
+    "files": [
+      "src/DI/functions.php"
+    ]
+  },
+  "config": {
+    "allow-plugins": {
+      "ergebnis/composer-normalize": true,
+      "olvlvl/composer-attribute-collector": false,
+      "phpstan/extension-installer": true,
+      "symfony/runtime": false
+    },
+    "preferred-install": {
+      "*": "dist"
+    },
+    "sort-packages": true
+  },
+  "scripts": {
+    "post-update-cmd": "@composer normalize"
+  }
+}

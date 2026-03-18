@@ -1,0 +1,11 @@
+/.idea/
+/.task/
+coverage/
+vendor/
+.DS_Store
+.php-cs-fixer.php
+compose*.yaml
+composer.lock
+phpstan.neon
+phpunit.xml
+Taskfile.yaml
